@@ -1048,7 +1048,9 @@ function buildAdminNav() {
     <button onclick="showSection('retailers')">🏪 Retailers</button>
     <button onclick="showSection('orders')">📦 Orders</button>
     <button onclick="showSection('auto-orders')">🔄 Auto-Orders</button>
-    <button onclick="showSection('settings')">⚙️ Settings</button>`;
+    <button onclick="showSection('bake')">🍞 Bake Tab</button>
+    <button onclick="showSection('settings')">⚙️ Settings</button>`
+    <button onclick="showSection('bake')">🩂 Bake Tab</button>;
 }
 function buildRetailerNav() {
   document.getElementById('main-nav').innerHTML=`
@@ -1073,6 +1075,8 @@ function showSection(name) {
   if(name==='retailers') renderRetailers();
   if(name==='orders'){renderOrders();fillRetailerSelects();}
   if(name==='auto-orders'){renderAutoOrders();fillRetailerSelects();}
+  if(name==='bake'){renderBakeTab();}
+  if(name==='bake'){renderBakeTab();}
   if(name==='summary') fillRetailerSelects();
   if(name==='settings') { setTimeout(renderNotifList,50); }
   if(name==='r-home') renderRetailerHome();
@@ -1147,6 +1151,10 @@ function buildAdminContent() {
   <div class="panel" style="margin-top:18px;">
     <div class="panel-title">🔄 Product Movement: Current vs Prior Year</div>
     <div id="anal-prod-yoy"></div>
+  </div>
+  <div class="panel" style="margin-top:18px;">
+    <div class="panel-title">📆 Yearly Revenue Breakdown</div>
+    <div id="anal-yearly"></div>
   </div>
 </section>
 
@@ -1283,6 +1291,18 @@ function buildAdminContent() {
     <input type="file" id="fi-orders" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(event,'orders')"/>
     <div id="orders-preview" style="margin-top:10px;"></div>
     <div id="orders-import-btn" style="margin-top:10px;display:none;"><button class="btn btn-primary" onclick="commitImport('orders')">✅ Import Orders</button></div>
+  </div>
+</section>
+
+<!-- BAKE TAB -->
+<section class="section" id="sec-bake">
+  <h2 class="page-h">Bake Tab</h2><p class="page-sub">Generate a consolidated bake list from all pending and confirmed orders.</p>
+  <div class="panel">
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
+      <button class="btn btn-primary" onclick="generateBakeList()" style="font-size:1rem;padding:12px 28px;">🩂 Generate Total Order</button>
+      <span style="font-size:.82rem;color:var(--brown-lt);" id="bake-order-count"></span>
+    </div>
+    <div id="bake-results"></div>
   </div>
 </section>
 
@@ -1667,15 +1687,15 @@ function renderOrders() {
     sumEl.innerHTML=`<strong>${orders.length}</strong> order${orders.length!==1?'s':''} &nbsp;·&nbsp; <strong>${filtUnits}</strong> units &nbsp;·&nbsp; <strong>${fmtCur(filtTotal)}</strong>`;
   }
   if(!orders.length){tbody.innerHTML='<tr><td colspan="8" class="empty-row">No orders found.</td></tr>';return;}
-  tbody.innerHTML=orders.map(o=>`<tr>
-    <td><strong>${invNum(o.invoiceNum)}</strong></td>
-    <td>${esc(o.retailerName)}</td>
-    <td>${fmtDate(o.date)}</td>
-    <td>${o.delivery?fmtDate(o.delivery):'—'}</td>
-    <td>${o.products.filter(p=>p.product!=='Delivery').length} item${o.products.filter(p=>p.product!=='Delivery').length!==1?'s':''}</td>
-    <td><strong>${fmtCur(o.total)}</strong></td>
-    <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
-    <td style="display:flex;gap:5px;flex-wrap:wrap;">
+  tbody.innerHTML=orders.map(o=>`<tr style="vertical-align:middle;">
+    <td style="vertical-align:middle;"><strong>${invNum(o.invoiceNum)}</strong></td>
+    <td style="vertical-align:middle;">${esc(o.retailerName)}</td>
+    <td style="vertical-align:middle;">${fmtDate(o.date)}</td>
+    <td style="vertical-align:middle;">${o.delivery?fmtDate(o.delivery):'—'}</td>
+    <td style="vertical-align:middle;">${o.products.filter(p=>p.product!=='Delivery').length} item${o.products.filter(p=>p.product!=='Delivery').length!==1?'s':''}</td>
+    <td style="vertical-align:middle;"><strong>${fmtCur(o.total)}</strong></td>
+    <td style="vertical-align:middle;"><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
+    <td style="vertical-align:middle;white-space:nowrap;">
       <button class="btn btn-outline btn-sm" onclick="viewOrderDetail(${o.id})">👁</button>
       <button class="btn btn-primary btn-sm" onclick="openEditOrder(${o.id})">✏️</button>
       <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})">🧾</button>
@@ -1755,7 +1775,9 @@ async function updateOrderStatus(id,status) {
   const o=db.orders.find(x=>x.id===id);if(!o)return;
   const {error}=await sbClient.from('orders').update({status}).eq('id',id);
   if(error){toast('⚠️ Error updating status: '+error.message);return;}
-  o.status=status;renderOrders();toast(`✅ ${invNum(o.invoiceNum)} marked as ${status}.`);
+  o.status=status;renderOrders();
+  if(document.getElementById('sec-bake')?.classList.contains('active'))generateBakeList();
+  toast(`✅ ${invNum(o.invoiceNum)} marked as ${status}.`);
 }
 async function deleteOrder(id) {
   if(!confirm('Delete this order? Cannot be undone.'))return;
@@ -1887,8 +1909,8 @@ function refreshDashboard() {
   const totalUnits=orders52.reduce((s,o)=>s+o.products.reduce((ps,p)=>ps+(p.qty||0),0),0);
   const avgPerWeek=Math.round(totalUnits/52);
   sg.innerHTML=`
-    <div class="stat-card"><div class="si">🏪</div><div class="sl">Total Retailers</div><div class="sv">${db.retailers.length}</div></div>
-    <div class="stat-card"><div class="si">✅</div><div class="sl">Active Retailers</div><div class="sv">${db.retailers.filter(r=>r.status==='Active').length}</div></div>
+    <div class="stat-card"><div class="si">🏪</div><div class="sl">Total Partners</div><div class="sv">${db.retailers.length}</div></div>
+    <div class="stat-card"><div class="si">✅</div><div class="sl">Active Partners</div><div class="sv">${db.retailers.filter(r=>r.status==='Active').length} of ${db.retailers.length}</div></div>
     <div class="stat-card"><div class="si">📦</div><div class="sl">Total Orders</div><div class="sv">${db.orders.length}</div></div>
     <div class="stat-card"><div class="si">🍪</div><div class="sl">Avg Items / Week</div><div class="sv">${avgPerWeek}</div></div>
     <div class="stat-card"><div class="si">🔄</div><div class="sl">Auto-Orders</div><div class="sv">${db.autoOrders.filter(a=>a.active).length}</div></div>
@@ -2307,6 +2329,66 @@ function renderNotifList() {
 }
 
 // =====================================================================
+//  [BAKE TAB]
+//  renderBakeTab() resets the panel; generateBakeList() aggregates all
+//  Pending + Confirmed orders into a consolidated product bake list.
+//  Auto-refreshes when orders are marked Delivered.
+// =====================================================================
+function renderBakeTab() {
+  const el=document.getElementById('bake-results');
+  const ct=document.getElementById('bake-order-count');
+  if(el) el.innerHTML='<p style="color:var(--brown-lt);font-style:italic;">Press \u201cGenerate Total Order\u201d to see what needs to be baked.</p>';
+  if(ct) ct.textContent='';
+}
+function generateBakeList() {
+  const activeOrders=db.orders.filter(o=>o.status==='Pending'||o.status==='Confirmed');
+  const ct=document.getElementById('bake-order-count');
+  const el=document.getElementById('bake-results');
+  if(!el) return;
+  if(!activeOrders.length){
+    if(ct) ct.textContent='No pending or confirmed orders found.';
+    el.innerHTML='<p style="color:var(--brown-lt);font-style:italic;">There are no Pending or Confirmed orders right now.</p>';
+    return;
+  }
+  const totals={};
+  activeOrders.forEach(o=>{
+    o.products.forEach(p=>{
+      if(!p.product||p.product==='Delivery'||!p.qty) return;
+      totals[p.product]=(totals[p.product]||0)+Number(p.qty);
+    });
+  });
+  const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
+  const grandTotal=sorted.reduce((s,[,q])=>s+q,0);
+  if(ct) ct.textContent=`Based on ${activeOrders.length} order${activeOrders.length!==1?'s':''} (Pending + Confirmed)`;
+  const orderRows=activeOrders.map(o=>{
+    const items=o.products.filter(p=>p.product&&p.product!=='Delivery'&&p.qty>0);
+    return `<div style="font-size:.78rem;color:var(--brown-lt);padding:3px 0 3px 12px;border-left:2px solid var(--tan);">
+      <strong style="color:var(--brown-dk);">${invNum(o.invoiceNum)}</strong> · ${esc(o.retailerName)} · <span class="badge ${sBadge(o.status)}">${o.status}</span>
+      — ${items.map(p=>`${p.qty}× ${esc(p.product)}`).join(', ')}
+    </div>`;
+  }).join('');
+  el.innerHTML=`
+    <div style="margin-bottom:20px;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:10px;font-weight:700;">Total to Bake</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
+        ${sorted.map(([prod,qty])=>`
+          <div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:.9rem;color:var(--brown-dk);font-weight:600;">${esc(prod)}</span>
+            <span style="font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--brown-dk);line-height:1;">${qty}</span>
+          </div>`).join('')}
+      </div>
+      <div style="margin-top:12px;padding:10px 16px;background:var(--sage);border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.85rem;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:.07em;">Grand Total Units</span>
+        <span style="font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:#fff;">${grandTotal}</span>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:8px;font-weight:700;">Order Breakdown</div>
+      <div style="display:flex;flex-direction:column;gap:5px;">${orderRows}</div>
+    </div>`;
+}
+
+// =====================================================================
 //  [16] ANALYTICS
 //  refreshAnalytics() / renderAnalytics() → full analytics rebuild.
 //  Panels: Revenue Over Time, Product Movement, 52-Wk YoY, QoQ.
@@ -2338,7 +2420,7 @@ function refreshAnalytics() {
     <div class="anal-card"><div class="al">Total Revenue</div><div class="av">${fmtCur(rev)}</div><div class="ac">All-time wholesale</div></div>
     <div class="anal-card"><div class="al">This Month</div><div class="av">${fmtCur(thisMonthRev)}</div><div class="ac">${thisMonthOrders.length} orders</div></div>
     <div class="anal-card"><div class="al">Avg Order Value</div><div class="av">${fmtCur(avgOrder)}</div><div class="ac">Per invoice</div></div>
-    <div class="anal-card"><div class="al">Active Partners</div><div class="av">${activeCount}</div><div class="ac">${db.retailers.length} accounts · ordered last 2 mo.</div></div>
+    <div class="anal-card"><div class="al">Active Partners</div><div class="av">${activeCount} of ${db.retailers.length}</div><div class="ac">Active partners (ordered last 2 mo.)</div></div>
     <div class="anal-card"><div class="al">Total Invoices</div><div class="av">${db.orders.length}</div><div class="ac">Since launch</div></div>
     <div class="anal-card" style="border-left:3px solid var(--brown-dk);"><div class="al">Avg Orders / Month</div><div class="av">${avgOrdersPerMonth.toFixed(1)}</div><div class="ac">Trailing 6 months</div></div>`;
 
@@ -2500,7 +2582,26 @@ function refreshAnalytics() {
           </div>
         </div>`;}).join('')}`;
   }
-}
+
+
+  // ── Yearly Revenue Breakdown ──
+  const yearlyEl=document.getElementById('anal-yearly'); if(yearlyEl){
+    const yearSet=new Set();
+    db.orders.forEach(o=>{if(!o.date)return;const d=new Date(o.date);if(!isNaN(d))yearSet.add(d.getFullYear());});
+    const years=[...yearSet].sort((a,b)=>a-b);
+    if(!years.length){yearlyEl.innerHTML='<p style="color:var(--brown-lt);font-style:italic;">No data yet.</p>';}
+    else{
+      const yData=years.map(y=>{
+        const yOrds=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date);return !isNaN(d)&&d.getFullYear()===y;});
+        const rev=yOrds.reduce((s,o)=>s+(o.total||0),0);
+        const units=yOrds.reduce((s,o)=>s+o.products.reduce((ps,p)=>ps+(p.qty||0),0),0);
+        const partners=new Set(yOrds.map(o=>o.retailerId)).size;
+        return {year:y,rev,orders:yOrds.length,units,partners};
+      });
+      const maxRev=Math.max(...yData.map(d=>d.rev),1);
+      yearlyEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">${yData.map((d,i)=>`<div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:14px 16px;"><div style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--brown-dk);">${d.year}</div><div style="font-size:1.25rem;font-weight:700;color:var(--sage);margin:4px 0;">${fmtCur(d.rev)}</div><div style="height:5px;background:var(--tan);border-radius:3px;margin:6px 0;"><div style="height:100%;width:${Math.round((d.rev/maxRev)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};border-radius:3px;"></div></div><div style="font-size:.75rem;color:var(--brown-lt);margin-top:4px;">${d.orders} orders &middot; ${d.units} units &middot; ${d.partners} partner${d.partners!==1?'s':''}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="border-bottom:2px solid var(--tan);"><th style="text-align:left;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Year</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Revenue</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Orders</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Units</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Partners</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">YoY</th></tr></thead><tbody>${yData.map((d,i)=>{const prev=yData[i-1];const yoy=prev&&prev.rev>0?Math.round(((d.rev-prev.rev)/prev.rev)*100):null;return `<tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:9px 10px;font-weight:700;color:var(--brown-dk);">${d.year}</td><td style="padding:9px 10px;text-align:right;font-weight:700;color:var(--sage);">${fmtCur(d.rev)}</td><td style="padding:9px 10px;text-align:right;">${d.orders}</td><td style="padding:9px 10px;text-align:right;">${d.units}</td><td style="padding:9px 10px;text-align:right;">${d.partners}</td><td style="padding:9px 10px;text-align:right;">${yoy!==null?`<span style="color:${yoy>=0?'#2e7d4f':'var(--danger)'};">${yoy>=0?'▲':'▼'}${Math.abs(yoy)}%</span>`:'—'}</td></tr>`;}).join('')}</tbody></table>`;
+    }
+  }}
 
 //  [21] CATALOG ORDER FORM (RETAILER)
 //  snapToIncrement → updateCatalogTotal → retailerPlaceCatalogOrder.
