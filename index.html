@@ -1137,11 +1137,7 @@ function buildAdminContent() {
       <div style="font-size:.75rem;color:var(--sage);margin-top:6px;font-style:italic;">Trailing 6 months</div>
     </div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;">
-    <div class="panel">
-      <div class="panel-title">📈 Year-over-Year Revenue</div>
-      <div id="anal-yoy"></div>
-    </div>
+  <div style="margin-top:18px;">
     <div class="panel">
       <div class="panel-title">📊 Quarter-over-Quarter Revenue</div>
       <div id="anal-qoq"></div>
@@ -1642,6 +1638,12 @@ async function submitNewOrder() {
   if(!retailerId){toast('⚠️ Select a retailer.');return;}
   if(!date){toast('⚠️ Set an order date.');return;}
   if(!products.length){toast('⚠️ Add at least one product.');return;}
+  // Validate product minimums
+  for(const p of products){
+    const moq=PRODUCT_MOQ[p.product];
+    if(moq&&p.qty<moq){toast(`⚠️ ${p.product} requires a minimum of ${moq} units.`);return;}
+  }
+  const retailer=db.retailers.find(r=>r.id===retailerId)||{};
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
   const inv=db.nextInvoice++;
   _writeActive = true;
@@ -1652,6 +1654,7 @@ async function submitNewOrder() {
     if(oErr){toast('⚠️ Error creating order: '+oErr.message);db.nextInvoice--;return;}
     const {error:iErr}=await sbClient.from('order_items').insert(products.map(p=>({order_id:newOrder.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
     if(iErr){toast('⚠️ Order saved but items failed: '+iErr.message);}
+    sendOrderNotification(retailer.name||'Partner', products, total, newOrder.id, delivery||null, notes);
     // Reload from Supabase now that both order + items are fully written
     await loadFromSupabase();
     refreshDashboard();
@@ -2430,9 +2433,9 @@ function refreshAnalytics() {
   const maxM=Math.max(...monthTotals,1);
   const bars=document.getElementById('anal-monthly-bars'); if(bars){
     bars.innerHTML=months.map((mo,i)=>`
-      <div class="bar-wrap" title="${mo.label}: ${fmtCur(monthTotals[i])}">
+      <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])}">
         <div class="bar" style="height:${Math.max(4,Math.round((monthTotals[i]/maxM)*90))}px;"></div>
-        <div class="bar-label">${mo.label}</div>
+        <div class="bar-label">${mo.label}${(i===0||mo.y!==months[i-1].y)?`<br><span style="font-size:.58rem;opacity:.65;">'${String(mo.y).slice(2)}</span>`:''}</div>
       </div>`).join('');
   }
 
@@ -2507,22 +2510,6 @@ function refreshAnalytics() {
         <div class="bar" style="height:${Math.max(4,Math.round((c/maxC)*90))}px;background:var(--brown-dk);"></div>
         <div class="bar-label">${six6months[i].label}</div>
       </div>`).join('');
-  }
-
-  // ── Year-over-Year Revenue ──
-  const yoyEl=document.getElementById('anal-yoy'); if(yoyEl){
-    const curYear=now.getFullYear();
-    const years=[curYear-1,curYear];
-    const yRevs=years.map(y=>db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date);return !isNaN(d)&&d.getFullYear()===y;}).reduce((s,o)=>s+(o.total||0),0));
-    const maxYR=Math.max(...yRevs,1);
-    yoyEl.innerHTML=years.map((y,i)=>{
-      const change=i>0&&yRevs[i-1]>0?Math.round(((yRevs[i]-yRevs[i-1])/yRevs[i-1])*100):null;
-      return `<div class="top-ret-row" style="align-items:center;">
-        <span class="top-ret-name" style="flex:0 0 50px;font-weight:700;">${y}</span>
-        <div class="top-ret-bar-wrap"><div class="top-ret-bar" style="width:${Math.round((yRevs[i]/maxYR)*100)}%;background:${PROD_COLORS[i]};"></div></div>
-        <span class="top-ret-val">${fmtCur(yRevs[i])}</span>
-        ${change!==null?`<span style="font-size:.72rem;margin-left:8px;color:${change>=0?'#2e7d4f':'var(--danger)'};">${change>=0?'▲':'▼'}${Math.abs(change)}%</span>`:''}
-      </div>`;}).join('');
   }
 
   // ── Quarter-over-Quarter Revenue ──
