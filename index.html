@@ -223,15 +223,74 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 }
 
 @media(max-width:640px){
-  main{padding:16px 14px;}
-  header{padding:12px 14px;}
-  .prod-item{grid-template-columns:1fr 80px 95px auto;}
-  .invoice-box{padding:20px;}
+  /* ── Layout ── */
+  main{padding:14px 12px;}
+  header{padding:10px 12px;}
+  .hdr-text h1{font-size:1.2rem;}
+  .hdr-text p{font-size:.62rem;letter-spacing:.08em;}
+  .hdr-right{position:static;margin-left:auto;}
+  .hdr-center{width:100%;justify-content:space-between;}
+  header{flex-wrap:wrap;gap:6px;}
+  .hdr-user{display:none;}
+  .btn-logout{padding:5px 10px;font-size:.72rem;}
+
+  /* ── Nav ── */
+  nav button{padding:10px 14px;font-size:.74rem;letter-spacing:.04em;}
+
+  /* ── Page headings ── */
+  .page-h{font-size:1.3rem;}
+  .page-sub{font-size:.82rem;margin-bottom:16px;}
+
+  /* ── Panels ── */
+  .panel{padding:14px 13px;}
+  .panel-title{font-size:.97rem;}
+
+  /* ── Stats / KPI grids ── */
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .stat-card{padding:13px 11px;}
+  .stat-card .sv{font-size:1.55rem;}
+  .analytics-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .anal-card .av{font-size:1.35rem;}
+
+  /* ── Forms ── */
+  .form-row{flex-direction:column;gap:10px;}
+  .fg{min-width:unset;}
+  .prod-item{grid-template-columns:1fr 70px 80px auto;}
+  .form-actions{flex-direction:column;gap:8px;}
+  .form-actions .btn{width:100%;text-align:center;}
+
+  /* ── Tables ── */
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  table{min-width:520px;}
+  .modal table{min-width:400px;}
+
+  /* ── Invoice ── */
+  .invoice-box{padding:16px 14px;}
+  .inv-header{flex-direction:column;gap:12px;}
+  .inv-meta{text-align:left;}
+
+  /* ── Analytics charts ── */
   #anal-charts-row{grid-template-columns:1fr !important;}
+
+  /* ── Catalog ── */
   .catalog-grid{grid-template-columns:1fr !important;}
   .catalog-section-hd{display:none;}
   .catalog-img-slot{display:none;}
-  .notif-item{padding:10px 14px;}
+  .catalog-order-footer{flex-direction:column;gap:10px;align-items:stretch;}
+  .catalog-order-footer .btn{width:100%;text-align:center;}
+
+  /* ── Modals ── */
+  .modal{width:97%;padding:18px 14px;}
+  .modal-actions{flex-direction:column;gap:8px;}
+  .modal-actions .btn{width:100%;text-align:center;}
+
+  /* ── Misc ── */
+  .notif-item{padding:10px 12px;}
+  .retailer-welcome{flex-direction:column;gap:10px;padding:16px 14px;}
+  .retailer-welcome .rw-icon{font-size:1.8rem;}
+  .btn{padding:9px 14px;font-size:.83rem;}
+  .btn-sm{padding:5px 10px;font-size:.75rem;}
+  .hdr-right .hdr-user{display:none;}
 }
 
 /* ===================== NOTIFICATION BANNER ===================== */
@@ -873,7 +932,8 @@ function productOpts(sel='') {
     `<optgroup label="${sec.label}">`+
     sec.products.map(p=>`<option value="${p}"${p===sel?' selected':''}>${p}</option>`).join('')+
     `</optgroup>`
-  ).join('');
+  ).join('')+
+  `<optgroup label="Other"><option value="Delivery"${sel==='Delivery'?' selected':''}>🚚 Delivery Fee</option></optgroup>`;
 }
 
 // =====================================================================
@@ -1029,7 +1089,7 @@ function bootApp() {
     buildAdminNav(); buildAdminContent(); showSection('dashboard');
   } else {
     const r=session.retailer;
-    document.getElementById('hdr-subtitle').textContent='Retailer Portal';
+    document.getElementById('hdr-subtitle').textContent='Partner Portal';
     document.getElementById('hdr-user-name').textContent=r.name;
     document.getElementById('hdr-user-role').textContent='Retail Partner';
     buildRetailerNav(); buildRetailerContent(); showSection('r-home');
@@ -2247,7 +2307,7 @@ function renderRetailerOrders() {
   const fs=document.getElementById('r-f-status');
   let orders=db.orders.filter(o=>o.retailerId===r.id);
   if(fs&&fs.value) orders=orders.filter(o=>o.status===fs.value);
-  orders=[...orders].reverse();
+  orders=[...orders].sort((a,b)=>new Date(b.created||b.date)-new Date(a.created||a.date));
   const tbody=document.getElementById('r-orders-tbody');if(!tbody)return;
   tbody.innerHTML=orders.length?orders.map(o=>`<tr>
     <td><strong>${invNum(o.invoiceNum)}</strong></td>
@@ -2270,7 +2330,7 @@ function retailerPlaceOrder() {
   if(!products.length){toast('⚠️ Add at least one product.');return;}
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
   const inv=db.nextInvoice++;
-  db.orders.push({id:Date.now(),invoiceNum:inv,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery,status:'Pending',notes:notes||'Submitted via retailer portal',products,total,created:new Date().toISOString()});
+  db.orders.push({id:Date.now(),invoiceNum:inv,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery,status:'Pending',notes:notes||'Submitted via partner portal',products,total,created:new Date().toISOString()});
   saveDB();
   document.getElementById('ro-prod-list').innerHTML='';
   document.getElementById('ro-notes').value='';
@@ -2399,6 +2459,21 @@ function generateBakeList() {
   const sorted=Object.entries(totals).sort((a,b)=>b[1]-a[1]);
   const grandTotal=sorted.reduce((s,[,q])=>s+q,0);
   if(ct) ct.textContent=`Based on ${activeOrders.length} order${activeOrders.length!==1?'s':''} (Pending + Confirmed)`;
+
+  // ── Delivery schedule grouped by date ──
+  const deliveryGroups={};
+  activeOrders.forEach(o=>{
+    const key=o.delivery||'(No delivery date set)';
+    if(!deliveryGroups[key]) deliveryGroups[key]=[];
+    deliveryGroups[key].push(o);
+  });
+  const deliverySorted=Object.entries(deliveryGroups).sort((a,b)=>{
+    if(a[0]==='(No delivery date set)') return 1;
+    if(b[0]==='(No delivery date set)') return -1;
+    return new Date(a[0])-new Date(b[0]);
+  });
+
+  // Build order-by-order breakdown
   const orderRows=activeOrders.map(o=>{
     const items=o.products.filter(p=>p.product&&p.product!=='Delivery'&&p.qty>0);
     return `<div style="font-size:.78rem;color:var(--brown-lt);padding:3px 0 3px 12px;border-left:2px solid var(--tan);">
@@ -2406,9 +2481,11 @@ function generateBakeList() {
       — ${items.map(p=>`${p.qty}× ${esc(p.product)}`).join(', ')}
     </div>`;
   }).join('');
+
   el.innerHTML=`
-    <div style="margin-bottom:20px;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:10px;font-weight:700;">Total to Bake</div>
+    <!-- BAKE LIST -->
+    <div style="margin-bottom:22px;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:10px;font-weight:700;">🍞 Total to Bake</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
         ${sorted.map(([prod,qty])=>`
           <div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
@@ -2421,8 +2498,42 @@ function generateBakeList() {
         <span style="font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:#fff;">${grandTotal}</span>
       </div>
     </div>
+
+    <!-- DELIVERY SCHEDULE -->
+    <div style="margin-bottom:22px;">
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:10px;font-weight:700;">🚚 Delivery Schedule</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        ${deliverySorted.map(([date,orders])=>{
+          const isNoDate=date==='(No delivery date set)';
+          return `<div style="background:var(--white);border:1px solid var(--tan);border-radius:10px;overflow:hidden;">
+            <div style="background:${isNoDate?'var(--tan-dk)':'var(--brown-dk)'};color:var(--cream);padding:9px 16px;font-size:.82rem;font-weight:700;display:flex;align-items:center;gap:8px;">
+              <span>📅</span> <span>${isNoDate?'No delivery date set':fmtDate(date)}</span>
+              <span style="margin-left:auto;font-size:.75rem;opacity:.8;">${orders.length} order${orders.length!==1?'s':''}</span>
+            </div>
+            <div style="padding:10px 14px;display:flex;flex-direction:column;gap:6px;">
+              ${orders.map(o=>{
+                const items=o.products.filter(p=>p.product&&p.product!=='Delivery'&&p.qty>0);
+                const hasDelivery=o.products.some(p=>p.product==='Delivery');
+                return `<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 10px;background:var(--cream);border-radius:8px;">
+                  <div style="flex:1;">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+                      <strong style="font-size:.86rem;color:var(--brown-dk);">${esc(o.retailerName)}</strong>
+                      <span class="badge ${sBadge(o.status)}">${o.status}</span>
+                    </div>
+                    <div style="font-size:.78rem;color:var(--brown-lt);">${items.map(p=>`${p.qty}× ${esc(p.product)}`).join(' · ')}${hasDelivery?' · 🚚 Delivery':''}</div>
+                  </div>
+                  ${o.invoiceNum?`<div style="font-size:.68rem;color:var(--brown-lt);white-space:nowrap;">${invNum(o.invoiceNum)}</div>`:''}
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- ORDER BREAKDOWN -->
     <div>
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:8px;font-weight:700;">Order Breakdown</div>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:8px;font-weight:700;">📋 Order Breakdown</div>
       <div style="display:flex;flex-direction:column;gap:5px;">${orderRows}</div>
     </div>`;
 }
@@ -2760,12 +2871,12 @@ async function retailerPlaceCatalogOrder() {
   const {data,error}=await sbClient.rpc('submit_retailer_order',{
     p_retailer_id:r.id,p_pin:session.pin,p_invoice_num:0,
     p_date:todayStr(),p_delivery_date:delivery||todayStr(),
-    p_notes:notes||'Submitted via retailer portal',
+    p_notes:notes||'Submitted via partner portal',
     p_items:safeItems
   });
   if(error){toast('⚠️ Error placing order: '+error.message);return;}
   const total=allItems.reduce((s,p)=>s+(p.qty*p.price),0);
-  db.orders.unshift({id:data.order_id,invoiceNum:0,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery,status:'Pending',notes:notes||'Submitted via retailer portal',products:allItems,total});
+  db.orders.unshift({id:data.order_id,invoiceNum:0,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery,status:'Pending',notes:notes||'Submitted via partner portal',products:allItems,total});
   sendOrderNotification(r.name, allItems, total, data.order_id, delivery, notes);
   resetCatalog();
   document.getElementById('ro-notes').value='';
