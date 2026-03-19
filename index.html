@@ -1048,15 +1048,16 @@ function buildAdminNav() {
     <button onclick="showSection('retailers')">🏪 Retailers</button>
     <button onclick="showSection('orders')">📦 Orders</button>
     <button onclick="showSection('auto-orders')">🔄 Auto-Orders</button>
-    <button onclick="showSection('bake')">🍞 Bake Tab</button>
+    <button onclick="showSection('bake')">🍞 Production</button>
     <button onclick="showSection('settings')">⚙️ Settings</button>`
 }
 function buildRetailerNav() {
   document.getElementById('main-nav').innerHTML=`
-    <button onclick="showSection('r-home')">🏠 My Account</button>
+    <button onclick="showSection('r-home')">🏠 Home</button>
     <button onclick="showSection('r-orders')">📦 My Orders</button>
     <button onclick="showSection('r-new-order')">➕ Place Order</button>
-    <button onclick="showSection('r-auto')">🔄 Auto-Order</button>`;
+    <button onclick="showSection('r-auto')">🔄 Auto-Order</button>
+    <button onclick="showSection('r-account')">✏️ My Account</button>`;
 }
 
 function showSection(name) {
@@ -1064,7 +1065,7 @@ function showSection(name) {
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.classList.add('active');
-  const maps={admin:['dashboard','analytics','retailers','orders','auto-orders','settings'],retailer:['r-home','r-orders','r-new-order','r-auto']};
+  const maps={admin:['dashboard','analytics','retailers','orders','auto-orders','bake','settings'],retailer:['r-home','r-orders','r-new-order','r-auto','r-account']};
   const map=session.type==='admin'?maps.admin:maps.retailer;
   const idx=map.indexOf(name);
   const navBtns=document.querySelectorAll('nav button');
@@ -1079,6 +1080,7 @@ function showSection(name) {
   if(name==='summary') fillRetailerSelects();
   if(name==='settings') { setTimeout(renderNotifList,50); }
   if(name==='r-home') renderRetailerHome();
+  if(name==='r-account') loadAccountDetails();
   if(name==='r-orders') renderRetailerOrders();
   if(name==='r-auto') renderRetailerAuto();
   if(name==='r-new-order') { const l=document.getElementById('ro-prod-list'); if(l&&!l.children.length) addProdRow('ro-prod-list','',1,'',true); }
@@ -1291,7 +1293,7 @@ function buildAdminContent() {
 
 <!-- BAKE TAB -->
 <section class="section" id="sec-bake">
-  <h2 class="page-h">Bake Tab</h2><p class="page-sub">Generate a consolidated bake list from all pending and confirmed orders.</p>
+  <h2 class="page-h">Production</h2><p class="page-sub">Generate a consolidated bake list from all pending and confirmed orders.</p>
   <div class="panel">
     <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;">
       <button class="btn btn-primary" onclick="generateBakeList()" style="font-size:1rem;padding:12px 28px;">🩂 Generate Total Order</button>
@@ -1405,6 +1407,38 @@ function buildRetailerContent() {
       ${r.phone?`<tr><td style="color:var(--brown-lt);padding:5px 0;">Phone</td><td>${esc(r.phone)}</td></tr>`:''}
       ${r.day?`<tr><td style="color:var(--brown-lt);padding:5px 0;">Delivery Day</td><td>${esc(r.day)}</td></tr>`:''}
     </tbody></table>
+  </div>
+</section>
+
+<!-- PARTNER MY ACCOUNT -->
+<section class="section" id="sec-r-account">
+  <h2 class="page-h">My Account</h2><p class="page-sub">Update your contact details — changes are reflected on our end immediately.</p>
+  <div class="panel">
+    <div class="panel-title">🏪 Business Information</div>
+    <div class="form-row">
+      <div class="fg"><label>Business Name</label><input id="ra-name" placeholder="Your business name"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>Primary Contact</label><input id="ra-contact" placeholder="Primary contact name"/></div>
+      <div class="fg"><label>Phone</label><input id="ra-phone" type="tel" placeholder="Phone number"/></div>
+      <div class="fg"><label>Email</label><input id="ra-email" type="email" placeholder="Email address"/></div>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:18px;">
+    <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+      <span>👥 Additional Contacts</span>
+      <button class="btn btn-outline btn-sm" onclick="addAccountContactRow()">+ Add Contact</button>
+    </div>
+    <div id="ra-extra-contacts" style="margin-top:10px;"></div>
+    <p style="font-size:.78rem;color:var(--brown-lt);margin-top:10px;font-style:italic;">Add buyers, managers, or anyone else we should have on file.</p>
+  </div>
+  <div class="panel" style="margin-top:18px;">
+    <div class="panel-title">📝 Notes for Lazar Family Bakehouse</div>
+    <textarea id="ra-notes" rows="3" placeholder="Delivery preferences, allergy info, special instructions..." style="width:100%;border:1px solid var(--tan);border-radius:8px;padding:10px 12px;font-family:'Lato',sans-serif;font-size:.9rem;background:var(--cream);color:var(--brown-dk);resize:vertical;margin-top:6px;"></textarea>
+  </div>
+  <div class="form-actions" style="margin-top:18px;">
+    <button class="btn btn-primary" onclick="saveAccountDetails()">💾 Save Changes</button>
+    <button class="btn btn-outline" onclick="loadAccountDetails()">↺ Discard</button>
   </div>
 </section>
 
@@ -2244,6 +2278,9 @@ function retailerPlaceOrder() {
   toast(`✅ Order ${invNum(inv)} submitted! We'll confirm shortly.`);
   showSection('r-orders');
 }
+function loadAccountDetails(){const r=session&&session.retailer?db.retailers.find(x=>x.id===session.retailer.id):null;if(!r)return;document.getElementById('ra-name').value=r.name||'';document.getElementById('ra-contact').value=r.contact||'';document.getElementById('ra-phone').value=r.phone||'';document.getElementById('ra-email').value=r.email||'';document.getElementById('ra-notes').value=r.notes||'';const extraEl=document.getElementById('ra-extra-contacts');extraEl.innerHTML='';(r.extra_contacts||[]).forEach(c=>addAccountContactRow(c.name||'',c.email||'',c.phone||''));}
+function addAccountContactRow(name='',email='',phone=''){const extraEl=document.getElementById('ra-extra-contacts');const div=document.createElement('div');div.className='form-row';div.style.alignItems='center';div.innerHTML='<div class="fg"><input placeholder="Contact name" value="'+esc(name)+'" class="ra-extra-name"/></div><div class="fg"><input placeholder="Email" type="email" value="'+esc(email)+'" class="ra-extra-email"/></div><div class="fg"><input placeholder="Phone" type="tel" value="'+esc(phone)+'" class="ra-extra-phone"/></div><button class="btn-icon" onclick="this.parentElement.remove()" title="Remove" style="flex-shrink:0;align-self:center;">✕</button>';extraEl.appendChild(div);}
+async function saveAccountDetails(){const r=session&&session.retailer?db.retailers.find(x=>x.id===session.retailer.id):null;if(!r){toast('⚠️ Not logged in.');return;}const name=document.getElementById('ra-name').value.trim();const contact=document.getElementById('ra-contact').value.trim();const phone=document.getElementById('ra-phone').value.trim();const email=document.getElementById('ra-email').value.trim();const notes=document.getElementById('ra-notes').value.trim();if(!name){toast('⚠️ Business name is required.');return;}const extras=Array.from(document.querySelectorAll('#ra-extra-contacts .form-row')).map(row=>({name:row.querySelector('.ra-extra-name').value.trim(),email:row.querySelector('.ra-extra-email').value.trim(),phone:row.querySelector('.ra-extra-phone').value.trim()})).filter(c=>c.name||c.email||c.phone);const {error}=await sbClient.rpc('update_retailer_contact',{p_retailer_id:r.id,p_name:name,p_contact:contact,p_email:email,p_phone:phone,p_notes:notes,p_extra_contacts:extras});if(error){toast('⚠️ Error saving: '+error.message);return;}Object.assign(r,{name,contact,email,phone,notes,extra_contacts:extras});session.retailer={...session.retailer,name};toast('✅ Account details saved!');renderRetailerHome();}
 function renderRetailerAuto() {
   const r=session.retailer;
   const myAO=db.autoOrders.filter(ao=>ao.retailerId===r.id);
@@ -2424,7 +2461,7 @@ function refreshAnalytics() {
     <div class="anal-card"><div class="al">Avg Order Value</div><div class="av">${fmtCur(avgOrder)}</div><div class="ac">Per invoice</div></div>
     <div class="anal-card"><div class="al">Active Partners</div><div class="av">${activeCount} of ${db.retailers.length}</div><div class="ac">Active partners (ordered last 2 mo.)</div></div>
     <div class="anal-card"><div class="al">Total Invoices</div><div class="av">${db.orders.length}</div><div class="ac">Since launch</div></div>
-    <div class="anal-card" style="border-left:3px solid var(--brown-dk);"><div class="al">Avg Orders / Month</div><div class="av">${avgOrdersPerMonth.toFixed(1)}</div><div class="ac">Trailing 6 months</div></div>`;
+    `;
 
   // Monthly bar chart — last 12 months
   const months=[]; const today=new Date();
