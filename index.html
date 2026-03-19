@@ -1779,7 +1779,7 @@ function renderOrders() {
   const sumEl=document.getElementById('orders-summary');
   if(sumEl){
     const filtTotal=orders.reduce((s,o)=>s+(o.total||0),0);
-    const filtUnits=orders.reduce((s,o)=>s+o.products.reduce((ps,p)=>ps+(p.qty||0),0),0);
+    const filtUnits=orders.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
     sumEl.innerHTML=`<strong>${orders.length}</strong> order${orders.length!==1?'s':''} &nbsp;·&nbsp; <strong>${filtUnits}</strong> units &nbsp;·&nbsp; <strong>${fmtCur(filtTotal)}</strong>`;
   }
   if(!orders.length){tbody.innerHTML='<tr><td colspan="8" class="empty-row">No orders found.</td></tr>';return;}
@@ -2002,7 +2002,7 @@ function refreshDashboard() {
   const revPrior52=ordersPrior52.reduce((s,o)=>s+(o.total||0),0);
   const yoyChange=revPrior52>0?Math.round(((rev52-revPrior52)/revPrior52)*100):null;
   // Avg items per week (last 52 weeks)
-  const totalUnits=orders52.reduce((s,o)=>s+o.products.reduce((ps,p)=>ps+(p.qty||0),0),0);
+  const totalUnits=orders52.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
   const avgPerWeek=Math.round(totalUnits/52);
   sg.innerHTML=`
     <div class="stat-card"><div class="si">🏪</div><div class="sl">Total Partners</div><div class="sv">${db.retailers.length}</div></div>
@@ -2237,11 +2237,11 @@ function renderRetailerHome() {
     const avgOrder=myOrders.length?(total/myOrders.length):0;
     // Large recent order alert: any single order with 40+ units placed in last 7 days
     const sevenDaysAgo=new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
-    const bigRecent=myOrders.filter(o=>{if(!o.date||new Date(o.date)<sevenDaysAgo)return false;return o.products.reduce((s,p)=>s+(p.qty||0),0)>=40;});
+    const bigRecent=myOrders.filter(o=>{if(!o.date||new Date(o.date)<sevenDaysAgo)return false;return o.products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0)>=40;});
     // Most recent order info
     const sorted=[...myOrders].sort((a,b)=>new Date(b.date)-new Date(a.date));
     const lastOrder=sorted[0];
-    const lastOrderUnits=lastOrder?lastOrder.products.reduce((s,p)=>s+(p.qty||0),0):0;
+    const lastOrderUnits=lastOrder?lastOrder.products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0):0;
     stats.innerHTML=`
       <div class="stat-card"><div class="si">📦</div><div class="sl">Total Orders</div><div class="sv">${myOrders.length||'—'}</div></div>
       <div class="stat-card"><div class="si">💰</div><div class="sl">Lifetime Value</div><div class="sv">${fmtCur(total)}</div></div>
@@ -2251,7 +2251,7 @@ function renderRetailerHome() {
       ${lastOrderUnits>0?`<div class="stat-card"><div class="si">🍪</div><div class="sl">Last Order Units</div><div class="sv">${lastOrderUnits}</div></div>`:''}`;
     // Big order alert banner
     if(bigRecent.length>0){
-      const bigUnits=bigRecent[0].products.reduce((s,p)=>s+(p.qty||0),0);
+      const bigUnits=bigRecent[0].products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0);
       const alertEl=document.getElementById('r-big-order-alert');
       if(alertEl) alertEl.innerHTML=`<div style="background:linear-gradient(135deg,var(--brown-dk),var(--brown));color:var(--cream);border-radius:12px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><span style="font-size:1.5rem;">🎉</span><div><strong>Your latest order of ${bigUnits} units has been received!</strong><br><span style="font-size:.83rem;opacity:.85;">Thank you — we're on it. You'll hear from us within 24 hours.</span></div></div>`;
     }
@@ -2730,7 +2730,7 @@ function refreshAnalytics() {
       const yData=years.map(y=>{
         const yOrds=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date);return !isNaN(d)&&d.getFullYear()===y;});
         const rev=yOrds.reduce((s,o)=>s+(o.total||0),0);
-        const units=yOrds.reduce((s,o)=>s+o.products.reduce((ps,p)=>ps+(p.qty||0),0),0);
+        const units=yOrds.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
         const partners=new Set(yOrds.map(o=>o.retailerId)).size;
         return {year:y,rev,orders:yOrds.length,units,partners};
       });
