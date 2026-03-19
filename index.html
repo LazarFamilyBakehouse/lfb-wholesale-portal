@@ -2482,16 +2482,18 @@ function refreshAnalytics() {
     }).sort((a,b)=>b.count-a.count);
     const maxF=retStats[0]?retStats[0].count:1;
     freqEl.innerHTML=retStats.length?`
-      <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px 14px;font-size:.78rem;font-weight:700;color:var(--brown-lt);border-bottom:1px solid var(--tan);padding-bottom:6px;margin-bottom:8px;">
-        <span>Partner</span><span style="text-align:right;">Orders</span><span style="text-align:right;">Avg Reorder</span><span style="text-align:right;">Last Order</span>
+      <div style="display:grid;grid-template-columns:1fr 52px 90px 96px;gap:0 14px;">
+        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);">Partner</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Orders</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Avg Reorder</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Last Order</span>
+        ${retStats.map(r=>`
+          <span style="font-weight:600;font-size:.83rem;padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${esc(r.name)}</span>
+          <span style="text-align:right;font-size:.83rem;font-weight:700;color:var(--brown-dk);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.count}</span>
+          <span style="text-align:right;font-size:.78rem;color:var(--brown-lt);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.avgDays!==null?r.avgDays+' days':'—'}</span>
+          <span style="text-align:right;font-size:.78rem;color:var(--brown-lt);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.lastOrder?fmtDate(r.lastOrder):'—'}</span>
+        `).join('')}
       </div>
-      ${retStats.map((r,i)=>`
-      <div style="display:grid;grid-template-columns:1fr auto auto auto;gap:6px 14px;align-items:center;padding:5px 0;border-bottom:1px solid var(--cream-dk);">
-        <span style="font-weight:600;font-size:.83rem;">${esc(r.name)}</span>
-        <span style="text-align:right;font-size:.83rem;font-weight:700;color:var(--brown-dk);">${r.count}</span>
-        <span style="text-align:right;font-size:.78rem;color:var(--brown-lt);">${r.avgDays!==null?r.avgDays+' days':'—'}</span>
-        <span style="text-align:right;font-size:.78rem;color:var(--brown-lt);">${r.lastOrder?fmtDate(r.lastOrder):'—'}</span>
-      </div>`).join('')}
     `:'<p style="color:var(--brown-lt);font-style:italic;">No active partners in the last 2 months.</p>';
   }
 
