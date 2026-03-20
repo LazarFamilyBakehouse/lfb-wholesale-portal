@@ -963,8 +963,7 @@ function productOpts(sel='') {
     `<optgroup label="${sec.label}">`+
     sec.products.map(p=>`<option value="${p}"${p===sel?' selected':''}>${p}</option>`).join('')+
     `</optgroup>`
-  ).join('')+
-  `<optgroup label="Other"><option value="Delivery"${sel==='Delivery'?' selected':''}>🚚 Delivery Fee</option></optgroup>`;
+  ).join('');
 }
 
 // =====================================================================
@@ -1633,17 +1632,32 @@ function autoFillPrice(sel,lockPrice=false) {
   if(priceInput&&price) { priceInput.value=price; if(lockPrice) priceInput.setAttribute('readonly',''); }
 }
 function refreshOrderPricesForRetailer(retailerId) {
-  // When admin changes the retailer, re-price any existing product rows
+  // Re-price product rows when retailer changes
   document.querySelectorAll('#o-prod-list .prod-item').forEach(row=>{
     const prodSel=row.querySelector('select');
     const priceInput=row.querySelectorAll('input')[1];
-    if(prodSel&&priceInput&&prodSel.value) {
+    if(prodSel&&priceInput&&prodSel.value&&prodSel.value!=='Delivery') {
       priceInput.value=getPriceForRetailer(prodSel.value, retailerId);
     }
   });
+  // Remove old delivery row, inject new locked one if fee > 0
+  document.querySelectorAll('#o-prod-list .delivery-row').forEach(r=>r.remove());
+  const fee=getDeliveryFee(Number(retailerId));
+  if(fee>0) {
+    const list=document.getElementById('o-prod-list');
+    const div=document.createElement('div');
+    div.className='prod-item delivery-row';
+    div.style.cssText='background:var(--cream-dk);border-radius:8px;opacity:.9;';
+    div.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:8px 6px;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" /><input type="number" value="${fee}" readonly style="opacity:.6;background:var(--cream);cursor:default;" /><span style="width:28px;"></span>`;
+    list.appendChild(div);
+  }
 }
 function getProdRows(listId) {
   return Array.from(document.querySelectorAll(`#${listId} .prod-item`)).map(r=>{
+    if(r.classList.contains('delivery-row')) {
+      const inputs=r.querySelectorAll('input');
+      return {product:'Delivery',qty:1,price:parseFloat(inputs[1].value)||0};
+    }
     const inputs=r.querySelectorAll('input,select');
     return {product:inputs[0].value,qty:Number(inputs[1].value)||1,price:parseFloat(inputs[2].value)||0};
   });
@@ -2671,7 +2685,7 @@ function refreshAnalytics() {
     // Show year label only on January bars (clean, unambiguous)
     bars.innerHTML=months.map((mo,i)=>`
       <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])}">
-        <div class="bar-val" style="font-size:.6rem;">${monthTotals[i]>0?'$'+Math.round(monthTotals[i]/1000)+'k':''}</div>
+        <div class="bar-val" style="font-size:.6rem;">${monthTotals[i]>0?(monthTotals[i]>=1000?'$'+Math.round(monthTotals[i]/1000)+'k':'$'+Math.round(monthTotals[i])):''}</div>
         <div class="bar" style="height:${Math.max(4,Math.round((monthTotals[i]/maxM)*90))}px;"></div>
         <div class="bar-label">${mo.label}${mo.m===0?`<br><span style="font-size:.58rem;opacity:.7;">${mo.y}</span>`:''}</div>
       </div>`).join('');
@@ -3090,7 +3104,14 @@ function openEditOrder(id) {
   document.getElementById('eo-notes').value=o.notes||'';
   const list=document.getElementById('eo-prod-list');
   list.innerHTML='';
-  (o.products||[]).forEach(p=>addProdRow('eo-prod-list',p.product,p.qty,p.price));
+  (o.products||[]).forEach(p=>{
+    if(p.product==='Delivery') {
+      const div=document.createElement('div');div.className='prod-item delivery-row';
+      div.style.cssText='background:var(--cream-dk);border-radius:8px;opacity:.9;';
+      div.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:8px 6px;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" /><input type="number" value="${p.price}" readonly style="opacity:.6;background:var(--cream);cursor:default;" /><span style="width:28px;"></span>`;
+      list.appendChild(div);
+    } else { addProdRow('eo-prod-list',p.product,p.qty,p.price); }
+  });
   if(!o.products||!o.products.length) addProdRow('eo-prod-list');
   updateEOTotal();
   document.getElementById('eo-prod-list').addEventListener('input',updateEOTotal);
