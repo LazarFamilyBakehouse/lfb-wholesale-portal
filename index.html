@@ -249,7 +249,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .stat-card{padding:13px 11px;}
   .stat-card .sv{font-size:1.55rem;}
-  .analytics-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .analytics-grid{grid-template-columns:repeat(3,1fr);gap:10px;}
   .anal-card .av{font-size:1.35rem;}
 
   /* ── Forms ── */
@@ -306,13 +306,13 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 .notif-dismiss:hover { opacity:1; }
 
 /* ===================== ANALYTICS ===================== */
-.analytics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:14px; margin-bottom:22px; }
+.analytics-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:22px; }
 .anal-card { background:var(--white); border:1px solid var(--tan); border-radius:12px; padding:16px; box-shadow:0 2px 8px var(--shadow); }
 .anal-card .al { font-size:.72rem; text-transform:uppercase; letter-spacing:.1em; color:var(--brown-lt); margin-bottom:3px; }
 .anal-card .av { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:var(--brown-dk); }
 .anal-card .ac { font-size:.75rem; color:var(--sage); margin-top:2px; font-style:italic; }
 .bar-chart { display:flex; align-items:flex-end; gap:4px; height:80px; padding:4px 0; }
-.bar-wrap { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; flex:1; gap:3px; }
+.bar-wrap { display:flex; flex-direction:column; align-items:center; justify-content:flex-start; flex:1; }
 .bar { background:var(--red); border-radius:3px 3px 0 0; width:100%; min-height:3px; transition:height .3s; cursor:default; }
 .bar:hover { background:var(--brown); }
 .bar-label { font-size:.58rem; color:var(--brown-lt); }
@@ -1202,8 +1202,7 @@ function buildAdminContent() {
   <!-- Monthly Revenue — full width -->
   <div class="panel" style="margin-top:18px;">
     <div class="panel-title">📅 Monthly Revenue (last 12 months)</div>
-    <div class="bar-chart" id="anal-monthly-bars" style="height:180px;align-items:flex-end;gap:6px;padding:8px 0;"></div>
-    <div id="anal-monthly-table" style="margin-top:10px;"></div>
+    <div class="bar-chart" id="anal-monthly-bars" style="height:180px;gap:6px;padding:8px 0;"></div>
   </div>
   <!-- 2-column chart grid -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;">
@@ -1223,7 +1222,7 @@ function buildAdminContent() {
       <div class="panel-title">📈 Quarter-over-Quarter Revenue</div>
       <div id="anal-qoq"></div>
     </div>
-    <div class="panel">
+    <div class="panel" style="grid-column:span 2;">
       <div class="panel-title">🔄 Product Movement: Current vs Prior Year</div>
       <div id="anal-prod-yoy"></div>
     </div>
@@ -2675,7 +2674,6 @@ function refreshAnalytics() {
     <div class="anal-card"><div class="al">Avg Order Value</div><div class="av">${fmtCur(avgOrder)}</div><div class="ac">Per invoice</div></div>
     <div class="anal-card"><div class="al">Active Partners</div><div class="av">${activeCount}</div><div class="ac">Ordered in last 2 mo.</div></div>
     <div class="anal-card"><div class="al">Avg Orders / Mo</div><div class="av">${avgOrdersPerMonth.toFixed(1)}</div><div class="ac">Trailing 6 months</div></div>
-    <div class="anal-card"><div class="al">Total Invoices</div><div class="av">${db.orders.length}</div><div class="ac">Since launch</div></div>
     `;
 
   // Monthly bar chart — last 12 months (use noon UTC to avoid timezone off-by-one)
@@ -2684,23 +2682,14 @@ function refreshAnalytics() {
   const monthTotals=months.map(mo=>db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===mo.y&&d.getMonth()===mo.m;}).reduce((s,o)=>s+(o.total||0),0));
   const maxM=Math.max(...monthTotals,1);
   const bars=document.getElementById('anal-monthly-bars'); if(bars){
+    const fmtK=v=>v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v);
     bars.innerHTML=months.map((mo,i)=>`
       <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])}">
-        <div class="bar-val" style="font-size:.62rem;font-weight:700;">${monthTotals[i]>0?fmtCur(monthTotals[i]):''}</div>
-        <div class="bar" style="height:${Math.max(4,Math.round((monthTotals[i]/maxM)*130))}px;"></div>
-        <div class="bar-label">${mo.label}${mo.m===0?`<br><span style="font-size:.55rem;opacity:.7;">${mo.y}</span>`:''}</div>
+        <div class="bar-val" style="font-size:.62rem;font-weight:700;height:16px;line-height:16px;">${monthTotals[i]>0?fmtK(monthTotals[i]):''}</div>
+        <div style="flex:1;min-height:0;"></div>
+        <div class="bar" style="height:${Math.max(4,Math.round((monthTotals[i]/maxM)*130))}px;width:100%;"></div>
+        <div class="bar-label" style="height:18px;line-height:18px;margin-top:3px;">${mo.label}</div>
       </div>`).join('');
-  }
-  // Monthly table
-  const mtEl=document.getElementById('anal-monthly-table'); if(mtEl){
-    const nonZero=months.filter((_,i)=>monthTotals[i]>0);
-    if(nonZero.length){
-      mtEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px 10px;margin-top:4px;">${months.map((mo,i)=>`
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:${monthTotals[i]>0?'var(--cream-dk)':'transparent'};border-radius:6px;">
-          <span style="font-size:.78rem;color:var(--brown-lt);">${mo.label} ${mo.y}</span>
-          <span style="font-size:.82rem;font-weight:700;color:${monthTotals[i]>0?'var(--brown-dk)':'var(--tan)'};">${monthTotals[i]>0?fmtCur(monthTotals[i]):'—'}</span>
-        </div>`).join('')}</div>`;
-    }
   }
 
   // Top retailers
