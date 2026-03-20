@@ -3114,6 +3114,16 @@ function openEditOrder(id) {
     } else { addProdRow('eo-prod-list',p.product,p.qty,p.price); }
   });
   if(!o.products||!o.products.length) addProdRow('eo-prod-list');
+  // Auto-inject delivery fee if retailer has one and it's missing from this order
+  const _eoHasDel=(o.products||[]).some(p=>p.product==='Delivery');
+  const _eoRet=db.retailers.find(r=>r.id===o.retailerId);
+  const _eoFee=_eoRet?getDeliveryFee(_eoRet.id):0;
+  if(!_eoHasDel&&_eoFee>0){
+    const _d=document.createElement('div');_d.className='prod-item delivery-row';
+    _d.style.cssText='background:var(--cream-dk);border-radius:8px;opacity:.9;';
+    _d.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:8px 6px;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;"/><input type="number" value="${_eoFee}" readonly style="opacity:.6;background:var(--cream);cursor:default;"/><span style="width:28px;"></span>`;
+    document.getElementById('eo-prod-list').appendChild(_d);
+  }
   updateEOTotal();
   document.getElementById('eo-prod-list').addEventListener('input',updateEOTotal);
   document.getElementById('edit-order-modal').classList.add('open');
