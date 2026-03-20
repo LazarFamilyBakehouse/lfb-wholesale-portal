@@ -1091,6 +1091,7 @@ async function doLogin() {
 }
 
 async function logout() {
+  clearTimeout(_inactivityTimer);
   if(session?.type==='admin') await sbClient.auth.signOut();
   sbClient.removeAllChannels();
   session=null;
@@ -1166,14 +1167,13 @@ function showSection(name) {
   if(name==='orders'){renderOrders();fillRetailerSelects();}
   if(name==='auto-orders'){renderAutoOrders();fillRetailerSelects();}
   if(name==='bake'){renderBakeTab();}
-  if(name==='bake'){renderBakeTab();}
   if(name==='summary') fillRetailerSelects();
   if(name==='settings') { setTimeout(renderNotifList,50); }
   if(name==='r-home') renderRetailerHome();
   if(name==='r-account') loadAccountDetails();
   if(name==='r-orders') renderRetailerOrders();
   if(name==='r-auto') renderRetailerAuto();
-  if(name==='r-new-order') { const l=document.getElementById('ro-prod-list'); if(l&&!l.children.length) addProdRow('ro-prod-list','',1,'',true); }
+  if(name==='r-new-order') { buildCatalogGrid(); }
 }
 
 //  [8] ADMIN UI BUILDER
@@ -2926,7 +2926,7 @@ function updateCatalogTotal() {
     if(subEl) subEl.innerHTML=`Subtotal: <strong>${fmtCur(sub)}</strong>`;
   });
   const feeEl=document.getElementById('catalog-delivery-fee');
-  if(feeEl) feeEl.style.display=deliveryFee>0?'':'none';
+  if(feeEl){feeEl.style.display=deliveryFee>0?'':'none';if(deliveryFee>0)feeEl.textContent='Incl. '+fmtCur(deliveryFee)+' delivery fee';}
   const tot=document.getElementById('catalog-order-total');
   if(tot) tot.textContent=fmtCur(grand+deliveryFee);
 }
@@ -3125,7 +3125,9 @@ function openEditOrder(id) {
     document.getElementById('eo-prod-list').appendChild(_d);
   }
   updateEOTotal();
-  document.getElementById('eo-prod-list').addEventListener('input',updateEOTotal);
+  const _eoList=document.getElementById('eo-prod-list');
+  _eoList.removeEventListener('input',updateEOTotal);
+  _eoList.addEventListener('input',updateEOTotal);
   document.getElementById('edit-order-modal').classList.add('open');
 }
 function updateEOTotal() {
