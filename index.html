@@ -1199,12 +1199,14 @@ function buildAdminContent() {
   <h2 class="page-h">Analytics</h2><p class="page-sub">Revenue trends, top partners, and product insights.</p>
   <!-- KPI Row -->
   <div class="analytics-grid" id="anal-kpi"></div>
+  <!-- Monthly Revenue — full width -->
+  <div class="panel" style="margin-top:18px;">
+    <div class="panel-title">📅 Monthly Revenue (last 12 months)</div>
+    <div class="bar-chart" id="anal-monthly-bars" style="height:180px;align-items:flex-end;gap:6px;padding:8px 0;"></div>
+    <div id="anal-monthly-table" style="margin-top:10px;"></div>
+  </div>
   <!-- 2-column chart grid -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;">
-    <div class="panel">
-      <div class="panel-title">📅 Monthly Revenue (last 12 months)</div>
-      <div class="bar-chart" id="anal-monthly-bars" style="height:140px;align-items:flex-end;gap:5px;padding:8px 0;"></div>
-    </div>
     <div class="panel">
       <div class="panel-title">🏆 Top Partners by Revenue</div>
       <div id="anal-top-retailers"></div>
@@ -2682,13 +2684,23 @@ function refreshAnalytics() {
   const monthTotals=months.map(mo=>db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===mo.y&&d.getMonth()===mo.m;}).reduce((s,o)=>s+(o.total||0),0));
   const maxM=Math.max(...monthTotals,1);
   const bars=document.getElementById('anal-monthly-bars'); if(bars){
-    // Show year label only on January bars (clean, unambiguous)
     bars.innerHTML=months.map((mo,i)=>`
       <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])}">
-        <div class="bar-val" style="font-size:.6rem;">${monthTotals[i]>0?(monthTotals[i]>=1000?'$'+Math.round(monthTotals[i]/1000)+'k':'$'+Math.round(monthTotals[i])):''}</div>
-        <div class="bar" style="height:${Math.max(4,Math.round((monthTotals[i]/maxM)*90))}px;"></div>
-        <div class="bar-label">${mo.label}${mo.m===0?`<br><span style="font-size:.58rem;opacity:.7;">${mo.y}</span>`:''}</div>
+        <div class="bar-val" style="font-size:.62rem;font-weight:700;">${monthTotals[i]>0?fmtCur(monthTotals[i]):''}</div>
+        <div class="bar" style="height:${Math.max(4,Math.round((monthTotals[i]/maxM)*130))}px;"></div>
+        <div class="bar-label">${mo.label}${mo.m===0?`<br><span style="font-size:.55rem;opacity:.7;">${mo.y}</span>`:''}</div>
       </div>`).join('');
+  }
+  // Monthly table
+  const mtEl=document.getElementById('anal-monthly-table'); if(mtEl){
+    const nonZero=months.filter((_,i)=>monthTotals[i]>0);
+    if(nonZero.length){
+      mtEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px 10px;margin-top:4px;">${months.map((mo,i)=>`
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;background:${monthTotals[i]>0?'var(--cream-dk)':'transparent'};border-radius:6px;">
+          <span style="font-size:.78rem;color:var(--brown-lt);">${mo.label} ${mo.y}</span>
+          <span style="font-size:.82rem;font-weight:700;color:${monthTotals[i]>0?'var(--brown-dk)':'var(--tan)'};">${monthTotals[i]>0?fmtCur(monthTotals[i]):'—'}</span>
+        </div>`).join('')}</div>`;
+    }
   }
 
   // Top retailers
