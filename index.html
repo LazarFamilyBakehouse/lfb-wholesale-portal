@@ -564,7 +564,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 // EMAILJS_CONFIRM_TPL → sent to THE PARTNER when you confirm their order
 const EMAILJS_SERVICE     = 'service_j5qotyn';
 const EMAILJS_NOTIFY_TPL  = 'template_wbhl7fm';    // admin notification (existing)
-const EMAILJS_CONFIRM_TPL = 'template_REPLACE_ME'; // retailer confirmation — paste new ID here
+const EMAILJS_CONFIRM_TPL = 'template_5m4rusk'; // retailer confirmation email
 
 const SUPABASE_URL  = 'https://ylvoswzsijigyezqvaat.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlsdm9zd3pzaWppZ3llenF2YWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2Mjk5MTAsImV4cCI6MjA4OTIwNTkxMH0.iA4QMZkxTsqArV3CgHb-YluiBeiIq5RppGV6kBe8G8g';
@@ -1905,7 +1905,7 @@ async function confirmOrder() {
       order_date: fmtDate(o.date),
       orders: productItems.map(p=>({name:String(p.product),units:String(p.qty),price:'$'+(Number(p.price)||0).toFixed(2)})),
       cost: {
-        shipping: deliveryFeeItem ? '$'+(Number(deliveryFeeItem.price)||0).toFixed(2) : '$0.00',
+        shipping: deliveryFeeItem ? '$'+(Number(deliveryFeeItem.price)||0).toFixed(2) : null,
         tax: '$0.00',
         total: '$'+Number(o.total).toFixed(2)
       },
