@@ -559,6 +559,13 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 //  [1b] SUPABASE ANON KEY
 //  Rotate key in Supabase dashboard if ever exposed. Update SUPABASE_ANON here.
 // =====================================================================
+// ── EmailJS config ──────────────────────────────────────────────────
+// EMAILJS_NOTIFY_TPL  → sent to YOU when a partner places an order
+// EMAILJS_CONFIRM_TPL → sent to THE PARTNER when you confirm their order
+const EMAILJS_SERVICE     = 'service_j5qotyn';
+const EMAILJS_NOTIFY_TPL  = 'template_wbhl7fm';    // admin notification (existing)
+const EMAILJS_CONFIRM_TPL = 'template_REPLACE_ME'; // retailer confirmation — paste new ID here
+
 const SUPABASE_URL  = 'https://ylvoswzsijigyezqvaat.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlsdm9zd3pzaWppZ3llenF2YWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2Mjk5MTAsImV4cCI6MjA4OTIwNTkxMH0.iA4QMZkxTsqArV3CgHb-YluiBeiIq5RppGV6kBe8G8g';
 const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -1872,17 +1879,23 @@ async function confirmOrder() {
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
   const retailerEmail=retailer.email||'';
   if(retailerEmail) {
+    // Retailer confirmation — tells the PARTNER their order is confirmed
     const productItems=o.products.filter(p=>p.product!=='Delivery');
-    emailjs.send('service_j5qotyn','template_wbhl7fm',{
+    const deliveryFeeItem=o.products.find(p=>p.product==='Delivery');
+    emailjs.send(EMAILJS_SERVICE, EMAILJS_CONFIRM_TPL, {
       retailer_name: o.retailerName,
       order_id: invNum(o.invoiceNum),
       delivery_date: deliveryDate ? fmtDate(deliveryDate) : 'To be confirmed',
       order_notes: notes||'None',
       order_date: fmtDate(o.date),
       orders: productItems.map(p=>({name:String(p.product),units:String(p.qty),price:'$'+(Number(p.price)||0).toFixed(2)})),
-      cost: {shipping:'$0.00',tax:'$0.00',total:'$'+Number(o.total).toFixed(2)},
+      cost: {
+        shipping: deliveryFeeItem ? '$'+(Number(deliveryFeeItem.price)||0).toFixed(2) : '$0.00',
+        tax: '$0.00',
+        total: '$'+Number(o.total).toFixed(2)
+      },
       email: retailerEmail
-    }).catch(err=>console.warn('EmailJS confirmation failed:',err));
+    }).catch(err=>console.warn('EmailJS retailer confirmation failed:',err));
   }
   closeModal('confirm-order-modal');
   toast(`✅ ${invNum(o.invoiceNum)} confirmed${retailerEmail?' — email sent to '+o.retailerName:''}.`);
@@ -2823,7 +2836,8 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
   const deliveryFee = deliveryItem ? Number(deliveryItem.price)||0 : 0;
   const deliveryDisplay = deliveryDate || 'Not specified';
   const notesDisplay = notes || 'None';
-  emailjs.send('service_j5qotyn', 'template_wbhl7fm', {
+  // Admin notification — tells YOU a new order needs review
+  emailjs.send(EMAILJS_SERVICE, EMAILJS_NOTIFY_TPL, {
     retailer_name: retailerName,
     order_id: orderId || 'TBD',
     delivery_date: deliveryDisplay,
@@ -2832,7 +2846,7 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
     orders: orderRows,
     cost: { shipping: deliveryFee > 0 ? '$' + deliveryFee.toFixed(2) : '$0.00', tax: '$0.00', total: '$' + Number(total).toFixed(2) },
     email: 'info@lazarfamilybakehouse.com'
-  }).catch(err => console.warn('EmailJS notification failed:', err));
+  }).catch(err => console.warn('EmailJS admin notification failed:', err));
 }
 //  Delivery fee from DELIVERY_FEES[retailerId] added as line item.
 // =====================================================================
