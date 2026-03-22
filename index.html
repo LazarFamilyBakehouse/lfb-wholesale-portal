@@ -342,8 +342,8 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 .catalog-section-hd { grid-column:1/-1; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--brown-dk); padding:10px 4px 6px; border-bottom:2px solid var(--tan); margin-top:8px; }
 .catalog-section-hd:first-child { margin-top:0; }
 .catalog-section-icon { font-size:1.2rem; }
-.catalog-img-slot { width:100%; height:220px; overflow:hidden; background:transparent; display:flex; align-items:center; justify-content:center; }
-.catalog-img-slot img { width:100%; height:100%; object-fit:cover; display:block; border-radius:12px 12px 0 0; }
+.catalog-img-slot { width:100%; height:280px; overflow:hidden; background:transparent; display:flex; align-items:center; justify-content:center; }
+.catalog-img-slot img { width:100%; height:100%; object-fit:contain; display:block; border-radius:12px 12px 0 0; }
 .catalog-img-ph { color:var(--brown-lt); font-size:.8rem; text-align:center; padding:12px; line-height:1.5; }
 
 /* ===================== SOCIAL PROOF ===================== */
@@ -1496,7 +1496,7 @@ function buildRetailerContent() {
 
 <!-- PARTNER MY ACCOUNT -->
 <section class="section" id="sec-r-account">
-  <h2 class="page-h">My Account</h2><p class="page-sub">Update your contact details — changes are reflected on our end immediately.</p>
+  <h2 class="page-h">My Account</h2><p class="page-sub">Please save your changes below.</p>
   <div class="panel">
     <div class="panel-title">🏪 Business Information</div>
     <div class="form-row">
@@ -1521,7 +1521,7 @@ function buildRetailerContent() {
     <textarea id="ra-notes" rows="3" placeholder="Delivery preferences, allergy info, special instructions..." style="width:100%;border:1px solid var(--tan);border-radius:8px;padding:10px 12px;font-family:'Lato',sans-serif;font-size:.9rem;background:var(--cream);color:var(--brown-dk);resize:vertical;margin-top:6px;"></textarea>
   </div>
   <div class="form-actions" style="margin-top:18px;">
-    <button class="btn btn-primary" onclick="saveAccountDetails()">💾 Update Your Changes & Save</button>
+    <button class="btn btn-primary" onclick="saveAccountDetails()">💾 Save Changes</button>
     <button class="btn btn-outline" onclick="loadAccountDetails()">↺ Discard</button>
   </div>
 </section>
