@@ -326,18 +326,18 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 /* ===================== PRODUCT CATALOG ===================== */
 .catalog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-bottom:18px; }
-.catalog-card { background:var(--white); border:1.5px solid var(--tan); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px var(--shadow); transition:border-color .2s,box-shadow .2s; }
+.catalog-card { background:var(--white); border:1.5px solid var(--tan); border-radius:12px; overflow:hidden; box-shadow:0 2px 8px var(--shadow); transition:border-color .2s,box-shadow .2s; display:flex; flex-direction:column; height:100%; }
 .catalog-card:hover { border-color:var(--red); box-shadow:0 4px 16px var(--shadow); }
 .catalog-card-hd { background:linear-gradient(135deg,var(--brown-dk),var(--brown)); color:var(--cream); padding:13px 16px; display:flex; flex-direction:column; justify-content:space-between; min-height:92px; }
 .catalog-card-hd h3 { font-family:'Playfair Display',serif; font-size:.95rem; margin:0; line-height:1.3; word-wrap:break-word; }
 .catalog-card-hd .cat-price { font-size:1.35rem; font-weight:700; color:var(--red); margin-top:auto; padding-top:6px; }
-.catalog-card-bd { padding:12px 16px; }
-.catalog-card-bd p { font-size:.8rem; color:var(--brown-lt); margin-bottom:10px; line-height:1.45; }
-.cat-qty-row { display:flex; align-items:center; gap:8px; }
+.catalog-card-bd { padding:12px 16px; display:flex; flex-direction:column; flex:1; }
+.catalog-card-bd p { font-size:.8rem; color:var(--brown-lt); margin-bottom:10px; line-height:1.45; min-height:42px; max-height:42px; overflow:hidden; }
+.cat-qty-row { display:flex; align-items:center; gap:8px; margin-top:auto; }
 .cat-qty-row label { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--brown); }
 .cat-qty-row input { width:68px; padding:5px 8px; border:1.5px solid var(--tan); border-radius:7px; font-family:'Lato',sans-serif; font-size:.9rem; background:var(--cream); color:var(--brown-dk); text-align:center; }
 .cat-qty-row input:focus { outline:none; border-color:var(--red); }
-.catalog-total { text-align:right; font-size:.8rem; color:var(--brown-lt); margin-top:6px; }
+.catalog-total { text-align:right; font-size:.8rem; color:var(--brown-lt); margin-top:8px; }
 .catalog-total strong { color:var(--brown-dk); }
 .catalog-section-hd { grid-column:1/-1; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--brown-dk); padding:10px 4px 6px; border-bottom:2px solid var(--tan); margin-top:8px; }
 .catalog-section-hd:first-child { margin-top:0; }
@@ -895,16 +895,16 @@ const PRODUCT_PRICES = {
   'Individual Mandel Bread':1.50,'Two Packs':2.50
 };
 const PRODUCT_DESC = {
-  'CC Mandelbites':'Chocolate chip mandel bread in snackable bite-sized pieces. Our classic flavor and top seller.',
-  'Funfetti Mandelbites':'Mandel bread bites packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
-  'Gluten-Free Chocolate-Chip':'Chocolate chip mandel bread bites, 100% gluten-free. All the flavor, none of the gluten. Our fastest-growing SKU.',
-  'Funfetti':'Mandel bread packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
-  'Almond':'Lightly sweet almond mandel bread bites. A refined, traditional take.',
-  'Indiv. Mandel - Chocolate Chip':'Single-serve chocolate chip mandel bread, individually wrapped. Perfect for cafés, hotel service, and gift displays.',
-  'Indiv. Mandel - Almond':'Single-serve almond mandel bread, individually wrapped. Elegant and lightly sweet.',
-  'Indiv. Mandel - Funfetti':'Single-serve funfetti mandel bread, individually wrapped. A pop of color for events and catering.',
-  'Indiv. Mandel - GF Choc Chip':'Single-serve chocolate chip mandel bread, 100% gluten-free and individually wrapped.',
-  'Two Pack Chocolate Chip':'Two chocolate chip mandel bread pieces, individually packaged. Built for coffee service, hotel catering, and premium display cases.',
+  'CC Mandelbites':'Chocolate-Chip Mandel Bread in snackable bite-sized pieces. Our classic flavor and top seller.',
+  'Funfetti Mandelbites':'Mandel Bread bites packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
+  'Gluten-Free Chocolate-Chip':'Chocolate-Chip Mandel Bread bites, 100% gluten-free. All the flavor, none of the gluten. Our fastest-growing SKU.',
+  'Funfetti':'Mandel Bread packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
+  'Almond':'Lightly sweet Almond Mandel Bread bites. A refined, traditional take.',
+  'Indiv. Mandel - Chocolate Chip':'Single-serve Chocolate-Chip Mandel Bread, individually wrapped. Perfect for cafés, hotel service, and gift displays.',
+  'Indiv. Mandel - Almond':'Single-serve Almond Mandel Bread, individually wrapped. Elegant and lightly sweet.',
+  'Indiv. Mandel - Funfetti':'Single-serve Funfetti Mandel Bread, individually wrapped. A pop of color for events and catering.',
+  'Indiv. Mandel - GF Choc Chip':'Single-serve Gluten-Free Chocolate-Chip Mandel Bread, individually wrapped.',
+  'Two Pack Chocolate Chip':'Two-Pack Chocolate-Chip Mandel Bread. Built for coffee service, hotel catering, and premium display cases.',
   // Legacy SKUs (historical orders)
   'Individual Mandel Bread':'Single-serve traditional mandel bread piece.',
   'Two Packs':'Two-pack of mandel bread.'
@@ -2920,8 +2920,10 @@ function buildCatalogGrid() {
           <div class="cat-price">${fmtCur(price)} <span style="font-size:.7rem;font-weight:400;color:var(--cream-dk);">/ ${p.startsWith('Indiv.')?'piece':'unit'}</span></div>
         </div>
         <div class="catalog-card-bd">
-          <p>${esc(PRODUCT_DESC[p]||'')}</p>
-          <div style="font-size:.72rem;color:var(--brown-lt);margin-bottom:8px;">Min: <strong>${moq}</strong> · Increments of <strong>${inc}</strong></div>
+          <div>
+            <p>${esc(PRODUCT_DESC[p]||'')}</p>
+            <div style="font-size:.72rem;color:var(--brown-lt);margin-bottom:8px;">Min: <strong>${moq}</strong> · Increments of <strong>${inc}</strong></div>
+          </div>
           <div class="cat-qty-row">
             <label>Qty:</label>
             <input type="number" min="0" step="${inc}" value="0" id="cat-qty-${p.replace(/[^a-z0-9]/gi,'_')}" onchange="snapToIncrement(this,${moq},${inc});updateCatalogTotal()" onkeyup="updateCatalogTotal()"/>
