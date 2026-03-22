@@ -927,12 +927,17 @@ const PRODUCT_DISPLAY_NAMES = {
 function getProductDisplayName(p){return PRODUCT_DISPLAY_NAMES[p]||p;}
 
 const PRODUCT_IMAGES = {
-  'CC Mandelbites':'','Gluten-Free Chocolate-Chip':'','Almond':'',
-  'Indiv. Mandel - Chocolate Chip':'','Indiv. Mandel - Almond':'','Indiv. Mandel - GF Choc Chip':'',
-  'Two Pack Chocolate Chip':''
+  'CC Mandelbites':'images/cc-mandelbites.jpg',
+  'Funfetti Mandelbites':'images/funfetti-mandelbites.jpg',
+  'Gluten-Free Chocolate-Chip':'images/gf-choc-chip-mandelbites.jpg',
+  'Almond':'images/almond-mandelbites.jpg',
+  'Indiv. Mandel - Chocolate Chip':'images/indiv-choc-chip-mandel-bread.jpg',
+  'Indiv. Mandel - Almond':'images/indiv-almond-mandel-bread.jpg',
+  'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg',
+  'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg'
 };
-// Load saved product images from localStorage
-(function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');Object.assign(PRODUCT_IMAGES,saved);}catch(e){}})();
+// Load saved product images from localStorage (only override if saved value is non-empty)
+(function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k])PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
 // Minimum order quantities and increment rules
 const PRODUCT_MOQ = {
   'CC Mandelbites':8,'Funfetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
@@ -1866,7 +1871,8 @@ function viewOrderDetail(id) {
       <thead style="background:var(--tan);"><tr><th style="padding:7px 10px;text-align:left;">Product</th><th style="padding:7px 10px;text-align:center;">Qty</th><th style="padding:7px 10px;text-align:right;">Unit Price</th><th style="padding:7px 10px;text-align:right;">Subtotal</th></tr></thead>
       <tbody>${o.products.map(p=>p.product==='Delivery'?`<tr style="color:var(--brown-lt);font-style:italic;"><td style="padding:6px 10px;">🚚 Delivery Fee</td><td style="padding:6px 10px;text-align:center;">—</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.price)}</strong></td></tr>`:`<tr><td style="padding:6px 10px;">${esc(p.product)}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
       <tfoot><tr><td colspan="3" style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">Order Total:</td><td style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">${fmtCur(o.total)}</td></tr></tfoot>
-    </table>`;
+    </table>
+    <p style="margin-top:14px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">Shipping, delivery, and packing costs are not included in the total.<br>Please wait for final invoice upon delivery to submit payment.</p>`;
   const next={Pending:'Confirmed',Confirmed:'Delivered',Delivered:'Pending'};
   const btn=document.getElementById('order-status-btn');
   btn.textContent=`Mark as ${next[o.status]}`;
@@ -1910,7 +1916,7 @@ async function confirmOrder() {
   if(retailerEmail) {
     // Retailer confirmation — tells the PARTNER their order is confirmed
     const productItems=o.products.filter(p=>p.product!=='Delivery');
-    emailjs.send(EMAILJS_SERVICE, EMAILJS_CONFIRM_TPL, {
+    const confirmParams = {
       retailer_name: o.retailerName,
       order_id: invNum(o.invoiceNum),
       delivery_date: deliveryDate ? fmtDate(deliveryDate) : 'To be confirmed',
@@ -1920,8 +1926,15 @@ async function confirmOrder() {
       cost: {
         total: '$'+Number(o.total).toFixed(2)
       },
-      email: retailerEmail
-    }).catch(err=>console.warn('EmailJS retailer confirmation failed:',err));
+      email: retailerEmail,
+      to_email: retailerEmail
+    };
+    console.log('[LFB] Sending confirmation email to:', retailerEmail, 'params:', confirmParams);
+    emailjs.send(EMAILJS_SERVICE, EMAILJS_CONFIRM_TPL, confirmParams)
+      .then(res=>console.log('[LFB] Confirmation email sent successfully:', res))
+      .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);toast('⚠️ Order confirmed but email failed: '+err.text);});
+  } else {
+    console.warn('[LFB] No retailer email found — cannot send confirmation. Retailer:', o.retailerName);
   }
   closeModal('confirm-order-modal');
   toast(`✅ ${invNum(o.invoiceNum)} confirmed${retailerEmail?' — email sent to '+o.retailerName:''}.`);
@@ -1961,6 +1974,7 @@ function showInvoice(id) {
         <tfoot><tr><td colspan="3" style="text-align:right;">Total Due:</td><td style="text-align:right;">${fmtCur(o.total)}</td></tr></tfoot>
       </table>
       ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--brown-lt);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
+      <p style="margin:16px 0 8px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">Shipping, delivery, and packing costs are not included in the total.<br>Please wait for final invoice upon delivery to submit payment.</p>
       <div class="inv-footer">Thank you for your partnership with Lazar Family Bakehouse 🍞<br>
         ${/hilton|hotel/i.test(o.retailerName) ? 'Payment due <strong>Net 15</strong> from delivery date. ' : 'Please remit payment within <strong>30 days of delivery</strong>. '}
         Payment by check only — payable to <em>Lazar Family Bakehouse</em>, 4351 E. Perry Pkwy, Greenwood Village, CO 80121.</div>
