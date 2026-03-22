@@ -342,8 +342,8 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 .catalog-section-hd { grid-column:1/-1; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--brown-dk); padding:10px 4px 6px; border-bottom:2px solid var(--tan); margin-top:8px; }
 .catalog-section-hd:first-child { margin-top:0; }
 .catalog-section-icon { font-size:1.2rem; }
-.catalog-img-slot { width:100%; height:220px; overflow:hidden; background:var(--cream-dk); border-bottom:1px solid var(--tan); display:flex; align-items:center; justify-content:center; }
-.catalog-img-slot img { width:100%; height:100%; object-fit:contain; display:block; padding:6px; }
+.catalog-img-slot { width:100%; height:220px; overflow:hidden; background:transparent; display:flex; align-items:center; justify-content:center; }
+.catalog-img-slot img { width:100%; height:100%; object-fit:cover; display:block; border-radius:12px 12px 0 0; }
 .catalog-img-ph { color:var(--brown-lt); font-size:.8rem; text-align:center; padding:12px; line-height:1.5; }
 
 /* ===================== SOCIAL PROOF ===================== */
@@ -1560,6 +1560,7 @@ function buildRetailerContent() {
         <div class="fg"><label>Notes / Special Instructions</label><input id="ro-notes" placeholder="e.g. Call before delivery"/></div>
       </div>
     </div>
+    <p style="margin-top:14px;font-size:.82rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>
     <div class="form-actions" style="margin-top:14px;">
       <button class="btn btn-primary" onclick="retailerPlaceCatalogOrder()">📦 Submit Order</button>
       <button class="btn btn-outline" onclick="resetCatalog()">Clear</button>
@@ -1872,7 +1873,7 @@ function viewOrderDetail(id) {
       <tbody>${o.products.map(p=>p.product==='Delivery'?`<tr style="color:var(--brown-lt);font-style:italic;"><td style="padding:6px 10px;">🚚 Delivery Fee</td><td style="padding:6px 10px;text-align:center;">—</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.price)}</strong></td></tr>`:`<tr><td style="padding:6px 10px;">${esc(p.product)}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
       <tfoot><tr><td colspan="3" style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">Order Total:</td><td style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">${fmtCur(o.total)}</td></tr></tfoot>
     </table>
-    <p style="margin-top:14px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">Shipping, delivery, and packing costs are not included in the total.<br>Please wait for final invoice upon delivery to submit payment.</p>`;
+    <p style="margin-top:14px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>`;
   const next={Pending:'Confirmed',Confirmed:'Delivered',Delivered:'Pending'};
   const btn=document.getElementById('order-status-btn');
   btn.textContent=`Mark as ${next[o.status]}`;
@@ -1974,7 +1975,7 @@ function showInvoice(id) {
         <tfoot><tr><td colspan="3" style="text-align:right;">Total Due:</td><td style="text-align:right;">${fmtCur(o.total)}</td></tr></tfoot>
       </table>
       ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--brown-lt);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
-      <p style="margin:16px 0 8px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">Shipping, delivery, and packing costs are not included in the total.<br>Please wait for final invoice upon delivery to submit payment.</p>
+      <p style="margin:16px 0 8px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>
       <div class="inv-footer">Thank you for your partnership with Lazar Family Bakehouse 🍞<br>
         ${/hilton|hotel/i.test(o.retailerName) ? 'Payment due <strong>Net 15</strong> from delivery date. ' : 'Please remit payment within <strong>30 days of delivery</strong>. '}
         Payment by check only — payable to <em>Lazar Family Bakehouse</em>, 4351 E. Perry Pkwy, Greenwood Village, CO 80121.</div>
@@ -2491,9 +2492,7 @@ async function retailerPlaceFromAO(id) {
     ...p,
     price:Number(p.price)||Number(getPriceForRetailer(p.product,r.id))||0
   }));
-  const deliveryFee=r.deliveryFee||0;
   const allItems=[...resolvedProducts];
-  if(deliveryFee>0) allItems.push({product:'Delivery',qty:1,price:deliveryFee});
   const total=allItems.reduce((s,p)=>s+(p.qty*(Number(p.price)||0)),0);
   const inv=db.nextInvoice++;
   const notes=`Placed from standing order (${ao.freq})`;
@@ -2938,7 +2937,6 @@ function buildCatalogGrid() {
 function updateCatalogTotal() {
   const retailerId=session&&session.retailer?session.retailer.id:null;
   const retailer=retailerId?db.retailers.find(r=>r.id===Number(retailerId)):null;
-  const deliveryFee=retailer&&retailer.deliveryFee?retailer.deliveryFee:0;
   let grand=0;
   PRODUCTS.forEach(p=>{
     const key=p.replace(/[^a-z0-9]/gi,'_');
@@ -2951,9 +2949,9 @@ function updateCatalogTotal() {
     if(subEl) subEl.innerHTML=`Subtotal: <strong>${fmtCur(sub)}</strong>`;
   });
   const feeEl=document.getElementById('catalog-delivery-fee');
-  if(feeEl){feeEl.style.display=deliveryFee>0?'':'none';if(deliveryFee>0)feeEl.textContent='Incl. '+fmtCur(deliveryFee)+' delivery fee';}
+  if(feeEl) feeEl.style.display='none';
   const tot=document.getElementById('catalog-order-total');
-  if(tot) tot.textContent=fmtCur(grand+deliveryFee);
+  if(tot) tot.textContent=fmtCur(grand);
 }
 function resetCatalog() {
   PRODUCTS.forEach(p=>{const inp=document.getElementById('cat-qty-'+p.replace(/[^a-z0-9]/gi,'_'));if(inp)inp.value=0;});
@@ -2984,9 +2982,7 @@ async function retailerPlaceCatalogOrder() {
   const delivery=document.getElementById('ro-delivery').value;
   if(delivery && delivery < todayStr()){toast('⚠️ Delivery date cannot be in the past.');return;}
   const notes=v('ro-notes');
-  const deliveryFee=r.deliveryFee||0;
   const allItems=[...products];
-  if(deliveryFee>0) allItems.push({product:'Delivery',qty:1,price:deliveryFee});
   // Invoice numbers are assigned by admin only — retailer orders start at 0 (TBD)
   // Sanitize all items — unit_price must never be null
   const safeItems=allItems.map(p=>({product:String(p.product),qty:Number(p.qty)||1,price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)}));
