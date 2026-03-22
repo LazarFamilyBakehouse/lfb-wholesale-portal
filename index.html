@@ -912,17 +912,17 @@ const PRODUCT_DESC = {
 // Product image URLs — admin can update these via Settings → Product Photos
 // Full display names for analytics / reporting (maps short SKU names to full names)
 const PRODUCT_DISPLAY_NAMES = {
-  'Funfetti':'Funfetti Mandelbites',
-  'Almond':'Almond Mandelbites',
-  'CC Mandelbites':'CC Mandelbites',
-  'Funfetti Mandelbites':'Funfetti Mandelbites',
-  'Gluten-Free Chocolate-Chip':'GF Choc-Chip Mandelbites',
-  'Indiv. Mandel - Chocolate Chip':'Indiv. Choc-Chip Mandel Bread',
-  'Indiv. Mandel - Almond':'Indiv. Almond Mandel Bread',
-  'Indiv. Mandel - Funfetti':'Indiv. Funfetti Mandel Bread',
-  'Indiv. Mandel - GF Choc Chip':'Indiv. GF Choc-Chip Mandel Bread',
-  'Two Pack Chocolate Chip':'Two-Pack Choc-Chip',
-  'CC Mandel Bread':'Red Bag of Chocolate Chip Mango Bread'
+  'Funfetti':'Funfetti MandelBites',
+  'Almond':'Almond MandelBites',
+  'CC Mandelbites':'Chocolate-Chip MandelBites',
+  'Funfetti Mandelbites':'Funfetti MandelBites',
+  'Gluten-Free Chocolate-Chip':'Gluten-Free Chocolate-Chip MandelBites',
+  'Indiv. Mandel - Chocolate Chip':'Individual Mandel Bread — Chocolate Chip',
+  'Indiv. Mandel - Almond':'Individual Mandel Bread — Almond',
+  'Indiv. Mandel - Funfetti':'Individual Mandel Bread — Funfetti',
+  'Indiv. Mandel - GF Choc Chip':'Individual Mandel Bread — Gluten-Free Chocolate Chip',
+  'Two Pack Chocolate Chip':'Two-Pack Chocolate Chip',
+  'CC Mandel Bread':'Chocolate-Chip Mandel Bread (Red Bag)'
 };
 function getProductDisplayName(p){return PRODUCT_DISPLAY_NAMES[p]||p;}
 
@@ -2916,8 +2916,8 @@ function buildCatalogGrid() {
       <div class="catalog-card">
         ${imgArea}
         <div class="catalog-card-hd">
-          <h3>${esc(p)}</h3>
-          <div class="cat-price">${fmtCur(price)} <span style="font-size:.7rem;font-weight:400;color:var(--cream-dk);">/ unit</span></div>
+          <h3>${esc(getProductDisplayName(p))}</h3>
+          <div class="cat-price">${fmtCur(price)} <span style="font-size:.7rem;font-weight:400;color:var(--cream-dk);">/ ${p.startsWith('Indiv.')?'piece':'unit'}</span></div>
         </div>
         <div class="catalog-card-bd">
           <p>${esc(PRODUCT_DESC[p]||'')}</p>
