@@ -69,15 +69,15 @@ body{font-family:'Lato',sans-serif;background:var(--cream);color:var(--brown-dk)
 
 /* ===================== APP SHELL ===================== */
 #app { display:none; flex-direction:column; min-height:100vh; }
-header { background:var(--red);color:#fff;padding:12px 28px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 3px 16px rgba(0,0,0,.25); }
+header { background:var(--cream);color:var(--brown-dk);padding:12px 28px;display:flex;align-items:center;justify-content:center;position:relative;box-shadow:0 3px 16px rgba(0,0,0,.25);border-bottom:3px solid var(--red); }
 .hdr-center { display:flex;align-items:center;gap:14px; }
-.hdr-text h1 { font-family:'Playfair Display',serif;font-size:1.55rem;color:#fff;letter-spacing:.01em; }
-.hdr-text p  { font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.8);margin-top:2px; }
+.hdr-text h1 { font-family:'Playfair Display',serif;font-size:1.55rem;color:var(--brown-dk);letter-spacing:.01em; }
+.hdr-text p  { font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--brown);margin-top:2px; }
 .hdr-right { position:absolute;right:28px;display:flex;align-items:center;gap:12px; }
-.hdr-user { font-size:.8rem;color:rgba(255,255,255,.85);text-align:right; }
-.hdr-user strong { display:block;color:#fff;font-weight:700; }
-.btn-logout { background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);color:#fff;padding:6px 14px;border-radius:7px;cursor:pointer;font-family:'Lato',sans-serif;font-size:.78rem;transition:all .2s; }
-.btn-logout:hover { background:rgba(255,255,255,.28); }
+.hdr-user { font-size:.8rem;color:var(--brown);text-align:right; }
+.hdr-user strong { display:block;color:var(--brown-dk);font-weight:700; }
+.btn-logout { background:var(--red);border:1px solid var(--red);color:#fff;padding:6px 14px;border-radius:7px;cursor:pointer;font-family:'Lato',sans-serif;font-size:.78rem;transition:all .2s; }
+.btn-logout:hover { background:var(--red-dk); }
 nav { background:var(--cream);border-bottom:2px solid var(--tan);display:flex;overflow-x:auto; }
 nav button { background:none;border:none;color:var(--brown);font-family:'Lato',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:13px 20px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap; }
 nav button:hover { color:var(--brown-dk);background:rgba(61,31,0,.05); }
@@ -410,6 +410,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <div id="lfb-err-banner" style="display:none;background:var(--danger);color:#fff;padding:10px 18px;font-size:.85rem;font-weight:700;text-align:center;position:sticky;top:0;z-index:9999;cursor:pointer;" onclick="this.style.display='none'">⚠️ Loading error — tap to dismiss</div>
   <header>
     <div class="hdr-center">
+      <div class="hdr-logo-svg" id="hdr-logo" style="width:48px;height:48px;"></div>
       <div class="hdr-text">
         <h1>Lazar Family Bakehouse</h1>
         <p id="hdr-subtitle">Partner Portal</p>
@@ -517,7 +518,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 <script>
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║        LAZAR FAMILY BAKEHOUSE — WHOLESALE PARTNER PORTAL            ║
+// ║        LAZAR FAMILY BAKEHOUSE — PARTNER PORTAL                    ║
 // ║        Single-file app · All HTML/CSS/JS in one document            ║
 // ╠══════════════════════════════════════════════════════════════════════╣
 // ║  QUICK-REFERENCE TABLE OF CONTENTS                                  ║
@@ -553,7 +554,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 // ║  PRODUCT_SECTIONS[] Catalog groupings shown to retailers            ║
 // ║  PRODUCT_MOQ{}     Min order qty enforced on retailer submit        ║
 // ║  PRODUCT_INCREMENT{} Snap-to increment per SKU                      ║
-// ║  DELIVERY_FEES{}   Per-retailer delivery fee (localStorage-backed)  ║
+// ║  (delivery fees removed)                                            ║
 // ║  PROD_COLORS[]     Chart bar colors — one per active SKU            ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 
@@ -588,9 +589,9 @@ const SEED_DATA = {
     {id:3,  name:"Congress Park Market",               contact:"",                 email:"", phone:"303-333-7094", day:"", notes:"Best contact: Email · 2x a month", pin:"1003", status:"Active",   joined:"2025-07-11"},
     {id:4,  name:"SkyMarket",                          contact:"Teresa Jones",     email:"", phone:"303-342-6642", day:"", notes:"Best contact: Email",              pin:"1004", status:"Active",   joined:"2025-07-27"},
     {id:5,  name:"Rockin' R Ranch",                    contact:"Cindy",            email:"", phone:"970-262-3558", day:"", notes:"Best contact: Email · 1x a month", pin:"1005", status:"Active",   joined:"2025-10-31"},
-    {id:6,  name:"Embassy Suites Boulder",             contact:"Tobias Burkhalter",email:"Tobias.Burkhalter@hilton.com", phone:"303-443-2600", day:"", notes:"",  pin:"1006", status:"Active",   joined:"2026-02-02", priceOverrides:{"Two Pack Chocolate Chip":3.00,"Two Packs":3.00}, deliveryFee:10},
-    {id:7,  name:"SelvaSur Coffee",                    contact:"",                 email:"", phone:"720-490-8477", day:"", notes:"",                                 pin:"1007", status:"Active",   joined:"2026-02-02", deliveryFee:10},
-    {id:8,  name:"The Art Hotel Denver",               contact:"Tobias Burkhalter",email:"Tobias.Burkhalter@hilton.com", phone:"303-572-8000", day:"", notes:"AGM · ART Hotel Denver, Curio Collection by Hilton · Organized Vendor Showcase 3/10/26 · Tom Stafford (Commonwealth Hotels) also key contact: tstafford@commonwealthhotels.com", pin:"1008", status:"Active",   joined:"2026-02-02", priceOverrides:{"Two Pack Chocolate Chip":3.00,"Two Packs":3.00}, deliveryFee:10},
+    {id:6,  name:"Embassy Suites Boulder",             contact:"Tobias Burkhalter",email:"Tobias.Burkhalter@hilton.com", phone:"303-443-2600", day:"", notes:"",  pin:"1006", status:"Active",   joined:"2026-02-02", priceOverrides:{"Two Pack Chocolate Chip":3.00,"Two Packs":3.00}},
+    {id:7,  name:"SelvaSur Coffee",                    contact:"",                 email:"", phone:"720-490-8477", day:"", notes:"",                                 pin:"1007", status:"Active",   joined:"2026-02-02"},
+    {id:8,  name:"The Art Hotel Denver",               contact:"Tobias Burkhalter",email:"Tobias.Burkhalter@hilton.com", phone:"303-572-8000", day:"", notes:"AGM · ART Hotel Denver, Curio Collection by Hilton · Organized Vendor Showcase 3/10/26 · Tom Stafford (Commonwealth Hotels) also key contact: tstafford@commonwealthhotels.com", pin:"1008", status:"Active",   joined:"2026-02-02", priceOverrides:{"Two Pack Chocolate Chip":3.00,"Two Packs":3.00}},
     // ── INACTIVE ──
     {id:9,  name:"Ruby's Market",                      contact:"",                 email:"", phone:"303-733-2784", day:"", notes:"Last order: Oct 2025",             pin:"2001", status:"Inactive", joined:"2025-05-28"},
     {id:10, name:"Lucky's Market Boulder",             contact:"Shelby",           email:"", phone:"303-444-0215", day:"", notes:"Best contact: Text · Weekly",      pin:"2002", status:"Inactive", joined:"2025-06-25"},
@@ -946,6 +947,9 @@ const PRODUCT_IMAGES = {
 };
 // Load saved product images from localStorage (only override if saved value is non-empty)
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k])PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
+// Logo image reference — reuse the login logo for header & invoices
+const LFB_LOGO_SRC = document.querySelector('.login-mark-svg img')?.src || '';
+(function(){const hdrLogo=document.getElementById('hdr-logo');if(hdrLogo&&LFB_LOGO_SRC)hdrLogo.innerHTML=`<img src="${LFB_LOGO_SRC}" style="width:48px;height:48px;object-fit:contain;border-radius:50%;" alt="LFB Logo"/>`;})();
 // Minimum order quantities and increment rules
 const PRODUCT_MOQ = {
   'CC Mandelbites':8,'Funfetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
@@ -957,13 +961,9 @@ const PRODUCT_INCREMENT = {
   'Indiv. Mandel - Chocolate Chip':40,'Indiv. Mandel - Almond':40,'Indiv. Mandel - GF Choc Chip':40,
   'Two Pack Chocolate Chip':25
 };
-// Delivery fees per retailer — persisted in localStorage so new retailers survive page refresh
-// Key: retailer id (number), Value: fee in dollars. All new retailers default to $10.
-const DELIVERY_FEE_DEFAULTS = {6:10, 7:10, 8:10};
-const DELIVERY_FEES = {...DELIVERY_FEE_DEFAULTS};
-(function(){try{const saved=JSON.parse(localStorage.getItem('lfb_delivery_fees')||'{}');Object.assign(DELIVERY_FEES,saved);}catch(e){}})();
-function getDeliveryFee(retailerId){return DELIVERY_FEES[Number(retailerId)]||0;}
-function setDeliveryFee(retailerId,fee){DELIVERY_FEES[Number(retailerId)]=fee;try{localStorage.setItem('lfb_delivery_fees',JSON.stringify(DELIVERY_FEES));}catch(e){}}
+// Delivery fees removed — no longer applicable
+function getDeliveryFee(retailerId){return 0;}
+function setDeliveryFee(retailerId,fee){}
 
 // Catalog display groupings
 const PRODUCT_SECTIONS = [
@@ -1560,7 +1560,7 @@ function buildRetailerContent() {
     <div style="border-top:2px solid var(--gold);padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
       <div>
         <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brown);margin-bottom:4px;">Order Total</div>
-        <div id="catalog-delivery-fee" style="display:none;font-size:.8rem;color:var(--brown-lt);margin-bottom:2px;">Incl. $10.00 delivery fee</div>
+        <div id="catalog-delivery-fee" style="display:none;"></div>
         <div id="catalog-order-total" style="font-family:'Playfair Display',serif;font-size:1.6rem;color:var(--brown-dk);">$0.00</div>
       </div>
       <div class="form-row" style="margin:0;gap:10px;flex-wrap:wrap;">
@@ -1662,17 +1662,8 @@ function refreshOrderPricesForRetailer(retailerId) {
       priceInput.value=getPriceForRetailer(prodSel.value, retailerId);
     }
   });
-  // Remove old delivery row, inject new locked one if fee > 0
+  // Delivery fee removed
   document.querySelectorAll('#o-prod-list .delivery-row').forEach(r=>r.remove());
-  const fee=getDeliveryFee(Number(retailerId));
-  if(fee>0) {
-    const list=document.getElementById('o-prod-list');
-    const div=document.createElement('div');
-    div.className='prod-item delivery-row';
-    div.style.cssText='background:var(--cream-dk);border-radius:8px;opacity:.9;';
-    div.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:8px 6px;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" /><input type="number" value="${fee}" readonly style="opacity:.6;background:var(--cream);cursor:default;" /><span style="width:28px;"></span>`;
-    list.appendChild(div);
-  }
 }
 function getProdRows(listId) {
   return Array.from(document.querySelectorAll(`#${listId} .prod-item`)).map(r=>{
@@ -1701,8 +1692,7 @@ async function addRetailer() {
   if(db.retailers.some(r=>r.pin===pin)){toast('⚠️ PIN already in use.');return;}
   const {data,error}=await sbClient.from('retailers').insert({name,pin,contact,email,phone,delivery_day:day,notes,status:'Active',joined_date:todayStr()}).select().single();
   if(error){toast('⚠️ Error adding retailer: '+error.message);return;}
-  setDeliveryFee(data.id, 10); // save $10 default to localStorage so it survives page refresh
-  db.retailers.push({id:data.id,name,contact,email,phone,day,notes,pin,status:'Active',joined_date:todayStr(),deliveryFee:10});
+  db.retailers.push({id:data.id,name,contact,email,phone,day,notes,pin,status:'Active',joined_date:todayStr()});
   renderRetailers();fillRetailerSelects();
   ['r-name','r-contact','r-email','r-phone','r-notes','r-pin'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('r-day').value='';
@@ -1983,9 +1973,9 @@ function showInvoice(id) {
     <div class="invoice-box">
       <div class="inv-header">
         <div class="inv-from">
-          <div style="font-size:1.6rem;margin-bottom:6px;">🍞</div>
+          <div style="margin-bottom:6px;"><img src="${LFB_LOGO_SRC}" style="width:52px;height:52px;object-fit:contain;" alt="LFB Logo"/></div>
           <h2>Lazar Family Bakehouse</h2>
-          <p>Wholesale Division</p>
+          <p>Partner Division</p>
           <p>info@lazarfamilybakehouse.com</p>
         </div>
         <div class="inv-meta">
@@ -2008,8 +1998,8 @@ function showInvoice(id) {
         <tfoot><tr><td colspan="3" style="text-align:right;">Total Due:</td><td style="text-align:right;">${fmtCur(o.total)}</td></tr></tfoot>
       </table>
       ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--brown-lt);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
-      <p style="margin:16px 0 8px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>
-      <div class="inv-footer">Thank you for your partnership with Lazar Family Bakehouse 🍞<br>
+      <p style="margin:16px 0 8px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">Please reference the delivered invoice for the final amount.</p>
+      <div class="inv-footer">Thank you for your partnership with Lazar Family Bakehouse<br>
         ${/hilton|hotel/i.test(o.retailerName) ? 'Payment due <strong>Net 15</strong> from delivery date. ' : 'Please remit payment within <strong>30 days of delivery</strong>. '}
         Payment by check only — payable to <em>Lazar Family Bakehouse</em>, 4351 E. Perry Pkwy, Greenwood Village, CO 80121.</div>
     </div>`;
@@ -2905,7 +2895,7 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
     units: String(p.qty),
     price: '$' + (Number(p.price)||0).toFixed(2)
   }));
-  const deliveryFee = deliveryItem ? Number(deliveryItem.price)||0 : 0;
+  const deliveryFee = 0;
   const deliveryDisplay = deliveryDate || 'Not specified';
   const notesDisplay = notes || 'None';
   // Admin notification — tells YOU a new order needs review
@@ -2916,7 +2906,7 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
     order_notes: notesDisplay,
     order_date: todayStr(),
     orders: orderRows,
-    cost: { shipping: deliveryFee > 0 ? '$' + deliveryFee.toFixed(2) : '$0.00', tax: '$0.00', total: '$' + Number(total).toFixed(2) },
+    cost: { shipping: '$0.00', tax: '$0.00', total: '$' + Number(total).toFixed(2) },
     email: 'info@lazarfamilybakehouse.com'
   }).catch(err => console.warn('EmailJS admin notification failed:', err));
 }
@@ -3170,16 +3160,7 @@ function openEditOrder(id) {
     } else { addProdRow('eo-prod-list',p.product,p.qty,p.price); }
   });
   if(!o.products||!o.products.length) addProdRow('eo-prod-list');
-  // Auto-inject delivery fee if retailer has one and it's missing from this order
-  const _eoHasDel=(o.products||[]).some(p=>p.product==='Delivery');
-  const _eoRet=db.retailers.find(r=>r.id===o.retailerId);
-  const _eoFee=_eoRet?getDeliveryFee(_eoRet.id):0;
-  if(!_eoHasDel&&_eoFee>0){
-    const _d=document.createElement('div');_d.className='prod-item delivery-row';
-    _d.style.cssText='background:var(--cream-dk);border-radius:8px;opacity:.9;';
-    _d.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:8px 6px;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;"/><input type="number" value="${_eoFee}" readonly style="opacity:.6;background:var(--cream);cursor:default;"/><span style="width:28px;"></span>`;
-    document.getElementById('eo-prod-list').appendChild(_d);
-  }
+  // Delivery fee auto-inject removed
   updateEOTotal();
   const _eoList=document.getElementById('eo-prod-list');
   _eoList.removeEventListener('input',updateEOTotal);
