@@ -1634,7 +1634,7 @@ function addProdRow(listId,product='',qty=1,price='',lockPrice=false) {
 function isHotelAccount(r) {
   if(!r||!r.name) return false;
   const n=r.name.toLowerCase();
-  return n.includes('hotel')||n.includes('suites')||n.includes('jacquard');
+  return n.includes('hotel')||n.includes('suites')||n.includes('jacquard')||n.includes('hilton')||n.includes('hyatt')||n.includes('intercontinental')||n.includes('claret')||n.includes('msc');
 }
 function getPriceForRetailer(product, retailerId) {
   if(retailerId) {
