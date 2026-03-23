@@ -663,7 +663,7 @@ const SEED_DATA = {
     {id:3007,invoiceNum:59,retailerId:3,retailerName:"Congress Park Market",date:"2025-11-18",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20}],total:187.20,created:"2025-11-18T00:00:00Z"},
     {id:3008,invoiceNum:79,retailerId:3,retailerName:"Congress Park Market",date:"2025-12-29",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00}],total:96.00,created:"2025-12-29T00:00:00Z"},
     {id:3009,invoiceNum:86,retailerId:3,retailerName:"Congress Park Market",date:"2026-02-02",delivery:"",status:"Delivered",notes:"",products:[{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20}],total:99.20,created:"2026-02-02T00:00:00Z"},
-    {id:3010,invoiceNum:94,retailerId:3,retailerName:"Congress Park Market",date:"2026-02-17",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Two Packs",qty:25,price:2.50}],total:158.50,created:"2026-02-17T00:00:00Z"},
+    {id:3010,invoiceNum:94,retailerId:3,retailerName:"Congress Park Market",date:"2026-02-17",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Two Pack Chocolate Chip",qty:25,price:2.50}],total:158.50,created:"2026-02-17T00:00:00Z"},
         // ── Sky Market ──
     {id:4001,invoiceNum:16, retailerId:4,retailerName:"Sky Market",date:"2025-07-24",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:128,price:5.50}],total:704.00,created:"2025-07-24T00:00:00Z"},
     {id:4002,invoiceNum:46, retailerId:4,retailerName:"Sky Market",date:"2025-10-06",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:32,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:32,price:6.20},{product:"Almond",qty:32,price:6.40}],total:579.20,created:"2025-10-06T00:00:00Z"},
@@ -674,10 +674,10 @@ const SEED_DATA = {
     {id:5001,invoiceNum:62,retailerId:5,retailerName:"Rockin R Ranch",date:"2025-10-31",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20}],total:195.20,created:"2025-10-31T00:00:00Z"},
     {id:5002,invoiceNum:80,retailerId:5,retailerName:"Rockin R Ranch",date:"2026-01-01",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00}],total:96.00,created:"2026-01-01T00:00:00Z"},
     {id:5003,invoiceNum:84,retailerId:5,retailerName:"Rockin R Ranch",date:"2026-01-28",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:32,price:6.00},{product:"Gluten-Free Chocolate-Chip",qty:32,price:6.20}],total:390.40,created:"2026-01-28T00:00:00Z"},
-    {id:5004,invoiceNum:89,retailerId:5,retailerName:"Rockin R Ranch",date:"2026-02-10",delivery:"",status:"Delivered",notes:"",products:[{product:"Two Packs",qty:25,price:2.50}],total:62.50,created:"2026-02-10T00:00:00Z"},
+    {id:5004,invoiceNum:89,retailerId:5,retailerName:"Rockin R Ranch",date:"2026-02-10",delivery:"",status:"Delivered",notes:"",products:[{product:"Two Pack Chocolate Chip",qty:25,price:2.50}],total:62.50,created:"2026-02-10T00:00:00Z"},
     // ── Hilton & ES ──
-    {id:6001,invoiceNum:85, retailerId:6,retailerName:"Hilton & ES",              date:"2026-02-02",delivery:"",status:"Delivered",notes:"",products:[{product:"Two Packs",qty:100,price:3.00}],total:300.00,          created:"2026-02-02T00:00:00Z"},
-    {id:6002,invoiceNum:99, retailerId:6,retailerName:"Hilton & ES",              date:"2026-02-06",delivery:"",status:"Delivered",notes:"",products:[{product:"Two Packs",qty:150,price:3.00}],total:450.00,          created:"2026-02-06T00:00:00Z"},
+    {id:6001,invoiceNum:85, retailerId:6,retailerName:"Hilton & ES",              date:"2026-02-02",delivery:"",status:"Delivered",notes:"",products:[{product:"Two Pack Chocolate Chip",qty:100,price:3.00}],total:300.00,          created:"2026-02-02T00:00:00Z"},
+    {id:6002,invoiceNum:99, retailerId:6,retailerName:"Hilton & ES",              date:"2026-02-06",delivery:"",status:"Delivered",notes:"",products:[{product:"Two Pack Chocolate Chip",qty:150,price:3.00}],total:450.00,          created:"2026-02-06T00:00:00Z"},
     // ── Selva Sur ──
     {id:7001,invoiceNum:85,retailerId:7,retailerName:"Selva Sur",date:"2026-02-02",delivery:"",status:"Delivered",notes:"",products:[{product:"Individual Mandel Bread",qty:80,price:1.50}],total:120.00,created:"2026-02-02T00:00:00Z"},
     // ── Hilton Curio, Art Hotel ──
@@ -788,6 +788,9 @@ async function loadFromSupabase() {
               .map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0)})),
     total:parseFloat(o.total)||0, created:o.created_at||''
   }));
+  // Normalize legacy SKU names so everything consolidates under current product names
+  const SKU_NORMALIZE = {'Two Packs':'Two Pack Chocolate Chip','Individual Mandel Bread':'Indiv. Mandel - Chocolate Chip'};
+  db.orders.forEach(o=>o.products.forEach(p=>{if(SKU_NORMALIZE[p.product])p.product=SKU_NORMALIZE[p.product];}));
   // Sort client-side: retailers by name, orders newest-first (by date or id)
   db.retailers.sort((a,b)=>a.name.localeCompare(b.name));
   db.orders.sort((a,b)=>{
@@ -1870,7 +1873,7 @@ function viewOrderDetail(id) {
     <strong style="display:block;margin-bottom:8px;color:var(--brown);">Products:</strong>
     <table style="width:100%;font-size:.87rem;border-collapse:collapse;">
       <thead style="background:var(--tan);"><tr><th style="padding:7px 10px;text-align:left;">Product</th><th style="padding:7px 10px;text-align:center;">Qty</th><th style="padding:7px 10px;text-align:right;">Unit Price</th><th style="padding:7px 10px;text-align:right;">Subtotal</th></tr></thead>
-      <tbody>${o.products.map(p=>p.product==='Delivery'?`<tr style="color:var(--brown-lt);font-style:italic;"><td style="padding:6px 10px;">🚚 Delivery Fee</td><td style="padding:6px 10px;text-align:center;">—</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.price)}</strong></td></tr>`:`<tr><td style="padding:6px 10px;">${esc(p.product)}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
+      <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td style="padding:6px 10px;">${esc(p.product)}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
       <tfoot><tr><td colspan="3" style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">Order Total:</td><td style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">${fmtCur(o.total)}</td></tr></tfoot>
     </table>
     <p style="margin-top:14px;font-size:.8rem;color:var(--brown-lt);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>`;
@@ -1910,7 +1913,7 @@ async function confirmOrder() {
   if(deliveryDate) o.delivery=deliveryDate;
   if(notes) o.notes=notes;
   o.status='Confirmed';
-  renderOrders();
+  renderOrders();refreshDashboard();
   // Send confirmation email to retailer
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
   const retailerEmail=retailer.email||'';
@@ -1968,10 +1971,7 @@ function showInvoice(id) {
       </div>
       <table class="inv-table">
         <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
-        <tbody>${o.products.map(p=>p.product==='Delivery'
-          ?`<tr style="color:var(--brown-lt);font-style:italic;"><td>🚚 Delivery Fee</td><td style="text-align:center;">—</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.price)}</strong></td></tr>`
-          :`<tr><td>${esc(p.product)}</td><td style="text-align:center;">${p.qty}</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`
-        ).join('')}</tbody>
+        <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td>${esc(p.product)}</td><td style="text-align:center;">${p.qty}</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
         <tfoot><tr><td colspan="3" style="text-align:right;">Total Due:</td><td style="text-align:right;">${fmtCur(o.total)}</td></tr></tfoot>
       </table>
       ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--brown-lt);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
@@ -1986,7 +1986,7 @@ async function updateOrderStatus(id,status) {
   const o=db.orders.find(x=>x.id===id);if(!o)return;
   const {error}=await sbClient.from('orders').update({status}).eq('id',id);
   if(error){toast('⚠️ Error updating status: '+error.message);return;}
-  o.status=status;renderOrders();
+  o.status=status;renderOrders();refreshDashboard();
   if(document.getElementById('sec-bake')?.classList.contains('active'))generateBakeList();
   toast(`✅ ${invNum(o.invoiceNum)} marked as ${status}.`);
 }
@@ -1994,7 +1994,7 @@ async function deleteOrder(id) {
   if(!confirm('Delete this order? Cannot be undone.'))return;
   const {error}=await sbClient.from('orders').delete().eq('id',id);
   if(error){toast('⚠️ Error deleting order: '+error.message);return;}
-  db.orders=db.orders.filter(o=>o.id!==id);renderOrders();toast('🗑 Order deleted.');
+  db.orders=db.orders.filter(o=>o.id!==id);renderOrders();refreshDashboard();toast('🗑 Order deleted.');
 }
 
 // =====================================================================
@@ -2646,7 +2646,7 @@ function generateBakeList() {
                       <strong style="font-size:.86rem;color:var(--brown-dk);">${esc(o.retailerName)}</strong>
                       <span class="badge ${sBadge(o.status)}">${o.status}</span>
                     </div>
-                    <div style="font-size:.78rem;color:var(--brown-lt);">${items.map(p=>`${p.qty}× ${esc(p.product)}`).join(' · ')}${hasDelivery?' · 🚚 Delivery':''}</div>
+                    <div style="font-size:.78rem;color:var(--brown-lt);">${items.map(p=>`${p.qty}× ${esc(p.product)}`).join(' · ')}</div>
                   </div>
                   ${o.invoiceNum?`<div style="font-size:.68rem;color:var(--brown-lt);white-space:nowrap;">${invNum(o.invoiceNum)}</div>`:''}
                 </div>`;
