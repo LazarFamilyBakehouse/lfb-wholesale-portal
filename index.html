@@ -463,6 +463,11 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
       </div>
     </div>
     <div class="fg" style="margin-top:10px;">
+      <label>Partner Email <span style="color:var(--brown-lt);font-weight:400;">(for confirmation email)</span></label>
+      <input type="email" id="confirm-email" style="width:100%;padding:8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" placeholder="partner@example.com"/>
+      <div id="confirm-email-warn" style="display:none;margin-top:4px;font-size:.78rem;color:var(--red);line-height:1.3;"></div>
+    </div>
+    <div class="fg" style="margin-top:10px;">
       <label>Notes for Retailer <span style="color:var(--brown-lt);font-weight:400;">(optional)</span></label>
       <textarea id="confirm-notes" rows="3" style="width:100%;resize:vertical;padding:8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" placeholder="e.g. We adjusted your delivery to Thursday due to our bake schedule."></textarea>
     </div>
@@ -1894,6 +1899,20 @@ function openConfirmOrderModal() {
   if(dateInput) dateInput.value=o.delivery||'';
   const notesInput=document.getElementById('confirm-notes');
   if(notesInput) notesInput.value='';
+  // Pre-fill email from retailer profile
+  const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
+  const emailInput=document.getElementById('confirm-email');
+  const emailWarn=document.getElementById('confirm-email-warn');
+  if(emailInput) emailInput.value=retailer.email||'';
+  if(emailWarn) {
+    if(!retailer.email) {
+      emailWarn.style.display='block';
+      emailWarn.textContent='⚠️ No email on file for '+o.retailerName+'. Enter an email above to send a confirmation, or leave blank to skip.';
+    } else {
+      emailWarn.style.display='none';
+      emailWarn.textContent='';
+    }
+  }
   closeModal('order-detail-modal');
   openModal('confirm-order-modal');
 }
@@ -1916,7 +1935,14 @@ async function confirmOrder() {
   renderOrders();refreshDashboard();
   // Send confirmation email to retailer
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
-  const retailerEmail=retailer.email||'';
+  const emailInput=document.getElementById('confirm-email');
+  const retailerEmail=(emailInput?emailInput.value.trim():'')||retailer.email||'';
+  // If a new email was entered, save it to the retailer profile in Supabase
+  if(retailerEmail && retailerEmail!==retailer.email && retailer.id) {
+    sbClient.from('retailers').update({email:retailerEmail}).eq('id',retailer.id)
+      .then(()=>{retailer.email=retailerEmail;console.log('[LFB] Saved email to retailer profile:',retailerEmail);})
+      .catch(err=>console.warn('[LFB] Could not save retailer email:',err));
+  }
   if(retailerEmail) {
     // Retailer confirmation — tells the PARTNER their order is confirmed
     const productItems=o.products.filter(p=>p.product!=='Delivery');
@@ -1935,13 +1961,13 @@ async function confirmOrder() {
     };
     console.log('[LFB] Sending confirmation email to:', retailerEmail, 'params:', confirmParams);
     emailjs.send(EMAILJS_SERVICE, EMAILJS_CONFIRM_TPL, confirmParams)
-      .then(res=>console.log('[LFB] Confirmation email sent successfully:', res))
-      .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);toast('⚠️ Order confirmed but email failed: '+err.text);});
+      .then(res=>{console.log('[LFB] Confirmation email sent successfully:', res);toast('📧 Confirmation email sent to '+retailerEmail);})
+      .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);toast('⚠️ Order confirmed but email failed: '+(err.text||err));});
   } else {
     console.warn('[LFB] No retailer email found — cannot send confirmation. Retailer:', o.retailerName);
+    toast('⚠️ Order confirmed but no email on file for '+o.retailerName+'. Add their email in Partners to send confirmations.');
   }
   closeModal('confirm-order-modal');
-  toast(`✅ ${invNum(o.invoiceNum)} confirmed${retailerEmail?' — email sent to '+o.retailerName:''}.`);
 }
 function showInvoice(id) {
   const o=db.orders.find(x=>x.id===id);if(!o)return;
@@ -2110,11 +2136,11 @@ function refreshDashboard() {
   // Last 52 weeks revenue — true rolling window, only orders with a valid date
   const now52=new Date(); const cutoff52=new Date(now52); cutoff52.setDate(now52.getDate()-364);
   const orders52=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d>=cutoff52&&d<=now52;});
-  const rev52=orders52.reduce((s,o)=>s+(o.total||0),0);
+  const rev52=orders52.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty*(Number(p.price)||0)),0),0);
   // Compare to prior 52-week window (weeks 53-104 ago)
   const cutoff104=new Date(now52); cutoff104.setDate(now52.getDate()-728);
   const ordersPrior52=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d>=cutoff104&&d<cutoff52;});
-  const revPrior52=ordersPrior52.reduce((s,o)=>s+(o.total||0),0);
+  const revPrior52=ordersPrior52.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty*(Number(p.price)||0)),0),0);
   const yoyChange=revPrior52>0?Math.round(((rev52-revPrior52)/revPrior52)*100):null;
   // Avg items per week (last 52 weeks)
   const totalUnits=orders52.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
@@ -2679,10 +2705,10 @@ function generateBakeList() {
 function refreshAnalytics() {
   // KPI cards
   const kpi=document.getElementById('anal-kpi'); if(!kpi) return;
-  const rev=db.orders.reduce((s,o)=>s+(o.total||0),0);
+  const rev=db.orders.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty*(Number(p.price)||0)),0),0);
   const now=new Date();
   const thisMonthOrders=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();});
-  const thisMonthRev=thisMonthOrders.reduce((s,o)=>s+(o.total||0),0);
+  const thisMonthRev=thisMonthOrders.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty*(Number(p.price)||0)),0),0);
   const avgOrder=db.orders.length?rev/db.orders.length:0;
   const twoMoAgo=new Date(now);twoMoAgo.setMonth(twoMoAgo.getMonth()-2);
   const activeRetailerIds=new Set(db.orders.filter(o=>{const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d>=twoMoAgo;}).map(o=>o.retailerId));
