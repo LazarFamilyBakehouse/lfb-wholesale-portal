@@ -2473,16 +2473,29 @@ function retailerReorder(orderId) {
   productItems.forEach(p=>addProdRow('ro-prod-list',p.product,p.qty,p.price,false));
   toast('✅ Items from '+invNum(o.invoiceNum)+' pre-filled. Adjust and submit.');
 }
-function retailerPlaceOrder() {
+async function retailerPlaceOrder() {
   const r=session.retailer;
   const delivery=document.getElementById('ro-delivery').value;
   const notes=v('ro-notes');
   const products=getProdRows('ro-prod-list');
   if(!products.length){toast('⚠️ Add at least one product.');return;}
+  // Validate product minimums
+  for(const p of products){
+    const moq=PRODUCT_MOQ[p.product];
+    if(moq&&p.qty<moq){toast(`⚠️ ${p.product} requires a minimum of ${moq} units.`);return;}
+  }
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
   const inv=db.nextInvoice++;
-  db.orders.push({id:Date.now(),invoiceNum:inv,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery,status:'Pending',notes:notes||'Submitted via partner portal',products,total,created:new Date().toISOString()});
-  saveDB();
+  const orderNotes=notes||'Submitted via partner portal';
+  // Write to Supabase via RPC (same pattern as retailerPlaceFromAO)
+  const {data,error}=await sbClient.rpc('submit_retailer_order',{
+    p_retailer_id:r.id,p_pin:session.pin,p_invoice_num:inv,
+    p_date:todayStr(),p_delivery_date:delivery||null,p_notes:orderNotes,
+    p_items:products.map(p=>({product:p.product,qty:Number(p.qty)||1,price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)}))
+  });
+  if(error){toast('⚠️ Error placing order: '+error.message);db.nextInvoice--;return;}
+  db.orders.unshift({id:data.order_id,invoiceNum:inv,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery:delivery||'',status:'Pending',notes:orderNotes,products,total,created:new Date().toISOString()});
+  sendOrderNotification(r.name, products, total, data.order_id, delivery||null, notes);
   document.getElementById('ro-prod-list').innerHTML='';
   document.getElementById('ro-notes').value='';
   addProdRow('ro-prod-list','',1,'',true);
