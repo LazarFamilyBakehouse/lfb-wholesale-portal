@@ -378,18 +378,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <p>Partner Portal</p>
   </div>
   <div class="login-card">
-    <div class="login-tabs">
-      <button class="login-tab active" onclick="setLoginMode('admin')">Admin</button>
-      <button class="login-tab" onclick="setLoginMode('retailer')">Partner</button>
-    </div>
-    <div id="admin-login-form">
-      <div class="lf">
-        <label>Admin Password</label>
-        <input type="password" id="admin-pin-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()"/>
-      </div>
-      <button class="login-btn" onclick="doLogin()">Sign In as Admin</button>
-    </div>
-    <div id="retailer-login-form" style="display:none;">
+    <div id="retailer-login-form">
       <div class="lf">
         <label>Your Store</label>
         <select id="retailer-select-login"><option value="">-- Select your store --</option></select>
@@ -403,6 +392,16 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     </div>
     <div class="login-error" id="login-error"></div>
   </div>
+  <div id="admin-login-corner" style="position:fixed;bottom:18px;left:18px;z-index:10;">
+    <div id="admin-login-toggle" onclick="toggleAdminLogin()" style="cursor:pointer;font-size:.72rem;color:var(--brown-lt);opacity:.4;transition:opacity .2s;letter-spacing:.04em;" onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity=document.getElementById('admin-login-form').style.display==='none'?'.4':'.75'">Admin</div>
+    <div id="admin-login-form" style="display:none;background:var(--white);border-radius:12px;padding:20px 24px;box-shadow:0 8px 32px rgba(0,0,0,.18);width:280px;margin-top:8px;">
+      <div class="lf">
+        <label style="font-size:.8rem;">Admin Password</label>
+        <input type="password" id="admin-pin-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')doLogin()" style="font-size:.85rem;padding:9px 12px;"/>
+      </div>
+      <button class="login-btn" onclick="doLogin()" style="font-size:.85rem;padding:10px;">Sign In</button>
+    </div>
+  </div>
 </div>
 
 <!-- ==================== APP ==================== -->
@@ -410,7 +409,6 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <div id="lfb-err-banner" style="display:none;background:var(--danger);color:#fff;padding:10px 18px;font-size:.85rem;font-weight:700;text-align:center;position:sticky;top:0;z-index:9999;cursor:pointer;" onclick="this.style.display='none'">⚠️ Loading error — tap to dismiss</div>
   <header>
     <div class="hdr-center">
-      <div class="hdr-logo-svg" id="hdr-logo" style="width:48px;height:48px;"></div>
       <div class="hdr-text">
         <h1>Lazar Family Bakehouse</h1>
         <p id="hdr-subtitle">Partner Portal</p>
@@ -949,7 +947,26 @@ const PRODUCT_IMAGES = {
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k])PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
 // Logo image reference — reuse the login logo for header & invoices
 const LFB_LOGO_SRC = document.querySelector('.login-mark-svg img')?.src || '';
-(function(){const hdrLogo=document.getElementById('hdr-logo');if(hdrLogo&&LFB_LOGO_SRC)hdrLogo.innerHTML=`<img src="${LFB_LOGO_SRC}" style="width:48px;height:48px;object-fit:contain;border-radius:50%;" alt="LFB Logo"/>`;})();
+// Logo removed from portal header — kept only for invoices
+function addNewOrderDeliveryFee(){
+  const list=document.getElementById('o-prod-list');
+  if(list.querySelector('.delivery-row'))return;
+  const div=document.createElement('div');div.className='prod-item delivery-row';
+  div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;';
+  div.innerHTML='<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" class="eo-del-qty"/><input type="number" value="10.00" step="0.01" min="0" style="width:90px;" class="eo-del-price"/><button class="btn-icon" onclick="this.parentElement.remove();document.getElementById(\'o-add-delivery-btn\').style.display=\'\'" title="Remove" style="flex-shrink:0;">✕</button>';
+  list.appendChild(div);
+  document.getElementById('o-add-delivery-btn').style.display='none';
+}
+function addDeliveryFeeRow(){
+  const list=document.getElementById('eo-prod-list');
+  const div=document.createElement('div');div.className='prod-item delivery-row';
+  div.dataset.delivery='1';
+  div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;';
+  div.innerHTML='<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" class="eo-del-qty"/><input type="number" value="10.00" step="0.01" min="0" style="width:90px;" class="eo-del-price" oninput="updateEOTotal()"/><button class="btn-icon" onclick="this.parentElement.remove();updateEOTotal();document.getElementById(\'eo-add-delivery-btn\').style.display=\'\'" title="Remove delivery fee" style="flex-shrink:0;">✕</button>';
+  list.appendChild(div);
+  document.getElementById('eo-add-delivery-btn').style.display='none';
+  updateEOTotal();
+}
 // Minimum order quantities and increment rules
 const PRODUCT_MOQ = {
   'CC Mandelbites':8,'Funfetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
@@ -986,16 +1003,22 @@ function productOpts(sel='') {
 //  session = {type:'admin'} | {type:'retailer', retailer:{...}, pin}
 //  To change admin password: Settings → Change Admin Password.
 // =====================================================================
-let session=null, loginMode='admin', modalOrderId=null;
+let session=null, loginMode='retailer', modalOrderId=null;
 let _writeActive = false; // Suppress real-time reloads during our own write operations
 
 function setLoginMode(m) {
   loginMode=m;
-  document.querySelectorAll('.login-tab').forEach((b,i)=>b.classList.toggle('active',i===(m==='admin'?0:1)));
-  document.getElementById('admin-login-form').style.display   = m==='admin'?'':'none';
   document.getElementById('retailer-login-form').style.display = m==='retailer'?'':'none';
+  document.getElementById('admin-login-form').style.display   = m==='admin'?'':'none';
   document.getElementById('login-error').textContent='';
   if(m==='retailer') populateLoginRetailers();
+}
+function toggleAdminLogin(){
+  const form=document.getElementById('admin-login-form');
+  const showing=form.style.display!=='none';
+  form.style.display=showing?'none':'';
+  if(!showing) { setLoginMode('admin'); document.getElementById('admin-pin-input').focus(); }
+  else { setLoginMode('retailer'); }
 }
 
 // ── PIN brute-force protection ──────────────────────────────────────
@@ -1110,10 +1133,11 @@ async function logout() {
   session=null;
   document.getElementById('app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
+  const adminCorner=document.getElementById('admin-login-corner');if(adminCorner){adminCorner.style.display='';document.getElementById('admin-login-form').style.display='none';}
   document.getElementById('admin-pin-input').value='';
   document.getElementById('retailer-pin-input').value='';
   document.getElementById('login-error').textContent='';
-  setLoginMode('admin');
+  setLoginMode('retailer');
 }
 
 //  [7] APP BOOT
@@ -1123,6 +1147,7 @@ async function logout() {
 // =====================================================================
 function bootApp() {
   document.getElementById('login-screen').style.display='none';
+  const adminCorner=document.getElementById('admin-login-corner');if(adminCorner)adminCorner.style.display='none';
   const app=document.getElementById('app');
   app.style.display='flex';
   renderNotifBanner();
@@ -1288,7 +1313,10 @@ function buildAdminContent() {
     </div>
     <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brown);margin-bottom:8px;">Products</div>
     <div class="prod-list" id="o-prod-list"></div>
-    <button class="btn btn-outline btn-sm" onclick="addProdRow('o-prod-list')" style="margin-bottom:12px;">+ Add Product</button>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="btn btn-outline btn-sm" onclick="addProdRow('o-prod-list')">+ Add Product</button>
+      <button class="btn btn-outline btn-sm" id="o-add-delivery-btn" onclick="addNewOrderDeliveryFee()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
+    </div>
     <div class="form-row"><div class="fg"><label>Notes</label><input id="o-notes" placeholder="e.g. No sesame — allergy"/></div></div>
     <div class="form-actions">
       <button class="btn btn-primary" onclick="submitNewOrder()">📦 Create Order</button>
@@ -1796,6 +1824,9 @@ async function submitNewOrder() {
     const moq=PRODUCT_MOQ[p.product];
     if(moq&&p.qty<moq){toast(`⚠️ ${p.product} requires a minimum of ${moq} units.`);return;}
   }
+  // Include delivery fee if present
+  const delRow=document.querySelector('#o-prod-list .delivery-row');
+  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice});}
   const retailer=db.retailers.find(r=>r.id===retailerId)||{};
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
   const inv=db.nextInvoice++;
@@ -3164,16 +3195,21 @@ function openEditOrder(id) {
   document.getElementById('eo-notes').value=o.notes||'';
   const list=document.getElementById('eo-prod-list');
   list.innerHTML='';
+  let hasDelivery=false;
   (o.products||[]).forEach(p=>{
     if(p.product==='Delivery') {
+      hasDelivery=true;
       const div=document.createElement('div');div.className='prod-item delivery-row';
-      div.style.cssText='background:var(--cream-dk);border-radius:8px;opacity:.9;';
-      div.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:8px 6px;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" /><input type="number" value="${p.price}" readonly style="opacity:.6;background:var(--cream);cursor:default;" /><span style="width:28px;"></span>`;
+      div.dataset.delivery='1';
+      div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;';
+      div.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" class="eo-del-qty"/><input type="number" value="${p.price}" step="0.01" min="0" style="width:90px;" class="eo-del-price" oninput="updateEOTotal()"/><button class="btn-icon" onclick="this.parentElement.remove();updateEOTotal();document.getElementById('eo-add-delivery-btn').style.display=''" title="Remove delivery fee" style="flex-shrink:0;">✕</button>`;
       list.appendChild(div);
     } else { addProdRow('eo-prod-list',p.product,p.qty,p.price); }
   });
   if(!o.products||!o.products.length) addProdRow('eo-prod-list');
-  // Delivery fee auto-inject removed
+  // Show/hide the add-delivery button
+  const addDelBtn=document.getElementById('eo-add-delivery-btn');
+  if(addDelBtn) addDelBtn.style.display=hasDelivery?'none':'';
   updateEOTotal();
   const _eoList=document.getElementById('eo-prod-list');
   _eoList.removeEventListener('input',updateEOTotal);
@@ -3182,7 +3218,10 @@ function openEditOrder(id) {
 }
 function updateEOTotal() {
   const rows=getProdRows('eo-prod-list');
-  const total=rows.reduce((s,p)=>s+(p.qty*p.price),0);
+  let total=rows.reduce((s,p)=>s+(p.qty*p.price),0);
+  // Include delivery fee row if present
+  const delRow=document.querySelector('#eo-prod-list .delivery-row');
+  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;total+=delPrice;}
   document.getElementById('eo-total-display').textContent=fmtCur(total);
 }
 async function saveEditOrder() {
@@ -3190,6 +3229,9 @@ async function saveEditOrder() {
   const o=db.orders.find(x=>x.id===id);if(!o){toast('⚠️ Order not found.');return;}
   const products=getProdRows('eo-prod-list');
   if(!products.length){toast('⚠️ Add at least one product.');return;}
+  // Include delivery fee if present
+  const delRow=document.querySelector('#eo-prod-list .delivery-row');
+  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice});}
   const invNew=Number(document.getElementById('eo-inv').value)||0;
   const date=document.getElementById('eo-date').value;
   const delivery=document.getElementById('eo-delivery').value;
@@ -3237,7 +3279,10 @@ async function saveEditOrder() {
     <div class="fg" style="margin-bottom:12px;"><label>Notes</label><textarea id="eo-notes" rows="2" style="width:100%;padding:10px;border:1.5px solid var(--tan);border-radius:9px;font-family:'Lato',sans-serif;font-size:.93rem;resize:vertical;"></textarea></div>
     <div class="panel-title" style="margin-bottom:10px;">Products</div>
     <div class="prod-list" id="eo-prod-list"></div>
-    <button class="btn btn-outline btn-sm" onclick="addProdRow('eo-prod-list')" style="margin-bottom:12px;">+ Add Product</button>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <button class="btn btn-outline btn-sm" onclick="addProdRow('eo-prod-list')">+ Add Product</button>
+      <button class="btn btn-outline btn-sm" id="eo-add-delivery-btn" onclick="addDeliveryFeeRow()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
+    </div>
     <div style="background:var(--cream);border-radius:9px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-weight:700;color:var(--brown-dk);">Order Total</span>
       <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--red);" id="eo-total-display">$0.00</span>
