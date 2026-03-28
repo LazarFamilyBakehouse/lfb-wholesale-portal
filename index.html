@@ -37,7 +37,7 @@
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:16px;}
-body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown-dk);min-height:100vh;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown-dk);min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;}
 
 /* ===================== LOGIN ===================== */
 #login-screen {
@@ -320,7 +320,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 .bar-label { font-size:.58rem; color:var(--muted); }
 .bar-val { font-size:.52rem; color:var(--muted); text-align:center; white-space:nowrap; overflow:hidden; max-width:100%; }
 .top-ret-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-.top-ret-rank { font-size:.75rem; font-weight:700; color:var(--red); width:18px; text-align:center; }
+.top-ret-rank { font-size:.75rem; font-weight:700; color:var(--gold); width:18px; text-align:center; }
 .top-ret-name { flex:1; font-size:.86rem; color:var(--brown-dk); }
 .top-ret-bar-wrap { flex:1; min-width:60px; max-width:120px; background:var(--tan); border-radius:4px; height:7px; }
 .top-ret-bar { height:7px; background:var(--red); border-radius:4px; }
@@ -329,16 +329,16 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 /* ===================== PRODUCT CATALOG ===================== */
 .catalog-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; margin-bottom:18px; }
 .catalog-card { background:var(--white); border:1px solid var(--tan); border-radius:4px; overflow:hidden; box-shadow:none; transition:border-color .2s,box-shadow .2s; display:flex; flex-direction:column; height:100%; }
-.catalog-card:hover { border-color:var(--red); box-shadow:0 4px 16px var(--shadow); }
+.catalog-card:hover { border-color:var(--brown); box-shadow:0 4px 16px var(--shadow); }
 .catalog-card-hd { background:var(--brown-dk); color:var(--cream); padding:13px 16px; display:flex; flex-direction:column; justify-content:flex-start; min-height:92px; }
 .catalog-card-hd h3 { font-family:'Playfair Display',serif; font-size:.95rem; margin:0; line-height:1.3; word-wrap:break-word; min-height:2.6em; display:flex; align-items:flex-start; }
-.catalog-card-hd .cat-price { font-size:1.35rem; font-weight:700; color:var(--red); padding-top:6px; }
+.catalog-card-hd .cat-price { font-size:1.35rem; font-weight:700; color:var(--cream); padding-top:6px; }
 .catalog-card-bd { padding:12px 16px; display:flex; flex-direction:column; flex:1; }
 .catalog-card-bd p { font-size:.8rem; color:var(--muted); margin-bottom:10px; line-height:1.45; min-height:58px; }
 .cat-qty-row { display:flex; align-items:center; gap:8px; margin-top:auto; }
 .cat-qty-row label { font-size:.75rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--brown); }
 .cat-qty-row input { width:68px; padding:5px 8px; border:1.5px solid var(--tan); border-radius:7px; font-family:'Nunito',sans-serif; font-size:.9rem; background:var(--cream); color:var(--brown-dk); text-align:center; }
-.cat-qty-row input:focus { outline:none; border-color:var(--red); }
+.cat-qty-row input:focus { outline:none; border-color:var(--brown); }
 .catalog-total { text-align:right; font-size:.8rem; color:var(--muted); margin-top:8px; }
 .catalog-total strong { color:var(--brown-dk); }
 .catalog-section-hd { grid-column:1/-1; display:flex; align-items:center; gap:9px; font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:var(--brown-dk); padding:10px 4px 6px; border-bottom:2px solid var(--tan); margin-top:8px; }
@@ -350,7 +350,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 /* ===================== SOCIAL PROOF ===================== */
 .social-proof-bar { background:var(--brown-dk); border-radius:4px; padding:18px 22px; color:var(--cream); margin-bottom:22px; }
-.social-proof-bar h3 { font-family:'Playfair Display',serif; font-size:1rem; color:var(--red); margin-bottom:10px; }
+.social-proof-bar h3 { font-family:'Playfair Display',serif; font-size:1rem; color:var(--gold); margin-bottom:10px; }
 .sp-row { display:flex; flex-wrap:wrap; gap:8px; }
 .sp-chip { background:rgba(255,255,255,.12); border-radius:3px; padding:5px 12px; font-size:.79rem; }
 .sp-chip strong { color:var(--gold-lt); }
@@ -395,7 +395,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <div class="login-error" id="login-error"></div>
   </div>
   <div id="admin-login-corner" style="position:fixed;bottom:18px;left:18px;z-index:10;">
-    <div id="admin-login-toggle" onclick="toggleAdminLogin()" style="cursor:pointer;font-size:.72rem;color:var(--brown-lt);opacity:.4;transition:opacity .2s;letter-spacing:.04em;" onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity=document.getElementById('admin-login-form').style.display==='none'?'.4':'.75'">Admin</div>
+    <div id="admin-login-toggle" onclick="toggleAdminLogin()" style="cursor:pointer;font-size:.72rem;color:var(--muted);opacity:.4;transition:opacity .2s;letter-spacing:.04em;" onmouseenter="this.style.opacity='.75'" onmouseleave="this.style.opacity=document.getElementById('admin-login-form').style.display==='none'?'.4':'.75'">Admin</div>
     <div id="admin-login-form" style="display:none;background:var(--white);border-radius:6px;padding:20px 24px;box-shadow:0 4px 24px rgba(59,35,20,.12);width:280px;margin-top:8px;">
       <div class="lf">
         <label style="font-size:.8rem;">Admin Password</label>
@@ -408,7 +408,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 <!-- ==================== APP ==================== -->
 <div id="app">
-<div id="lfb-err-banner" style="display:none;background:var(--danger);color:#fff;padding:10px 18px;font-size:.85rem;font-weight:700;text-align:center;position:sticky;top:0;z-index:9999;cursor:pointer;" onclick="this.style.display='none'">⚠️ Loading error — tap to dismiss</div>
+<div id="lfb-err-banner" style="display:none;background:var(--danger);color:#fff;padding:10px 18px;font-size:.85rem;font-weight:700;text-align:center;position:sticky;top:0;z-index:9999;cursor:pointer;" onclick="this.style.display='none'">Loading error — tap to dismiss</div>
   <header>
     <div class="hdr-center">
       <div class="hdr-text">
@@ -429,11 +429,11 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== INVOICE MODAL ==================== -->
 <div class="modal-overlay" id="invoice-modal">
   <div class="modal" style="max-width:760px;">
-    <div class="modal-title">🧾 Invoice</div>
+    <div class="modal-title"> Invoice</div>
     <div id="invoice-modal-body"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('invoice-modal')">Close</button>
-      <button class="btn btn-gold" onclick="window.print()">🖨️ Print Invoice</button>
+      <button class="btn btn-gold" onclick="window.print()">Print Invoice</button>
     </div>
   </div>
 </div>
@@ -441,12 +441,12 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== ORDER DETAIL MODAL ==================== -->
 <div class="modal-overlay" id="order-detail-modal">
   <div class="modal">
-    <div class="modal-title">📦 Order Details</div>
+    <div class="modal-title">Order Details</div>
     <div id="order-detail-body"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('order-detail-modal')">Close</button>
-      <button class="btn btn-gold" onclick="openInvoiceFromDetail()">🧾 View Invoice</button>
-      <button class="btn btn-sage" id="order-confirm-btn" onclick="openConfirmOrderModal()" style="display:none;">✅ Confirm & Notify</button>
+      <button class="btn btn-gold" onclick="openInvoiceFromDetail()">View Invoice</button>
+      <button class="btn btn-sage" id="order-confirm-btn" onclick="openConfirmOrderModal()" style="display:none;">Confirm & Notify</button>
       <button class="btn btn-primary" id="order-status-btn"></button>
     </div>
   </div>
@@ -455,7 +455,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== CONFIRM ORDER MODAL ==================== -->
 <div class="modal-overlay" id="confirm-order-modal">
   <div class="modal">
-    <div class="modal-title">✅ Confirm Order & Notify Partner</div>
+    <div class="modal-title">Confirm Order & Notify Partner</div>
     <p style="margin:0 0 14px;color:var(--muted);font-size:.9rem;">Review the delivery date and add any notes before sending the confirmation email to the retailer.</p>
     <div class="form-row">
       <div class="fg">
@@ -466,7 +466,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <div class="fg" style="margin-top:10px;">
       <label>Partner Email <span style="color:var(--muted);font-weight:400;">(for confirmation email)</span></label>
       <input type="email" id="confirm-email" style="width:100%;padding:8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" placeholder="partner@example.com"/>
-      <div id="confirm-email-warn" style="display:none;margin-top:4px;font-size:.78rem;color:var(--red);line-height:1.3;"></div>
+      <div id="confirm-email-warn" style="display:none;margin-top:4px;font-size:.78rem;color:var(--danger);line-height:1.3;"></div>
     </div>
     <div class="fg" style="margin-top:10px;">
       <label>Notes for Retailer <span style="color:var(--muted);font-weight:400;">(optional)</span></label>
@@ -474,7 +474,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('confirm-order-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmOrder()">✉️ Confirm & Send Email</button>
+      <button class="btn btn-primary" onclick="confirmOrder()">Confirm & Send Email</button>
     </div>
   </div>
 </div>
@@ -482,7 +482,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== RETAILER EDIT MODAL ==================== -->
 <div class="modal-overlay" id="retailer-modal">
   <div class="modal">
-    <div class="modal-title">✏️ Edit Retailer</div>
+    <div class="modal-title">Edit Retailer</div>
     <div class="form-row">
       <div class="fg"><label>Business Name</label><input type="text" id="er-name"/></div>
       <div class="fg"><label>Contact Person</label><input type="text" id="er-contact"/></div>
@@ -804,7 +804,7 @@ async function loadFromSupabase() {
     return (b.id||0)-(a.id||0);
   });
   db.nextInvoice = db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100)+1;
-  lfbDiag(`✅ loaded ${db.retailers.length} retailers, ${db.orders.length} orders`);
+  lfbDiag(`loaded ${db.retailers.length} retailers, ${db.orders.length} orders`);
   console.log(`[LFB] Loaded ${db.retailers.length} retailers, ${db.orders.length} orders`);
 }
 
@@ -812,12 +812,12 @@ async function loadFromSupabase() {
 const _lfbLog = [];
 function lfbDiag(msg) { _lfbLog.push(msg); console.log('[LFB]', msg); }
 function lfbShowErr(msg) {
-  _lfbLog.push('❌ '+msg);
+  _lfbLog.push(''+msg);
   console.error('[LFB]', msg);
   // Show a sticky banner at top of app if it's already booted, or toast if not
   const banner = document.getElementById('lfb-err-banner');
-  if (banner) { banner.textContent = '⚠️ '+msg; banner.style.display='block'; }
-  else { toast('⚠️ '+msg); }
+  if (banner) { banner.textContent = ''+msg; banner.style.display='block'; }
+  else { toast(''+msg); }
 }
 async function lfbRunDiagnostic() {
   const out = document.getElementById('lfb-diag-out');
@@ -829,12 +829,12 @@ async function lfbRunDiagnostic() {
   // Row counts
   for (const tbl of ['retailers','orders','order_items']) {
     const { error, count } = await sbClient.from(tbl).select('*', {count:'exact',head:true});
-    lines.push(tbl+': ' + (error ? '❌ '+error.message+' ('+error.code+')' : '✅ '+count+' rows'));
+    lines.push(tbl+': ' + (error ? ''+error.message+' ('+error.code+')' : ''+count+' rows'));
   }
   // Peek at actual column names from orders (first row)
   const { data:peek, error:peekErr } = await sbClient.from('orders').select('*').limit(1);
   if (peek && peek.length) lines.push('orders columns: ' + Object.keys(peek[0]).join(', '));
-  else lines.push('orders peek: ' + (peekErr ? '❌ '+peekErr.message : 'no rows returned'));
+  else lines.push('orders peek: ' + (peekErr ? ''+peekErr.message : 'no rows returned'));
   // Peek at retailers columns
   const { data:rPeek } = await sbClient.from('retailers').select('*').limit(1);
   if (rPeek && rPeek.length) lines.push('retailers columns: ' + Object.keys(rPeek[0]).join(', '));
@@ -986,9 +986,9 @@ function setDeliveryFee(retailerId,fee){}
 
 // Catalog display groupings
 const PRODUCT_SECTIONS = [
-  {label:'Mandelbites (Packaged)',icon:'🍪',products:['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
-  {label:'Individual Mandel Bread',icon:'🍞',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
-  {label:'Two-Pack',icon:'☕',products:['Two Pack Chocolate Chip']}
+  {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
+  {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
+  {label:'Two-Pack',icon:'',products:['Two Pack Chocolate Chip']}
 ];
 function productOpts(sel='') {
   return PRODUCT_SECTIONS.map(sec=>
@@ -1174,21 +1174,21 @@ function bootApp() {
 // =====================================================================
 function buildAdminNav() {
   document.getElementById('main-nav').innerHTML=`
-    <button onclick="showSection('dashboard')">📊 Dashboard</button>
-    <button onclick="showSection('analytics')">📈 Analytics</button>
-    <button onclick="showSection('retailers')">🏪 Partners</button>
-    <button onclick="showSection('orders')">📦 Orders</button>
-    <button onclick="showSection('auto-orders')">🔄 Auto-Orders</button>
-    <button onclick="showSection('bake')">🍞 Production</button>
-    <button onclick="showSection('settings')">⚙️ Settings</button>`
+    <button onclick="showSection('dashboard')">Dashboard</button>
+    <button onclick="showSection('analytics')">Analytics</button>
+    <button onclick="showSection('retailers')">Partners</button>
+    <button onclick="showSection('orders')">Orders</button>
+    <button onclick="showSection('auto-orders')">Auto-Orders</button>
+    <button onclick="showSection('bake')">Production</button>
+    <button onclick="showSection('settings')">Settings</button>`
 }
 function buildRetailerNav() {
   document.getElementById('main-nav').innerHTML=`
-    <button onclick="showSection('r-home')">🏠 Home</button>
-    <button onclick="showSection('r-orders')">📦 My Orders</button>
-    <button onclick="showSection('r-new-order')">➕ Place Order</button>
-    <button onclick="showSection('r-auto')">🔄 Auto-Order</button>
-    <button onclick="showSection('r-account')">✏️ My Account</button>`;
+    <button onclick="showSection('r-home')">Home</button>
+    <button onclick="showSection('r-orders')">My Orders</button>
+    <button onclick="showSection('r-new-order')">Place Order</button>
+    <button onclick="showSection('r-auto')">Auto-Order</button>
+    <button onclick="showSection('r-account')">My Account</button>`;
 }
 
 function showSection(name) {
@@ -1228,10 +1228,10 @@ function buildAdminContent() {
   <h2 class="page-h">Dashboard</h2><p class="page-sub">Your partner overview.</p>
   <div class="stats-grid" id="stats-grid"></div>
   <div class="panel">
-    <div class="panel-title">📦 Recent Orders</div>
+    <div class="panel-title">Recent Orders</div>
     <div class="tbl-wrap"><table><thead><tr><th>Invoice</th><th>Retailer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody id="dash-orders"></tbody></table></div>
   </div>
-  <div class="panel"><div class="panel-title">🔄 Active Auto-Orders</div><div id="dash-auto"></div></div>
+  <div class="panel"><div class="panel-title">Active Auto-Orders</div><div id="dash-auto"></div></div>
 </section>
 
 <!-- ANALYTICS -->
@@ -1241,35 +1241,35 @@ function buildAdminContent() {
   <div class="analytics-grid" id="anal-kpi"></div>
   <!-- Monthly Revenue — full width -->
   <div class="panel" style="margin-top:18px;">
-    <div class="panel-title">📅 Monthly Revenue (last 12 months)</div>
+    <div class="panel-title">Monthly Revenue (last 12 months)</div>
     <div class="bar-chart" id="anal-monthly-bars" style="height:180px;gap:6px;padding:8px 0;"></div>
   </div>
   <!-- 2-column chart grid -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;">
     <div class="panel">
-      <div class="panel-title">🏆 Top Partners by Revenue</div>
+      <div class="panel-title">Top Partners by Revenue</div>
       <div id="anal-top-retailers"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">🍪 Products Sold (all time)</div>
+      <div class="panel-title">Products Sold (all time)</div>
       <div id="anal-products"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">📊 Order Frequency by Partner</div>
+      <div class="panel-title">Order Frequency by Partner</div>
       <div id="anal-freq"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">📈 Quarter-over-Quarter Revenue</div>
+      <div class="panel-title">Quarter-over-Quarter Revenue</div>
       <div id="anal-qoq"></div>
     </div>
     <div class="panel" style="grid-column:span 2;">
-      <div class="panel-title">🔄 Product Movement: Current vs Prior Year</div>
+      <div class="panel-title">Product Movement: Current vs Prior Year</div>
       <div id="anal-prod-yoy"></div>
     </div>
   </div>
   <!-- Yearly Breakdown — full width -->
   <div class="panel" style="margin-top:18px;">
-    <div class="panel-title">📆 Yearly Revenue Breakdown</div>
+    <div class="panel-title">Yearly Revenue Breakdown</div>
     <div id="anal-yearly"></div>
   </div>
 </section>
@@ -1278,7 +1278,7 @@ function buildAdminContent() {
 <section class="section" id="sec-retailers">
   <h2 class="page-h">Partners</h2><p class="page-sub">Manage your partners and their portal PINs.</p>
   <div class="panel">
-    <div class="panel-title">➕ Add New Retailer</div>
+    <div class="panel-title">Add New Retailer</div>
     <div class="form-row">
       <div class="fg"><label>Business Name *</label><input id="r-name" placeholder="e.g. Sunrise Grocery"/></div>
       <div class="fg"><label>Contact Person</label><input id="r-contact" placeholder="e.g. Sarah Cohen"/></div>
@@ -1294,10 +1294,10 @@ function buildAdminContent() {
       <div class="fg"><label>Portal PIN * (4–8 chars)</label><input id="r-pin" maxlength="8" placeholder="e.g. 4821 or sunrise"/></div>
       <div class="fg"><label>Notes</label><input id="r-notes" placeholder="e.g. Back entrance"/></div>
     </div>
-    <div class="form-actions"><button class="btn btn-primary" onclick="addRetailer()">➕ Add Retailer</button></div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="addRetailer()">Add Retailer</button></div>
   </div>
   <div class="panel">
-    <div class="panel-title">🏪 All Retailers</div>
+    <div class="panel-title">All Retailers</div>
     <div class="tbl-wrap"><table><thead><tr><th>Business</th><th>Contact</th><th>Email</th><th>Phone</th><th>Delivery Day</th><th>PIN</th><th>Status</th><th>Actions</th></tr></thead><tbody id="retailers-tbody"></tbody></table></div>
   </div>
 </section>
@@ -1306,7 +1306,7 @@ function buildAdminContent() {
 <section class="section" id="sec-orders">
   <h2 class="page-h">Orders</h2><p class="page-sub">Create and manage orders with invoice tracking.</p>
   <div class="panel">
-    <div class="panel-title">➕ Create New Order</div>
+    <div class="panel-title">Create New Order</div>
     <div class="form-row">
       <div class="fg"><label>Retailer *</label><select id="o-retailer" onchange="refreshOrderPricesForRetailer(this.value)"><option value="">-- Select --</option></select></div>
       <div class="fg"><label>Order Date *</label><input type="date" id="o-date"/></div>
@@ -1317,16 +1317,16 @@ function buildAdminContent() {
     <div class="prod-list" id="o-prod-list"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <button class="btn btn-outline btn-sm" onclick="addProdRow('o-prod-list')">+ Add Product</button>
-      <button class="btn btn-outline btn-sm" id="o-add-delivery-btn" onclick="addNewOrderDeliveryFee()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
+      <button class="btn btn-outline btn-sm" id="o-add-delivery-btn" onclick="addNewOrderDeliveryFee()" style="background:var(--cream-dk);">Add Delivery Fee</button>
     </div>
     <div class="form-row"><div class="fg"><label>Notes</label><input id="o-notes" placeholder="e.g. No sesame — allergy"/></div></div>
     <div class="form-actions">
-      <button class="btn btn-primary" onclick="submitNewOrder()">📦 Create Order</button>
+      <button class="btn btn-primary" onclick="submitNewOrder()">Create Order</button>
       <button class="btn btn-outline" onclick="clearOrderForm()">Clear</button>
     </div>
   </div>
   <div class="panel">
-    <div class="panel-title">📦 All Orders</div>
+    <div class="panel-title">All Orders</div>
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
       <select id="f-status" onchange="renderOrders()" style="padding:7px 11px;border:1px solid var(--tan);border-radius:8px;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown-dk);">
         <option value="">All Statuses</option><option>Pending</option><option>Confirmed</option><option>Delivered</option>
@@ -1344,7 +1344,7 @@ function buildAdminContent() {
 <section class="section" id="sec-auto-orders">
   <h2 class="page-h">Auto-Orders</h2><p class="page-sub">Recurring standing orders for partners.</p>
   <div class="panel">
-    <div class="panel-title">➕ New Auto-Order</div>
+    <div class="panel-title">New Auto-Order</div>
     <div class="form-row">
       <div class="fg"><label>Retailer *</label><select id="ao-retailer" onchange="buildAutoOrderGrid('ao-prod-grid',Number(this.value)||null)"><option value="">-- Select --</option></select></div>
       <div class="fg"><label>Frequency</label><select id="ao-freq"><option>Weekly</option><option>Bi-Weekly</option><option>Monthly</option></select></div>
@@ -1354,9 +1354,9 @@ function buildAdminContent() {
     <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brown);margin-bottom:8px;">Standing Products <span style="font-weight:400;color:var(--muted);font-size:.7rem;">(prices locked · enter 0 to exclude)</span></div>
     <div id="ao-prod-grid" style="margin-bottom:12px;"></div>
     <div class="form-row"><div class="fg"><label>Notes</label><input id="ao-notes" placeholder="e.g. Adjust holiday weeks"/></div></div>
-    <div class="form-actions"><button class="btn btn-sage" onclick="createAutoOrder()">🔄 Save Auto-Order</button></div>
+    <div class="form-actions"><button class="btn btn-sage" onclick="createAutoOrder()">Save Auto-Order</button></div>
   </div>
-  <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown-dk);margin-bottom:14px;">🔄 All Auto-Orders</h3>
+  <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown-dk);margin-bottom:14px;">All Auto-Orders</h3>
   <div class="auto-grid" id="auto-grid"></div>
 </section>
 
@@ -1364,19 +1364,19 @@ function buildAdminContent() {
 <section class="section" id="sec-summary">
   <h2 class="page-h">Weekly Summary</h2><p class="page-sub">Generate a printable weekly partner update.</p>
   <div class="panel">
-    <div class="panel-title">📅 Select Period</div>
+    <div class="panel-title">Select Period</div>
     <div class="form-row" style="align-items:flex-end;">
       <div class="fg"><label>From</label><input type="date" id="sum-start"/></div>
       <div class="fg"><label>To</label><input type="date" id="sum-end"/></div>
       <div class="fg"><label>Retailer</label><select id="sum-ret"><option value="">All Retailers</option></select></div>
-      <div><button class="btn btn-primary" onclick="generateSummary()">📋 Generate</button></div>
+      <div><button class="btn btn-primary" onclick="generateSummary()">Generate</button></div>
     </div>
   </div>
   <div id="summary-out" style="display:none;">
     <div class="print-actions" style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-      <button class="btn btn-gold" onclick="window.print()">🖨️ Print</button>
-      <button class="btn btn-outline" onclick="copySummary()">📋 Copy Text</button>
-      <button class="btn btn-sage" onclick="emailSummary()">✉️ Email</button>
+      <button class="btn btn-gold" onclick="window.print()">Print</button>
+      <button class="btn btn-outline" onclick="copySummary()">Copy Text</button>
+      <button class="btn btn-sage" onclick="emailSummary()">Email</button>
     </div>
     <div class="sum-box" id="sum-content"></div>
   </div>
@@ -1386,30 +1386,30 @@ function buildAdminContent() {
 <section class="section" id="sec-import">
   <h2 class="page-h">Import Data</h2><p class="page-sub">Upload your existing retailer and order data.</p>
   <div class="panel">
-    <div class="panel-title">📥 Import Retailers</div>
+    <div class="panel-title">Import Retailers</div>
     <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px;">Download the template, fill in your retailer info, then upload it back here.</p>
-    <button class="btn btn-outline" onclick="downloadTemplate('retailers')" style="margin-bottom:14px;">⬇️ Download Retailer Template (.xlsx)</button>
+    <button class="btn btn-outline" onclick="downloadTemplate('retailers')" style="margin-bottom:14px;">Download Retailer Template (.xlsx)</button>
     <div class="drop-zone" id="dz-retailers" onclick="document.getElementById('fi-retailers').click()" ondragover="dzDrag(event,'retailers')" ondragleave="dzLeave('retailers')" ondrop="dzDrop(event,'retailers')">
-      <div class="dz-icon">📊</div>
+      <div class="dz-icon"></div>
       <strong>Click or drag & drop your retailers spreadsheet</strong>
       <p>Supports .xlsx, .xls, .csv</p>
     </div>
     <input type="file" id="fi-retailers" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(event,'retailers')"/>
     <div id="retailers-preview" style="margin-top:10px;"></div>
-    <div id="retailers-import-btn" style="margin-top:10px;display:none;"><button class="btn btn-primary" onclick="commitImport('retailers')">✅ Import Retailers</button></div>
+    <div id="retailers-import-btn" style="margin-top:10px;display:none;"><button class="btn btn-primary" onclick="commitImport('retailers')">Import Retailers</button></div>
   </div>
   <div class="panel">
-    <div class="panel-title">📥 Import Orders</div>
+    <div class="panel-title">Import Orders</div>
     <p style="font-size:.88rem;color:var(--muted);margin-bottom:14px;">Download the template, fill in your order history, then upload it back here.</p>
-    <button class="btn btn-outline" onclick="downloadTemplate('orders')" style="margin-bottom:14px;">⬇️ Download Orders Template (.xlsx)</button>
+    <button class="btn btn-outline" onclick="downloadTemplate('orders')" style="margin-bottom:14px;">Download Orders Template (.xlsx)</button>
     <div class="drop-zone" id="dz-orders" onclick="document.getElementById('fi-orders').click()" ondragover="dzDrag(event,'orders')" ondragleave="dzLeave('orders')" ondrop="dzDrop(event,'orders')">
-      <div class="dz-icon">📦</div>
+      <div class="dz-icon"></div>
       <strong>Click or drag & drop your orders spreadsheet</strong>
       <p>Supports .xlsx, .xls, .csv</p>
     </div>
     <input type="file" id="fi-orders" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFile(event,'orders')"/>
     <div id="orders-preview" style="margin-top:10px;"></div>
-    <div id="orders-import-btn" style="margin-top:10px;display:none;"><button class="btn btn-primary" onclick="commitImport('orders')">✅ Import Orders</button></div>
+    <div id="orders-import-btn" style="margin-top:10px;display:none;"><button class="btn btn-primary" onclick="commitImport('orders')">Import Orders</button></div>
   </div>
 </section>
 
@@ -1429,7 +1429,7 @@ function buildAdminContent() {
 <section class="section" id="sec-settings">
   <h2 class="page-h">Settings</h2><p class="page-sub">Portal configuration.</p>
   <div class="panel" style="max-width:460px;">
-    <div class="panel-title">🔐 Change Admin Password</div>
+    <div class="panel-title">Change Admin Password</div>
     <div class="fg" style="margin-bottom:12px;"><label>Current Password</label><input type="password" id="s-cur"/></div>
     <div class="fg" style="margin-bottom:12px;"><label>New Password</label><input type="password" id="s-new" maxlength="64"/></div>
     <div class="fg" style="margin-bottom:16px;"><label>Confirm New Password</label><input type="password" id="s-con" maxlength="64"/></div>
@@ -1437,24 +1437,24 @@ function buildAdminContent() {
   </div>
   </div>
   <div class="panel" style="max-width:680px;margin-top:20px;">
-    <div class="panel-title">📢 Site Notifications</div>
+    <div class="panel-title">Site Notifications</div>
     <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Pin important messages at the top of the portal for all users to see.</p>
     <div class="form-row">
       <div class="fg" style="flex:2;"><label>Message *</label><input type="text" id="notif-msg" placeholder="e.g. Holiday orders close Dec 20th — order early!"/></div>
       <div class="fg"><label>Type</label>
         <select id="notif-type">
-          <option value="info">ℹ️ Info (blue)</option>
-          <option value="warning">⚠️ Warning (yellow)</option>
-          <option value="urgent">🚨 Urgent (red)</option>
-          <option value="success">✅ Success (green)</option>
+          <option value="info">Info (blue)</option>
+          <option value="warning">Warning (yellow)</option>
+          <option value="urgent">Urgent (red)</option>
+          <option value="success">Success (green)</option>
         </select>
       </div>
     </div>
-    <div class="form-actions"><button class="btn btn-primary" onclick="addNotification()">📢 Post Notification</button></div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="addNotification()">Post Notification</button></div>
     <div id="notif-list" style="margin-top:14px;"></div>
   </div>
   <div class="panel" style="max-width:460px;margin-top:20px;">
-    <div class="panel-title">🔄 Refresh Data from Server</div>
+    <div class="panel-title">Refresh Data from Server</div>
     <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Reloads all retailers and orders from the live Supabase database. Use this if the portal ever shows stale data.</p>
     <button class="btn btn-gold" onclick="reseedFromMaster()">🔄 Refresh from Supabase</button>
   </div>
@@ -1476,7 +1476,7 @@ function buildAdminContent() {
     </div>
   </div>
   <div class="panel" style="max-width:460px;margin-top:20px;">
-    <div class="panel-title">🗑️ Danger Zone</div>
+    <div class="panel-title">Danger Zone</div>
     <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Permanently clear all portal data. Cannot be undone.</p>
     <button class="btn btn-danger" onclick="clearAllData()">Clear All Portal Data</button>
   </div>
@@ -1518,7 +1518,7 @@ function buildRetailerContent() {
   <div class="stats-grid" id="r-stats"></div>
   <div id="r-social-proof" style="display:none;"></div>
   <div class="panel">
-    <div class="panel-title">📦 Recent Orders</div>
+    <div class="panel-title">Recent Orders</div>
     <div class="tbl-wrap"><table><thead><tr><th>Invoice</th><th>Date</th><th>Delivery</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="r-recent-orders"></tbody></table></div>
   </div>
   <div class="panel" style="font-size:.88rem;">
@@ -1600,7 +1600,7 @@ function buildRetailerContent() {
     </div>
     <p style="margin-top:14px;font-size:.82rem;color:var(--muted);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>
     <div class="form-actions" style="margin-top:14px;">
-      <button class="btn btn-primary" onclick="retailerPlaceCatalogOrder()">📦 Submit Order</button>
+      <button class="btn btn-primary" onclick="retailerPlaceCatalogOrder()"> Submit Order</button>
       <button class="btn btn-outline" onclick="resetCatalog()">Clear</button>
     </div>
   </div>
@@ -1621,7 +1621,7 @@ function buildRetailerContent() {
   <h2 class="page-h">Auto-Order</h2><p class="page-sub">Set up a recurring standing order and we'll schedule it automatically.</p>
   <div id="r-auto-content"></div>
   <div class="ao-request-form" style="margin-top:18px;">
-    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--brown-dk);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--tan);">➕ Request a New Auto-Order</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.05rem;color:var(--brown-dk);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--tan);">Request a New Auto-Order</div>
     <div class="form-row">
       <div class="fg"><label>Frequency</label>
         <select id="rao-freq"><option>Weekly</option><option>Bi-Weekly</option><option>Monthly</option></select>
@@ -1717,16 +1717,16 @@ function getProdRows(listId) {
 // =====================================================================
 async function addRetailer() {
   const name=v('r-name'),pin=v('r-pin'),contact=v('r-contact'),email=v('r-email'),phone=v('r-phone'),day=document.getElementById('r-day').value,notes=v('r-notes');
-  if(!name){toast('⚠️ Business name required.');return;}
-  if(!pin){toast('⚠️ Portal PIN required so retailer can log in.');return;}
-  if(db.retailers.some(r=>r.pin===pin)){toast('⚠️ PIN already in use.');return;}
+  if(!name){toast('Business name required.');return;}
+  if(!pin){toast('Portal PIN required so retailer can log in.');return;}
+  if(db.retailers.some(r=>r.pin===pin)){toast('PIN already in use.');return;}
   const {data,error}=await sbClient.from('retailers').insert({name,pin,contact,email,phone,delivery_day:day,notes,status:'Active',joined_date:todayStr()}).select().single();
-  if(error){toast('⚠️ Error adding retailer: '+error.message);return;}
+  if(error){toast('Error adding retailer: '+error.message);return;}
   db.retailers.push({id:data.id,name,contact,email,phone,day,notes,pin,status:'Active',joined_date:todayStr()});
   renderRetailers();fillRetailerSelects();
   ['r-name','r-contact','r-email','r-phone','r-notes','r-pin'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('r-day').value='';
-  toast('✅ Retailer added!');
+  toast('Retailer added!');
 }
 function sortedRetailers() {
   return [...db.retailers].sort((a,b) => {
@@ -1747,9 +1747,9 @@ function renderRetailers() {
     <td><code style="background:var(--cream-dk);padding:2px 7px;border-radius:5px;font-size:.82rem;">${esc(r.pin||'—')}</code></td>
     <td><span class="badge ${r.status==='Active'?'b-active':'b-inactive'}">${r.status}</span></td>
     <td style="display:flex;gap:5px;flex-wrap:wrap;">
-      <button class="btn btn-outline btn-sm" onclick="editRetailer(${r.id})">✏️ Edit</button>
-      <button class="btn btn-sm" style="background:var(--brown-lt);color:var(--white);" onclick="toggleRetailerStatus(${r.id})">${r.status==='Active'?'Deactivate':'Activate'}</button>
-      <button class="btn btn-sm" style="background:#c0392b;color:#fff;" onclick="deleteRetailer(${r.id},'${esc(r.name).replace(/'/g,"\\'")}')">🗑️ Delete</button>
+      <button class="btn btn-outline btn-sm" onclick="editRetailer(${r.id})">Edit</button>
+      <button class="btn btn-sm" style="background:var(--muted);color:var(--white);" onclick="toggleRetailerStatus(${r.id})">${r.status==='Active'?'Deactivate':'Activate'}</button>
+      <button class="btn btn-sm" style="background:#c0392b;color:#fff;" onclick="deleteRetailer(${r.id},'${esc(r.name).replace(/'/g,"\\'")}')">Delete</button>
     </td>
   </tr>`).join('');
 }
@@ -1765,24 +1765,24 @@ async function saveRetailerEdit() {
   const id=Number(document.getElementById('er-id').value);
   const r=db.retailers.find(x=>x.id===id);if(!r)return;
   const newPin=document.getElementById('er-pin').value.trim();
-  if(newPin&&db.retailers.some(x=>x.id!==id&&x.pin===newPin)){toast('⚠️ PIN already in use.');return;}
+  if(newPin&&db.retailers.some(x=>x.id!==id&&x.pin===newPin)){toast('PIN already in use.');return;}
   const updates={name:v('er-name'),contact:v('er-contact'),email:document.getElementById('er-email').value.trim(),
     phone:document.getElementById('er-phone').value.trim(),delivery_day:document.getElementById('er-day').value,
     notes:v('er-notes'),pin:newPin,status:document.getElementById('er-status').value};
   const mpVal=parseFloat(document.getElementById('er-minis-price').value);
   if(!isNaN(mpVal)&&mpVal>0) updates.price_overrides={...(r.priceOverrides||{}),Minis:mpVal};
   const {error}=await sbClient.from('retailers').update(updates).eq('id',id);
-  if(error){toast('⚠️ Error updating retailer: '+error.message);return;}
+  if(error){toast('Error updating retailer: '+error.message);return;}
   Object.assign(r,{name:updates.name,contact:updates.contact,email:updates.email,phone:updates.phone,
     day:updates.delivery_day,notes:updates.notes,pin:updates.pin,status:updates.status,
     priceOverrides:updates.price_overrides||r.priceOverrides});
-  renderRetailers();fillRetailerSelects();closeModal('retailer-modal');toast('✅ Retailer updated!');
+  renderRetailers();fillRetailerSelects();closeModal('retailer-modal');toast('Retailer updated!');
 }
 async function toggleRetailerStatus(id) {
   const r=db.retailers.find(x=>x.id===id);if(!r)return;
   const newStatus=r.status==='Active'?'Inactive':'Active';
   const {error}=await sbClient.from('retailers').update({status:newStatus}).eq('id',id);
-  if(error){toast('⚠️ Error updating status: '+error.message);return;}
+  if(error){toast('Error updating status: '+error.message);return;}
   r.status=newStatus;renderRetailers();toast(`Retailer marked ${newStatus}.`);
 }
 async function deleteRetailer(id, name) {
@@ -1792,11 +1792,11 @@ async function deleteRetailer(id, name) {
     : '';
   if (!confirm(`Delete partner "${name}"?${warning}\n\nThis cannot be undone.`)) return;
   const {error} = await sbClient.from('retailers').delete().eq('id', id);
-  if (error) { toast('⚠️ Error deleting partner: ' + error.message); return; }
+  if (error) { toast('Error deleting partner: ' + error.message); return; }
   db.retailers = db.retailers.filter(x => x.id !== id);
   fillRetailerSelects();
   renderRetailers();
-  toast(`🗑️ ${name} removed.`);
+  toast(`${name} removed.`);
 }
 
 // =====================================================================
@@ -1804,10 +1804,10 @@ async function deleteRetailer(id, name) {
 //  submitNewOrder() → admin creates order, inserts into orders + order_items.
 //  renderOrders() → renders filterable order table with per-retailer totals.
 //  showInvoice() → generates printable invoice modal with delivery terms.
-//  ⚠️  unit_price must NEVER be null — always use Number(p.price)||0.
+//  unit_price must NEVER be null — always use Number(p.price)||0.
 //  [12] ORDERS (ADMIN)
 //  submitNewOrder(), renderOrders(), showInvoice(), deleteOrder().
-//  ⚠️  All order_items inserts must use Number(p.price)||0 for unit_price.
+//  All order_items inserts must use Number(p.price)||0 for unit_price.
 // =====================================================================
 function invNum(n){return (n&&n>0)?'INV-'+String(n).padStart(4,'0'):'TBD';}
 
@@ -1818,13 +1818,13 @@ async function submitNewOrder() {
   const status=document.getElementById('o-status').value;
   const notes=v('o-notes');
   const products=getProdRows('o-prod-list');
-  if(!retailerId){toast('⚠️ Select a retailer.');return;}
-  if(!date){toast('⚠️ Set an order date.');return;}
-  if(!products.length){toast('⚠️ Add at least one product.');return;}
+  if(!retailerId){toast('Select a retailer.');return;}
+  if(!date){toast('Set an order date.');return;}
+  if(!products.length){toast('Add at least one product.');return;}
   // Validate product minimums
   for(const p of products){
     const moq=PRODUCT_MOQ[p.product];
-    if(moq&&p.qty<moq){toast(`⚠️ ${p.product} requires a minimum of ${moq} units.`);return;}
+    if(moq&&p.qty<moq){toast(`${p.product} requires a minimum of ${moq} units.`);return;}
   }
   // Include delivery fee if present
   const delRow=document.querySelector('#o-prod-list .delivery-row');
@@ -1837,16 +1837,16 @@ async function submitNewOrder() {
     const {data:newOrder,error:oErr}=await sbClient.from('orders').insert({
       retailer_id:retailerId,invoice_num:inv,order_date:date,delivery_date:delivery||null,status,notes,total
     }).select().single();
-    if(oErr){toast('⚠️ Error creating order: '+oErr.message);db.nextInvoice--;return;}
+    if(oErr){toast('Error creating order: '+oErr.message);db.nextInvoice--;return;}
     const {error:iErr}=await sbClient.from('order_items').insert(products.map(p=>({order_id:newOrder.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
-    if(iErr){toast('⚠️ Order saved but items failed: '+iErr.message);}
+    if(iErr){toast('Order saved but items failed: '+iErr.message);}
     sendOrderNotification(retailer.name||'Partner', products, total, newOrder.id, delivery||null, notes);
     // Reload from Supabase now that both order + items are fully written
     await loadFromSupabase();
     refreshDashboard();
     renderOrders();
     clearOrderForm();
-    toast(`✅ Order ${invNum(inv)} created!`);
+    toast(`Order ${invNum(inv)} created!`);
   } finally {
     _writeActive = false;
   }
@@ -1886,7 +1886,7 @@ function renderOrders() {
     <td style="vertical-align:middle;white-space:nowrap;">
       <button class="btn btn-outline btn-sm" onclick="viewOrderDetail(${o.id})">👁</button>
       <button class="btn btn-primary btn-sm" onclick="openEditOrder(${o.id})">✏️</button>
-      <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})">🧾</button>
+      <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})"></button>
       <button class="btn btn-danger btn-sm" onclick="deleteOrder(${o.id})">🗑</button>
     </td>
   </tr>`).join('');
@@ -1897,7 +1897,7 @@ function viewOrderDetail(id) {
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
   document.getElementById('order-detail-body').innerHTML=`
     <table style="width:100%;margin-bottom:14px;">
-      <tr><td style="color:var(--brown-lt);width:130px;padding:5px 0;">Invoice</td><td><strong>${invNum(o.invoiceNum)}</strong></td></tr>
+      <tr><td style="color:var(--muted);width:130px;padding:5px 0;">Invoice</td><td><strong>${invNum(o.invoiceNum)}</strong></td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Retailer</td><td>${esc(o.retailerName)}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Contact</td><td>${esc(retailer.contact||'—')} · ${esc(retailer.email||'—')}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Order Date</td><td>${fmtDate(o.date)}</td></tr>
@@ -1937,7 +1937,7 @@ function openConfirmOrderModal() {
   if(emailWarn) {
     if(!retailer.email) {
       emailWarn.style.display='block';
-      emailWarn.textContent='⚠️ No email on file for '+o.retailerName+'. Enter an email above to send a confirmation, or leave blank to skip.';
+      emailWarn.textContent='No email on file for '+o.retailerName+'. Enter an email above to send a confirmation, or leave blank to skip.';
     } else {
       emailWarn.style.display='none';
       emailWarn.textContent='';
@@ -1957,8 +1957,8 @@ async function confirmOrder() {
   if(deliveryDate) updates.delivery_date=deliveryDate;
   if(notes) updates.notes=notes;
   const {error}=await sbClient.from('orders').update(updates).eq('id',o.id);
-  if(btn){btn.textContent='✉️ Confirm & Send Email';btn.disabled=false;}
-  if(error){toast('⚠️ Error confirming order: '+error.message);return;}
+  if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}
+  if(error){toast('Error confirming order: '+error.message);return;}
   if(deliveryDate) o.delivery=deliveryDate;
   if(notes) o.notes=notes;
   o.status='Confirmed';
@@ -1992,10 +1992,10 @@ async function confirmOrder() {
     console.log('[LFB] Sending confirmation email to:', retailerEmail, 'params:', confirmParams);
     emailjs.send(EMAILJS_SERVICE, EMAILJS_CONFIRM_TPL, confirmParams)
       .then(res=>{console.log('[LFB] Confirmation email sent successfully:', res);toast('📧 Confirmation email sent to '+retailerEmail);})
-      .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);toast('⚠️ Order confirmed but email failed: '+(err.text||err));});
+      .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);toast('Order confirmed but email failed: '+(err.text||err));});
   } else {
     console.warn('[LFB] No retailer email found — cannot send confirmation. Retailer:', o.retailerName);
-    toast('⚠️ Order confirmed but no email on file for '+o.retailerName+'. Add their email in Partners to send confirmations.');
+    toast('Order confirmed but no email on file for '+o.retailerName+'. Add their email in Partners to send confirmations.');
   }
   closeModal('confirm-order-modal');
 }
@@ -2030,7 +2030,7 @@ function showInvoice(id) {
         <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td>${esc(getProductDisplayName(p.product))}</td><td style="text-align:center;">${p.qty}</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
         <tfoot><tr><td colspan="3" style="text-align:right;">Total Due:</td><td style="text-align:right;">${fmtCur(o.total)}</td></tr></tfoot>
       </table>
-      ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--brown-lt);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
+      ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--muted);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
       <p style="margin:16px 0 8px;font-size:.8rem;color:var(--muted);font-style:italic;line-height:1.5;text-align:center;">Please reference the delivered invoice for the final amount.</p>
       <div class="inv-footer">Thank you for your partnership with Lazar Family Bakehouse<br>
         ${/hilton|hotel/i.test(o.retailerName) ? 'Payment due <strong>Net 15</strong> from delivery date. ' : 'Please remit payment within <strong>30 days of delivery</strong>. '}
@@ -2041,15 +2041,15 @@ function showInvoice(id) {
 async function updateOrderStatus(id,status) {
   const o=db.orders.find(x=>x.id===id);if(!o)return;
   const {error}=await sbClient.from('orders').update({status}).eq('id',id);
-  if(error){toast('⚠️ Error updating status: '+error.message);return;}
+  if(error){toast('Error updating status: '+error.message);return;}
   o.status=status;renderOrders();refreshDashboard();
   if(document.getElementById('sec-bake')?.classList.contains('active'))generateBakeList();
-  toast(`✅ ${invNum(o.invoiceNum)} marked as ${status}.`);
+  toast(`${invNum(o.invoiceNum)} marked as ${status}.`);
 }
 async function deleteOrder(id) {
   if(!confirm('Delete this order? Cannot be undone.'))return;
   const {error}=await sbClient.from('orders').delete().eq('id',id);
-  if(error){toast('⚠️ Error deleting order: '+error.message);return;}
+  if(error){toast('Error deleting order: '+error.message);return;}
   db.orders=db.orders.filter(o=>o.id!==id);renderOrders();refreshDashboard();toast('🗑 Order deleted.');
 }
 
@@ -2070,7 +2070,7 @@ function buildAutoOrderGrid(containerId, retailerId) {
   const container=document.getElementById(containerId); if(!container) return;
   let html='';
   PRODUCT_SECTIONS.forEach(sec=>{
-    html+=`<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--brown-lt);margin:14px 0 6px;border-bottom:1px solid var(--tan);padding-bottom:4px;">${sec.icon} ${esc(sec.label)}</div>`;
+    html+=`<div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin:14px 0 6px;border-bottom:1px solid var(--tan);padding-bottom:4px;">${sec.icon} ${esc(sec.label)}</div>`;
     sec.products.forEach(p=>{
       const price=getPriceForRetailer(p,retailerId);
       const moq=PRODUCT_MOQ[p]||1;
@@ -2078,14 +2078,14 @@ function buildAutoOrderGrid(containerId, retailerId) {
       const key=p.replace(/[^a-z0-9]/gi,'_');
       html+=`<div style="display:flex;align-items:center;gap:12px;padding:7px 4px;border-bottom:1px solid var(--cream-dk);">
         <div style="flex:1;font-size:.84rem;font-weight:600;color:var(--brown-dk);">${esc(p)}</div>
-        <div style="font-size:.78rem;color:var(--brown-lt);white-space:nowrap;background:var(--cream);border-radius:6px;padding:3px 8px;">${fmtCur(price)}/unit</div>
+        <div style="font-size:.78rem;color:var(--muted);white-space:nowrap;background:var(--cream);border-radius:6px;padding:3px 8px;">${fmtCur(price)}/unit</div>
         <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;">
-          <label style="font-size:.72rem;color:var(--brown-lt);">Qty:</label>
+          <label style="font-size:.72rem;color:var(--muted);">Qty:</label>
           <input type="number" min="0" step="${inc}" value="0" id="aog-${key}"
             data-product="${p}" data-price="${price}" data-moq="${moq}" data-inc="${inc}"
             style="width:68px;" onchange="snapToIncrement(this,${moq},${inc})"/>
         </div>
-        <span style="font-size:.68rem;color:var(--brown-lt);white-space:nowrap;">min ${moq}</span>
+        <span style="font-size:.68rem;color:var(--muted);white-space:nowrap;">min ${moq}</span>
       </div>`;
     });
   });
@@ -2108,19 +2108,19 @@ function createAutoOrder() {
   const start=document.getElementById('ao-start').value;
   const notes=v('ao-notes');
   const products=getAutoOrderGridProducts('ao-prod-grid');
-  if(!retailerId){toast('⚠️ Select a retailer.');return;}
-  if(!products.length){toast('⚠️ Add at least one product with quantity > 0.');return;}
+  if(!retailerId){toast('Select a retailer.');return;}
+  if(!products.length){toast('Add at least one product with quantity > 0.');return;}
   const retailer=db.retailers.find(r=>r.id===retailerId);
   db.autoOrders.push({id:Date.now(),retailerId,retailerName:retailer.name,freq,day,start,notes,products,active:true,created:new Date().toISOString()});
   saveDB();renderAutoOrders();
   document.getElementById('ao-retailer').value='';
   buildAutoOrderGrid('ao-prod-grid',null);
   document.getElementById('ao-notes').value='';
-  toast('✅ Auto-order saved!');
+  toast('Auto-order saved!');
 }
 function renderAutoOrders() {
   const grid=document.getElementById('auto-grid');if(!grid)return;
-  if(!db.autoOrders.length){grid.innerHTML='<div style="color:var(--brown-lt);font-style:italic;padding:12px;">No auto-orders yet.</div>';return;}
+  if(!db.autoOrders.length){grid.innerHTML='<div style="color:var(--muted);font-style:italic;padding:12px;">No auto-orders yet.</div>';return;}
   grid.innerHTML=db.autoOrders.map(ao=>`
     <div class="auto-card">
       <div class="auto-card-hd">
@@ -2128,10 +2128,10 @@ function renderAutoOrders() {
         <span class="badge ${ao.active?'b-auto':'b-paused'}">${ao.active?'Active':'Paused'}</span>
       </div>
       <div class="pm">${ao.products.map(p=>`• ${esc(getProductDisplayName(p.product))} × ${p.qty}${p.price?` @ ${fmtCur(p.price)}`:''}`).join('<br>')}</div>
-      ${ao.notes?`<p style="font-size:.8rem;color:var(--brown-lt);">📝 ${esc(ao.notes)}</p>`:''}
+      ${ao.notes?`<p style="font-size:.8rem;color:var(--muted);">📝 ${esc(ao.notes)}</p>`:''}
       <div class="auto-card-ft">
         <button class="btn btn-outline btn-sm" onclick="toggleAO(${ao.id})">${ao.active?'⏸ Pause':'▶ Resume'}</button>
-        <button class="btn btn-primary btn-sm" onclick="genOrderFromAO(${ao.id})">➕ Create Order</button>
+        <button class="btn btn-primary btn-sm" onclick="genOrderFromAO(${ao.id})">Create Order</button>
         <button class="btn btn-danger btn-sm" onclick="deleteAO(${ao.id})">🗑</button>
       </div>
     </div>`).join('');
@@ -2146,10 +2146,10 @@ async function genOrderFromAO(id) {
   const {data:newOrder,error}=await sbClient.from('orders').insert({
     retailer_id:ao.retailerId,invoice_num:inv,order_date:todayStr(),status:'Pending',notes,total
   }).select().single();
-  if(error){toast('⚠️ Error creating order: '+error.message);db.nextInvoice--;return;}
+  if(error){toast('Error creating order: '+error.message);db.nextInvoice--;return;}
   await sbClient.from('order_items').insert(ao.products.map(p=>({order_id:newOrder.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
   db.orders.unshift({id:newOrder.id,invoiceNum:inv,retailerId:ao.retailerId,retailerName:ao.retailerName,date:todayStr(),delivery:'',status:'Pending',notes,products:ao.products,total,created:new Date().toISOString()});
-  toast(`✅ ${invNum(inv)} created from auto-order!`);
+  toast(`${invNum(inv)} created from auto-order!`);
 }
 
 // =====================================================================
@@ -2177,8 +2177,8 @@ function refreshDashboard() {
   const avgPerWeek=Math.round(totalUnits/52);
   sg.innerHTML=`
     <div class="stat-card"><div class="si">🏪</div><div class="sl">Total Partners</div><div class="sv">${db.retailers.length}</div></div>
-    <div class="stat-card"><div class="si">✅</div><div class="sl">Active Partners</div><div class="sv">${db.retailers.filter(r=>r.status==='Active').length} of ${db.retailers.length}</div></div>
-    <div class="stat-card"><div class="si">📦</div><div class="sl">Total Orders</div><div class="sv">${db.orders.length}</div></div>
+    <div class="stat-card"><div class="si"></div><div class="sl">Active Partners</div><div class="sv">${db.retailers.filter(r=>r.status==='Active').length} of ${db.retailers.length}</div></div>
+    <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${db.orders.length}</div></div>
     <div class="stat-card"><div class="si">🍪</div><div class="sl">Avg Items / Week</div><div class="sv">${avgPerWeek}</div></div>
     <div class="stat-card"><div class="si">🔄</div><div class="sl">Auto-Orders</div><div class="sv">${db.autoOrders.filter(a=>a.active).length}</div></div>
     <div class="stat-card"><div class="si">💰</div><div class="sl">Last 52 Weeks Revenue</div><div class="sv">${fmtCur(rev52)}</div>${yoyChange!==null?`<div style="font-size:.72rem;margin-top:3px;color:${yoyChange>=0?'#2e7d4f':'var(--danger)'};">${yoyChange>=0?'▲':'▼'} ${Math.abs(yoyChange)}% vs prior year</div>`:''}</div>`;
@@ -2191,10 +2191,10 @@ function refreshDashboard() {
   da.innerHTML=active.length?active.map(ao=>`
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--tan);">
       <span style="font-size:1.3rem;">🔄</span>
-      <div><strong>${esc(ao.retailerName)}</strong> — ${ao.freq} on ${ao.day}s <span style="color:var(--brown-lt);font-size:.8rem;margin-left:8px;">${ao.products.length} product${ao.products.length!==1?'s':''}</span></div>
+      <div><strong>${esc(ao.retailerName)}</strong> — ${ao.freq} on ${ao.day}s <span style="color:var(--muted);font-size:.8rem;margin-left:8px;">${ao.products.length} product${ao.products.length!==1?'s':''}</span></div>
       <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="genOrderFromAO(${ao.id});showSection('orders');">Create Order Now</button>
     </div>`).join(''):
-    '<p style="color:var(--brown-lt);font-style:italic;">No active auto-orders.</p>';
+    '<p style="color:var(--muted);font-style:italic;">No active auto-orders.</p>';
 }
 
 //  [17] SUMMARY / EXPORT
@@ -2204,12 +2204,12 @@ function refreshDashboard() {
 // =====================================================================
 function generateSummary() {
   const start=document.getElementById('sum-start').value,end=document.getElementById('sum-end').value,ret=document.getElementById('sum-ret').value;
-  if(!start||!end){toast('⚠️ Select a date range.');return;}
+  if(!start||!end){toast('Select a date range.');return;}
   let orders=db.orders.filter(o=>o.date>=start&&o.date<=end);
   if(ret) orders=orders.filter(o=>o.retailerId===Number(ret));
   const out=document.getElementById('summary-out'),cont=document.getElementById('sum-content');
   out.style.display='block';cont.scrollIntoView({behavior:'smooth',block:'start'});
-  if(!orders.length){cont.innerHTML=`<div class="sum-hdr"><h2>Lazar Family Bakehouse</h2><p>${fmtDate(start)} – ${fmtDate(end)}</p></div><p style="text-align:center;color:var(--brown-lt);font-style:italic;padding:20px;">No orders in this period.</p>`;return;}
+  if(!orders.length){cont.innerHTML=`<div class="sum-hdr"><h2>Lazar Family Bakehouse</h2><p>${fmtDate(start)} – ${fmtDate(end)}</p></div><p style="text-align:center;color:var(--muted);font-style:italic;padding:20px;">No orders in this period.</p>`;return;}
   const byR={};
   orders.forEach(o=>{if(!byR[o.retailerId])byR[o.retailerId]={name:o.retailerName,orders:[]};byR[o.retailerId].orders.push(o);});
   const grand=orders.reduce((s,o)=>s+(o.total||0),0);
@@ -2219,15 +2219,15 @@ function generateSummary() {
       const rt=g.orders.reduce((s,o)=>s+(o.total||0),0);
       const prods={};g.orders.forEach(o=>o.products.filter(p=>p.product&&p.product!=='Delivery').forEach(p=>prods[p.product]=(prods[p.product]||0)+p.qty));
       return `<div class="sum-retailer"><div class="sum-rh">🏪 ${esc(g.name)}</div><div class="sum-rb">
-        <table style="width:100%;border-collapse:collapse;font-size:.86rem;"><thead><tr><th style="text-align:left;padding:4px 8px;color:var(--brown-lt);font-size:.73rem;text-transform:uppercase;">Product</th><th style="padding:4px 8px;color:var(--brown-lt);font-size:.73rem;text-transform:uppercase;">Total Qty</th></tr></thead>
+        <table style="width:100%;border-collapse:collapse;font-size:.86rem;"><thead><tr><th style="text-align:left;padding:4px 8px;color:var(--muted);font-size:.73rem;text-transform:uppercase;">Product</th><th style="padding:4px 8px;color:var(--muted);font-size:.73rem;text-transform:uppercase;">Total Qty</th></tr></thead>
         <tbody>${Object.entries(prods).map(([p,q])=>`<tr><td style="padding:4px 8px;">${esc(p)}</td><td style="padding:4px 8px;text-align:center;font-weight:700;">${q}</td></tr>`).join('')}</tbody></table>
         <div class="sum-total">Retailer Total: ${fmtCur(rt)}</div>
-        <div style="margin-top:6px;">${g.orders.map(o=>`<span style="display:inline-block;margin-right:10px;font-size:.78rem;color:var(--brown-lt);">${invNum(o.invoiceNum)} · ${fmtDate(o.date)} · <span class="badge ${sBadge(o.status)}">${o.status}</span></span>`).join('')}</div>
+        <div style="margin-top:6px;">${g.orders.map(o=>`<span style="display:inline-block;margin-right:10px;font-size:.78rem;color:var(--muted);">${invNum(o.invoiceNum)} · ${fmtDate(o.date)} · <span class="badge ${sBadge(o.status)}">${o.status}</span></span>`).join('')}</div>
       </div></div>`;}).join('')}
     <div style="text-align:right;padding:14px 0;font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--brown-dk);border-top:2px solid var(--gold);margin-top:8px;">Grand Total: <strong>${fmtCur(grand)}</strong></div>
-    <p style="text-align:center;color:var(--brown-lt);font-size:.78rem;margin-top:10px;">Generated ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} · Lazar Family Bakehouse Partner Portal</p>`;
+    <p style="text-align:center;color:var(--muted);font-size:.78rem;margin-top:10px;">Generated ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} · Lazar Family Bakehouse Partner Portal</p>`;
 }
-function copySummary(){navigator.clipboard.writeText(document.getElementById('sum-content').innerText).then(()=>toast('✅ Copied!'));}
+function copySummary(){navigator.clipboard.writeText(document.getElementById('sum-content').innerText).then(()=>toast('Copied!'));}
 function emailSummary(){const s=document.getElementById('sum-start').value,e=document.getElementById('sum-end').value;window.open(`mailto:?subject=${encodeURIComponent('LFB Partner Summary '+fmtDate(s)+' to '+fmtDate(e))}&body=${encodeURIComponent(document.getElementById('sum-content').innerText)}`);}
 
 // =====================================================================
@@ -2242,21 +2242,21 @@ function emailSummary(){const s=document.getElementById('sum-start').value,e=doc
 async function reseedFromMaster() {
   if(!confirm('This will reload all data from the live Supabase database. Continue?')) return;
   await loadFromSupabase();
-  toast('✅ Data reloaded from Supabase!');
+  toast('Data reloaded from Supabase!');
   showSection('dashboard');
 }
 
 async function changeAdminPin() {
   const cur=document.getElementById('s-cur').value,nw=document.getElementById('s-new').value.trim(),con=document.getElementById('s-con').value.trim();
-  if(!nw){toast('⚠️ Enter a new password.');return;}
-  if(nw!==con){toast('⚠️ Passwords do not match.');return;}
+  if(!nw){toast('Enter a new password.');return;}
+  if(nw!==con){toast('Passwords do not match.');return;}
   // Verify current password first
   const {error:signErr}=await sbClient.auth.signInWithPassword({email:'info@lazarfamilybakehouse.com',password:cur});
-  if(signErr){toast('⚠️ Current password incorrect.');return;}
+  if(signErr){toast('Current password incorrect.');return;}
   const {error}=await sbClient.auth.updateUser({password:nw});
-  if(error){toast('⚠️ Error updating password: '+error.message);return;}
+  if(error){toast('Error updating password: '+error.message);return;}
   ['s-cur','s-new','s-con'].forEach(id=>document.getElementById(id).value='');
-  toast('✅ Admin password updated!');
+  toast('Admin password updated!');
 }
 async function clearAllData() {
   if(!confirm('Permanently delete ALL portal data from Supabase? This cannot be undone.'))return;
@@ -2278,7 +2278,7 @@ function previewProductImage(productName) {
   if(!inp||!prev) return;
   const url=inp.value.trim();
   if(url){
-    prev.innerHTML=`<img src="${esc(url)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'>❌</span>'"/>`;
+    prev.innerHTML=`<img src="${esc(url)}" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\\'font-size:18px;\\'></span>'"/>`;
   } else {
     prev.innerHTML='<span style="font-size:18px;">📷</span>';
   }
@@ -2291,7 +2291,7 @@ function saveProductImages() {
   });
   try{localStorage.setItem('lfb_product_images',JSON.stringify(PRODUCT_IMAGES));}catch(e){}
   buildCatalogGrid();
-  toast('✅ Product photos saved!');
+  toast('Product photos saved!');
 }
 
 // =====================================================================
@@ -2316,7 +2316,7 @@ function downloadTemplate(type) {
   else XLSX.utils.sheet_add_aoa(ws,[['Sunrise Grocery','2025-01-06','2025-01-07','Delivered','','Sourdough Loaf','10','6.50','Challah','4','8.00','','','','','','','','','']],{origin:'A2'});
   XLSX.utils.book_append_sheet(wb,ws,type==='retailers'?'Retailers':'Orders');
   XLSX.writeFile(wb,`lfb-${type}-template.xlsx`);
-  toast('⬇️ Template downloaded!');
+  toast('Template downloaded!');
 }
 function dzDrag(e,t){e.preventDefault();document.getElementById('dz-'+t).classList.add('drag');}
 function dzLeave(t){document.getElementById('dz-'+t).classList.remove('drag');}
@@ -2330,9 +2330,9 @@ function handleFileList(files,type) {
       const wb=XLSX.read(e.target.result,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
-      if(rows.length<2){toast('⚠️ Spreadsheet appears empty.');return;}
+      if(rows.length<2){toast('Spreadsheet appears empty.');return;}
       importData[type]=rows;renderImportPreview(type,rows);
-    } catch{toast('⚠️ Could not read file.');}
+    } catch{toast('Could not read file.');}
   };
   reader.readAsArrayBuffer(files[0]);
 }
@@ -2341,10 +2341,10 @@ function renderImportPreview(type,rows) {
   const btn=document.getElementById(type+'-import-btn');
   const headers=rows[0];
   const body=rows.slice(1).filter(r=>r.some(c=>c!==''));
-  preview.innerHTML=`<p style="margin:10px 0 6px;font-size:.82rem;color:var(--brown-lt);">Preview: ${body.length} row${body.length!==1?'s':''} found.</p>
+  preview.innerHTML=`<p style="margin:10px 0 6px;font-size:.82rem;color:var(--muted);">Preview: ${body.length} row${body.length!==1?'s':''} found.</p>
     <div class="import-preview"><table><thead><tr>${headers.map(h=>`<th>${esc(String(h))}</th>`).join('')}</tr></thead>
     <tbody>${body.slice(0,10).map(r=>`<tr>${r.map(c=>`<td>${esc(String(c))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
-    ${body.length>10?`<p style="font-size:.78rem;color:var(--brown-lt);margin-top:4px;">Showing first 10 of ${body.length} rows.</p>`:''}`;
+    ${body.length>10?`<p style="font-size:.78rem;color:var(--muted);margin-top:4px;">Showing first 10 of ${body.length} rows.</p>`:''}`;
   btn.style.display='block';
 }
 async function commitImport(type) {
@@ -2414,11 +2414,11 @@ function renderRetailerHome() {
     const lastOrder=sorted[0];
     const lastOrderUnits=lastOrder?lastOrder.products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0):0;
     stats.innerHTML=`
-      <div class="stat-card"><div class="si">📦</div><div class="sl">Total Orders</div><div class="sv">${myOrders.length||'—'}</div></div>
+      <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${myOrders.length||'—'}</div></div>
       <div class="stat-card"><div class="si">💰</div><div class="sl">Lifetime Value</div><div class="sv">${fmtCur(total)}</div></div>
       ${thisMonthRev>0?`<div class="stat-card"><div class="si">📅</div><div class="sl">This Month</div><div class="sv">${fmtCur(thisMonthRev)}</div></div>`
         :lastOrder?`<div class="stat-card"><div class="si">🕐</div><div class="sl">Last Order</div><div class="sv">${fmtDate(lastOrder.date)}</div></div>`:''}
-      <div class="stat-card"><div class="si">📊</div><div class="sl">Avg Order Value</div><div class="sv">${fmtCur(avgOrder)}</div></div>
+      <div class="stat-card"><div class="si"></div><div class="sl">Avg Order Value</div><div class="sv">${fmtCur(avgOrder)}</div></div>
       ${lastOrderUnits>0?`<div class="stat-card"><div class="si">🍪</div><div class="sl">Last Order Units</div><div class="sv">${lastOrderUnits}</div></div>`:''}`;
     // Big order alert banner
     if(bigRecent.length>0){
@@ -2469,7 +2469,7 @@ function renderRetailerHome() {
       <td>${o.delivery?fmtDate(o.delivery):'—'}</td>
       <td><strong>${fmtCur(o.total)}</strong></td>
       <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
-      <td><button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})">🧾 Invoice</button></td>
+      <td><button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})"> Invoice</button></td>
     </tr>`).join(''):'<tr><td colspan="6" class="empty-row">No orders yet. Place your first order!</td></tr>';
   }
 }
@@ -2489,7 +2489,7 @@ function renderRetailerOrders() {
     <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
     <td>
       <button class="btn btn-outline btn-sm" onclick="viewOrderDetail(${o.id})">👁 View</button>
-      <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})">🧾 Invoice</button>
+      <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})"> Invoice</button>
       <button class="btn btn-sage btn-sm" onclick="retailerReorder(${o.id})" title="Reorder same items">🔄 Reorder</button>
     </td>
   </tr>`).join(''):'<tr><td colspan="7" class="empty-row">No orders found.</td></tr>';
@@ -2511,11 +2511,11 @@ async function retailerPlaceOrder() {
   const delivery=document.getElementById('ro-delivery').value;
   const notes=v('ro-notes');
   const products=getProdRows('ro-prod-list');
-  if(!products.length){toast('⚠️ Add at least one product.');return;}
+  if(!products.length){toast('Add at least one product.');return;}
   // Validate product minimums
   for(const p of products){
     const moq=PRODUCT_MOQ[p.product];
-    if(moq&&p.qty<moq){toast(`⚠️ ${p.product} requires a minimum of ${moq} units.`);return;}
+    if(moq&&p.qty<moq){toast(`${p.product} requires a minimum of ${moq} units.`);return;}
   }
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
   const inv=db.nextInvoice++;
@@ -2548,9 +2548,9 @@ function renderRetailerAuto() {
       <div><h3>${ao.freq} Standing Order</h3><p>Every ${ao.day}${ao.start?' · From '+fmtDate(ao.start):''}</p></div>
       <span class="badge ${ao.active?'b-auto':'b-paused'}">${ao.active?'Active':'Paused'}</span>
     </div>
-    <div class="pm"><strong>Your standing products:</strong><br>${ao.products.map(p=>`• ${esc(getProductDisplayName(p.product))} × ${p.qty}${p.price?` @ ${fmtCur(p.price)}`:'<span style="color:var(--brown-lt);font-size:.78rem;"> (price TBD)</span>'}`).join('<br>')}</div>
-    ${ao.notes?`<p style="font-size:.82rem;color:var(--brown-lt);">📝 ${esc(ao.notes)}</p>`:''}
-    <div class="auto-card-ft"><button class="btn btn-primary btn-sm" onclick="retailerPlaceFromAO(${ao.id})">➕ Place Order Now from This Template</button></div>
+    <div class="pm"><strong>Your standing products:</strong><br>${ao.products.map(p=>`• ${esc(getProductDisplayName(p.product))} × ${p.qty}${p.price?` @ ${fmtCur(p.price)}`:'<span style="color:var(--muted);font-size:.78rem;"> (price TBD)</span>'}`).join('<br>')}</div>
+    ${ao.notes?`<p style="font-size:.82rem;color:var(--muted);">📝 ${esc(ao.notes)}</p>`:''}
+    <div class="auto-card-ft"><button class="btn btn-primary btn-sm" onclick="retailerPlaceFromAO(${ao.id})">Place Order Now from This Template</button></div>
   </div>`).join('');
 }
 async function retailerPlaceFromAO(id) {
@@ -2588,7 +2588,7 @@ function renderNotifBanner() {
   const el=document.getElementById('notif-banner'); if(!el) return;
   const notifs=(db.notifications||[]);
   if(!notifs.length){el.innerHTML='';return;}
-  const icons={info:'ℹ️',warning:'⚠️',urgent:'🚨',success:'✅'};
+  const icons={info:'',warning:'',urgent:'',success:''};
   el.innerHTML=notifs.map(n=>`
     <div class="notif-item notif-${n.type||'info'}" id="notif-${n.id}">
       <span class="notif-icon">${icons[n.type]||'ℹ️'}</span>
@@ -2611,13 +2611,13 @@ function deleteNotification(id) {
 }
 function renderNotifList() {
   const el=document.getElementById('notif-list'); if(!el) return;
-  if(!db.notifications.length){el.innerHTML='<p style="color:var(--brown-lt);font-size:.84rem;font-style:italic;">No active notifications.</p>';return;}
-  const icons={info:'ℹ️',warning:'⚠️',urgent:'🚨',success:'✅'};
+  if(!db.notifications.length){el.innerHTML='<p style="color:var(--muted);font-size:.84rem;font-style:italic;">No active notifications.</p>';return;}
+  const icons={info:'',warning:'',urgent:'',success:''};
   el.innerHTML='<div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brown);margin-bottom:8px;">Active Notifications</div>'+
     db.notifications.map(n=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--cream);border-radius:8px;margin-bottom:6px;border-left:3px solid var(--gold);">
       <span>${icons[n.type]||'ℹ️'}</span>
       <span style="flex:1;font-size:.86rem;">${esc(n.msg)}</span>
-      <span style="font-size:.72rem;color:var(--brown-lt);">${n.type}</span>
+      <span style="font-size:.72rem;color:var(--muted);">${n.type}</span>
       <button class="btn btn-danger btn-sm" onclick="deleteNotification(${n.id})">✕</button>
     </div>`).join('');
 }
@@ -2631,7 +2631,7 @@ function renderNotifList() {
 function renderBakeTab() {
   const el=document.getElementById('bake-results');
   const ct=document.getElementById('bake-order-count');
-  if(el) el.innerHTML='<p style="color:var(--brown-lt);font-style:italic;">Press \u201cGenerate Total Order\u201d to see what needs to be baked.</p>';
+  if(el) el.innerHTML='<p style="color:var(--muted);font-style:italic;">Press \u201cGenerate Total Order\u201d to see what needs to be baked.</p>';
   if(ct) ct.textContent='';
 }
 function generateBakeList() {
@@ -2641,7 +2641,7 @@ function generateBakeList() {
   if(!el) return;
   if(!activeOrders.length){
     if(ct) ct.textContent='No pending or confirmed orders found.';
-    el.innerHTML='<p style="color:var(--brown-lt);font-style:italic;">There are no Pending or Confirmed orders right now.</p>';
+    el.innerHTML='<p style="color:var(--muted);font-style:italic;">There are no Pending or Confirmed orders right now.</p>';
     return;
   }
   const totals={};
@@ -2671,7 +2671,7 @@ function generateBakeList() {
   // Build order-by-order breakdown
   const orderRows=activeOrders.map(o=>{
     const items=o.products.filter(p=>p.product&&p.product!=='Delivery'&&p.qty>0);
-    return `<div style="font-size:.78rem;color:var(--brown-lt);padding:3px 0 3px 12px;border-left:2px solid var(--tan);">
+    return `<div style="font-size:.78rem;color:var(--muted);padding:3px 0 3px 12px;border-left:2px solid var(--tan);">
       <strong style="color:var(--brown-dk);">${invNum(o.invoiceNum)}</strong> · ${esc(o.retailerName)} · <span class="badge ${sBadge(o.status)}">${o.status}</span>
       — ${items.map(p=>`${p.qty}× ${esc(getProductDisplayName(p.product))}`).join(', ')}
     </div>`;
@@ -2680,7 +2680,7 @@ function generateBakeList() {
   el.innerHTML=`
     <!-- BAKE LIST -->
     <div style="margin-bottom:22px;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:10px;font-weight:700;">🍞 Total to Bake</div>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px;font-weight:700;">🍞 Total to Bake</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;">
         ${sorted.map(([prod,qty])=>`
           <div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:4px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
@@ -2696,7 +2696,7 @@ function generateBakeList() {
 
     <!-- DELIVERY SCHEDULE -->
     <div style="margin-bottom:22px;">
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:10px;font-weight:700;">🚚 Delivery Schedule</div>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:10px;font-weight:700;">🚚 Delivery Schedule</div>
       <div style="display:flex;flex-direction:column;gap:10px;">
         ${deliverySorted.map(([date,orders])=>{
           const isNoDate=date==='(No delivery date set)';
@@ -2715,9 +2715,9 @@ function generateBakeList() {
                       <strong style="font-size:.86rem;color:var(--brown-dk);">${esc(o.retailerName)}</strong>
                       <span class="badge ${sBadge(o.status)}">${o.status}</span>
                     </div>
-                    <div style="font-size:.78rem;color:var(--brown-lt);">${items.map(p=>`${p.qty}× ${esc(getProductDisplayName(p.product))}`).join(' · ')}</div>
+                    <div style="font-size:.78rem;color:var(--muted);">${items.map(p=>`${p.qty}× ${esc(getProductDisplayName(p.product))}`).join(' · ')}</div>
                   </div>
-                  ${o.invoiceNum?`<div style="font-size:.68rem;color:var(--brown-lt);white-space:nowrap;">${invNum(o.invoiceNum)}</div>`:''}
+                  ${o.invoiceNum?`<div style="font-size:.68rem;color:var(--muted);white-space:nowrap;">${invNum(o.invoiceNum)}</div>`:''}
                 </div>`;
               }).join('')}
             </div>
@@ -2728,7 +2728,7 @@ function generateBakeList() {
 
     <!-- ORDER BREAKDOWN -->
     <div>
-      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--brown-lt);margin-bottom:8px;font-weight:700;">📋 Order Breakdown</div>
+      <div style="font-size:.72rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);margin-bottom:8px;font-weight:700;">📋 Order Breakdown</div>
       <div style="display:flex;flex-direction:column;gap:5px;">${orderRows}</div>
     </div>`;
 }
@@ -2797,7 +2797,7 @@ function refreshAnalytics() {
         <span class="top-ret-name">${esc(name)}</span>
         <div class="top-ret-bar-wrap"><div class="top-ret-bar" style="width:${Math.round((rev/maxRev)*100)}%;"></div></div>
         <span class="top-ret-val">${fmtCur(rev)}</span>
-      </div>`).join(''):'<p style="color:var(--brown-lt);font-style:italic;">No data yet.</p>';
+      </div>`).join(''):'<p style="color:var(--muted);font-style:italic;">No data yet.</p>';
   }
 
   // Products sold — with distinct colors per product
@@ -2813,7 +2813,7 @@ function refreshAnalytics() {
         <span class="top-ret-name">${esc(getProductDisplayName(p))}</span>
         <div class="top-ret-bar-wrap" style="width:90px;"><div class="top-ret-bar" style="width:${Math.round((q/maxQ)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};"></div></div>
         <span class="top-ret-val">${q} units</span>
-      </div>`).join(''):'<p style="color:var(--brown-lt);font-style:italic;">No data yet.</p>';
+      </div>`).join(''):'<p style="color:var(--muted);font-style:italic;">No data yet.</p>';
   }
 
   // Order frequency + avg reorder time — ALL active partners (ordered last 2 months)
@@ -2832,18 +2832,18 @@ function refreshAnalytics() {
     const maxF=retStats[0]?retStats[0].count:1;
     freqEl.innerHTML=retStats.length?`
       <div style="display:grid;grid-template-columns:1fr 52px 90px 96px;gap:0 14px;">
-        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);">Partner</span>
-        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Orders</span>
-        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Avg Reorder</span>
-        <span style="font-size:.72rem;font-weight:700;color:var(--brown-lt);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Last Order</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--muted);padding-bottom:7px;border-bottom:2px solid var(--tan);">Partner</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--muted);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Orders</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--muted);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Avg Reorder</span>
+        <span style="font-size:.72rem;font-weight:700;color:var(--muted);padding-bottom:7px;border-bottom:2px solid var(--tan);text-align:right;">Last Order</span>
         ${retStats.map(r=>`
           <span style="font-weight:600;font-size:.83rem;padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${esc(r.name)}</span>
           <span style="text-align:right;font-size:.83rem;font-weight:700;color:var(--brown-dk);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.count}</span>
-          <span style="text-align:right;font-size:.78rem;color:var(--brown-lt);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.avgDays!==null?r.avgDays+' days':'—'}</span>
-          <span style="text-align:right;font-size:.78rem;color:var(--brown-lt);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.lastOrder?fmtDate(r.lastOrder):'—'}</span>
+          <span style="text-align:right;font-size:.78rem;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.avgDays!==null?r.avgDays+' days':'—'}</span>
+          <span style="text-align:right;font-size:.78rem;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.lastOrder?fmtDate(r.lastOrder):'—'}</span>
         `).join('')}
       </div>
-    `:'<p style="color:var(--brown-lt);font-style:italic;">No active partners in the last 2 months.</p>';
+    `:'<p style="color:var(--muted);font-style:italic;">No active partners in the last 2 months.</p>';
   }
 
   // ── Quarter-over-Quarter Revenue ──
@@ -2882,7 +2882,7 @@ function refreshAnalytics() {
     });
     const allProds=[...new Set([...Object.keys(byProdCur),...Object.keys(byProdPrv)])].sort((a,b)=>(byProdCur[b]||0)-(byProdCur[a]||0));
     const maxPY=Math.max(...allProds.map(p=>Math.max(byProdCur[p]||0,byProdPrv[p]||0)),1);
-    if(!allProds.length){prodYoyEl.innerHTML='<p style="color:var(--brown-lt);font-style:italic;">No data yet.</p>';return;}
+    if(!allProds.length){prodYoyEl.innerHTML='<p style="color:var(--muted);font-style:italic;">No data yet.</p>';return;}
     prodYoyEl.innerHTML=`
       <div style="display:flex;gap:18px;margin-bottom:10px;font-size:.75rem;font-weight:700;">
         <span><span style="display:inline-block;width:10px;height:10px;background:${PROD_COLORS[0]};border-radius:2px;margin-right:5px;"></span>${curY} (Current)</span>
@@ -2894,7 +2894,7 @@ function refreshAnalytics() {
         return `<div style="margin-bottom:12px;">
           <div style="display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:4px;">
             <span style="font-weight:600;">${esc(getProductDisplayName(p))}</span>
-            <span style="color:var(--brown-lt);">${cur} units ${change!==null?`<span style="color:${change>=0?'#2e7d4f':'var(--danger)'};">(${change>=0?'▲':'▼'}${Math.abs(change)}%)</span>`:''}</span>
+            <span style="color:var(--muted);">${cur} units ${change!==null?`<span style="color:${change>=0?'#2e7d4f':'var(--danger)'};">(${change>=0?'▲':'▼'}${Math.abs(change)}%)</span>`:''}</span>
           </div>
           <div style="height:8px;background:var(--cream-dk);border-radius:4px;overflow:hidden;margin-bottom:2px;">
             <div style="height:100%;width:${Math.round((cur/maxPY)*100)}%;background:${PROD_COLORS[0]};border-radius:4px;"></div>
@@ -2911,7 +2911,7 @@ function refreshAnalytics() {
     const yearSet=new Set();
     db.orders.forEach(o=>{if(!o.date)return;const d=new Date(o.date+'T12:00:00');if(!isNaN(d))yearSet.add(d.getFullYear());});
     const years=[...yearSet].sort((a,b)=>a-b);
-    if(!years.length){yearlyEl.innerHTML='<p style="color:var(--brown-lt);font-style:italic;">No data yet.</p>';}
+    if(!years.length){yearlyEl.innerHTML='<p style="color:var(--muted);font-style:italic;">No data yet.</p>';}
     else{
       const yData=years.map(y=>{
         const yOrds=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===y;});
@@ -2921,7 +2921,7 @@ function refreshAnalytics() {
         return {year:y,rev,orders:yOrds.length,units,partners};
       });
       const maxRev=Math.max(...yData.map(d=>d.rev),1);
-      yearlyEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">${yData.map((d,i)=>`<div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:14px 16px;"><div style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--brown-dk);">${d.year}</div><div style="font-size:1.25rem;font-weight:700;color:var(--sage);margin:4px 0;">${fmtCur(d.rev)}</div><div style="height:5px;background:var(--tan);border-radius:3px;margin:6px 0;"><div style="height:100%;width:${Math.round((d.rev/maxRev)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};border-radius:3px;"></div></div><div style="font-size:.75rem;color:var(--brown-lt);margin-top:4px;">${d.orders} orders &middot; ${d.units} units &middot; ${d.partners} partner${d.partners!==1?'s':''}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="border-bottom:2px solid var(--tan);"><th style="text-align:left;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Year</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Revenue</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Orders</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Units</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">Partners</th><th style="text-align:right;padding:8px 10px;color:var(--brown-lt);font-weight:700;font-size:.72rem;text-transform:uppercase;">YoY</th></tr></thead><tbody>${yData.map((d,i)=>{const prev=yData[i-1];const yoy=prev&&prev.rev>0?Math.round(((d.rev-prev.rev)/prev.rev)*100):null;return `<tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:9px 10px;font-weight:700;color:var(--brown-dk);">${d.year}</td><td style="padding:9px 10px;text-align:right;font-weight:700;color:var(--sage);">${fmtCur(d.rev)}</td><td style="padding:9px 10px;text-align:right;">${d.orders}</td><td style="padding:9px 10px;text-align:right;">${d.units}</td><td style="padding:9px 10px;text-align:right;">${d.partners}</td><td style="padding:9px 10px;text-align:right;">${yoy!==null?`<span style="color:${yoy>=0?'#2e7d4f':'var(--danger)'};">${yoy>=0?'▲':'▼'}${Math.abs(yoy)}%</span>`:'—'}</td></tr>`;}).join('')}</tbody></table>`;
+      yearlyEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">${yData.map((d,i)=>`<div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:14px 16px;"><div style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--brown-dk);">${d.year}</div><div style="font-size:1.25rem;font-weight:700;color:var(--sage);margin:4px 0;">${fmtCur(d.rev)}</div><div style="height:5px;background:var(--tan);border-radius:3px;margin:6px 0;"><div style="height:100%;width:${Math.round((d.rev/maxRev)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};border-radius:3px;"></div></div><div style="font-size:.75rem;color:var(--muted);margin-top:4px;">${d.orders} orders &middot; ${d.units} units &middot; ${d.partners} partner${d.partners!==1?'s':''}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="border-bottom:2px solid var(--tan);"><th style="text-align:left;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Year</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Revenue</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Orders</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Units</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Partners</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">YoY</th></tr></thead><tbody>${yData.map((d,i)=>{const prev=yData[i-1];const yoy=prev&&prev.rev>0?Math.round(((d.rev-prev.rev)/prev.rev)*100):null;return `<tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:9px 10px;font-weight:700;color:var(--brown-dk);">${d.year}</td><td style="padding:9px 10px;text-align:right;font-weight:700;color:var(--sage);">${fmtCur(d.rev)}</td><td style="padding:9px 10px;text-align:right;">${d.orders}</td><td style="padding:9px 10px;text-align:right;">${d.units}</td><td style="padding:9px 10px;text-align:right;">${d.partners}</td><td style="padding:9px 10px;text-align:right;">${yoy!==null?`<span style="color:${yoy>=0?'#2e7d4f':'var(--danger)'};">${yoy>=0?'▲':'▼'}${Math.abs(yoy)}%</span>`:'—'}</td></tr>`;}).join('')}</tbody></table>`;
     }
   }}
 
@@ -2991,7 +2991,7 @@ function buildCatalogGrid() {
         <div class="catalog-card-bd">
           <div>
             <p>${esc(PRODUCT_DESC[p]||'')}</p>
-            <div style="font-size:.72rem;color:var(--brown-lt);margin-bottom:8px;">Min: <strong>${moq}</strong> · Increments of <strong>${inc}</strong></div>
+            <div style="font-size:.72rem;color:var(--muted);margin-bottom:8px;">Min: <strong>${moq}</strong> · Increments of <strong>${inc}</strong></div>
           </div>
           <div class="cat-qty-row">
             <label>Qty:</label>
@@ -3088,7 +3088,7 @@ function retailerRequestAutoOrder() {
   const start=document.getElementById('rao-start').value;
   const notes=v('rao-notes');
   const products=getAutoOrderGridProducts('rao-prod-grid');
-  if(!products.length){toast('⚠️ Add at least one product.');return;}
+  if(!products.length){toast('Add at least one product.');return;}
   // Auto-fill prices from catalog
   products.forEach(p=>{if(!p.price&&PRODUCT_PRICES[p.product])p.price=PRODUCT_PRICES[p.product];});
   db.autoOrders.push({id:Date.now(),retailerId:r.id,retailerName:r.name,freq,day,start,notes,products,active:true,created:new Date().toISOString()});
@@ -3146,7 +3146,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const loginCard=document.querySelector('.login-card');
   const loadMsg=document.createElement('p');
   loadMsg.id='sb-connecting';
-  loadMsg.style.cssText='text-align:center;color:var(--brown-lt);font-size:.8rem;margin-top:8px;';
+  loadMsg.style.cssText='text-align:center;color:var(--muted);font-size:.8rem;margin-top:8px;';
   loadMsg.textContent='Connecting to server…';
   if(loginCard) loginCard.appendChild(loadMsg);
 
@@ -3166,7 +3166,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const {data:retList, error:retListErr}=await sbClient.from('retailers').select('id,name,status').eq('status','Active');
   if(retListErr) {
     console.error('[LFB] retailer list error:', retListErr);
-    if(loadMsg){ loadMsg.style.color='var(--red)'; loadMsg.textContent='⚠️ Could not connect to server. Check your internet connection and try reloading.'; }
+    if(loadMsg){ loadMsg.style.color='var(--danger)'; loadMsg.textContent='⚠️ Could not connect to server. Check your internet connection and try reloading.'; }
   } else if(retList) {
     db.retailers=retList.map(r=>({id:r.id,name:r.name,status:r.status,pin:''}));
     if(loadMsg) loadMsg.remove();
@@ -3230,7 +3230,7 @@ async function saveEditOrder() {
   const id=Number(document.getElementById('eo-id').value);
   const o=db.orders.find(x=>x.id===id);if(!o){toast('⚠️ Order not found.');return;}
   const products=getProdRows('eo-prod-list');
-  if(!products.length){toast('⚠️ Add at least one product.');return;}
+  if(!products.length){toast('Add at least one product.');return;}
   // Include delivery fee if present
   const delRow=document.querySelector('#eo-prod-list .delivery-row');
   if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice});}
@@ -3261,10 +3261,10 @@ async function saveEditOrder() {
 <!-- EDIT ORDER MODAL -->
 <div class="modal-overlay" id="edit-order-modal">
   <div class="modal" style="max-width:640px;">
-    <h3 style="font-family:'Playfair Display',serif;color:var(--brown-dk);margin-bottom:18px;">✏️ Edit Order</h3>
+    <h3 style="font-family:'Playfair Display',serif;color:var(--brown-dk);margin-bottom:18px;">Edit Order</h3>
     <input type="hidden" id="eo-id"/>
     <div class="form-row">
-      <div class="fg"><label>Invoice # <span style="font-size:.75rem;color:var(--brown-lt);">(admin-assigned)</span></label><input type="number" id="eo-inv" min="0" style="width:100%;"/></div>
+      <div class="fg"><label>Invoice # <span style="font-size:.75rem;color:var(--muted);">(admin-assigned)</span></label><input type="number" id="eo-inv" min="0" style="width:100%;"/></div>
       <div class="fg"><label>Retailer</label><input id="eo-retailer" readonly style="opacity:.6;"/></div>
     </div>
     <div class="form-row">
@@ -3283,11 +3283,11 @@ async function saveEditOrder() {
     <div class="prod-list" id="eo-prod-list"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <button class="btn btn-outline btn-sm" onclick="addProdRow('eo-prod-list')">+ Add Product</button>
-      <button class="btn btn-outline btn-sm" id="eo-add-delivery-btn" onclick="addDeliveryFeeRow()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
+      <button class="btn btn-outline btn-sm" id="eo-add-delivery-btn" onclick="addDeliveryFeeRow()" style="background:var(--cream-dk);">Add Delivery Fee</button>
     </div>
     <div style="background:var(--cream);border-radius:9px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-weight:700;color:var(--brown-dk);">Order Total</span>
-      <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--red);" id="eo-total-display">$0.00</span>
+      <span style="font-family:'Playfair Display',serif;font-size:1.2rem;color:var(--brown-dk);" id="eo-total-display">$0.00</span>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;">
       <button class="btn btn-outline" onclick="closeModal('edit-order-modal')">Cancel</button>
