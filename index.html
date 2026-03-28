@@ -33,7 +33,7 @@
   --sage:       #6b8f5e;
   --positive:   #2e7d4f;
   --cream-lt:   #fef9f3;
-  --muted:      #8a7968;
+  --muted:      #5c4a3a;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{font-size:16px;}
@@ -429,11 +429,11 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== INVOICE MODAL ==================== -->
 <div class="modal-overlay" id="invoice-modal">
   <div class="modal" style="max-width:760px;">
-    <div class="modal-title"> Invoice</div>
+    <div class="modal-title">🧾 Invoice</div>
     <div id="invoice-modal-body"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('invoice-modal')">Close</button>
-      <button class="btn btn-gold" onclick="window.print()">Print Invoice</button>
+      <button class="btn btn-gold" onclick="window.print()">🖨️ Print Invoice</button>
     </div>
   </div>
 </div>
@@ -441,12 +441,12 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== ORDER DETAIL MODAL ==================== -->
 <div class="modal-overlay" id="order-detail-modal">
   <div class="modal">
-    <div class="modal-title">Order Details</div>
+    <div class="modal-title">📦 Order Details</div>
     <div id="order-detail-body"></div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('order-detail-modal')">Close</button>
-      <button class="btn btn-gold" onclick="openInvoiceFromDetail()">View Invoice</button>
-      <button class="btn btn-sage" id="order-confirm-btn" onclick="openConfirmOrderModal()" style="display:none;">Confirm & Notify</button>
+      <button class="btn btn-gold" onclick="openInvoiceFromDetail()">🧾 View Invoice</button>
+      <button class="btn btn-sage" id="order-confirm-btn" onclick="openConfirmOrderModal()" style="display:none;">✅ Confirm & Notify</button>
       <button class="btn btn-primary" id="order-status-btn"></button>
     </div>
   </div>
@@ -455,7 +455,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== CONFIRM ORDER MODAL ==================== -->
 <div class="modal-overlay" id="confirm-order-modal">
   <div class="modal">
-    <div class="modal-title">Confirm Order & Notify Partner</div>
+    <div class="modal-title">✅ Confirm Order & Notify Partner</div>
     <p style="margin:0 0 14px;color:var(--muted);font-size:.9rem;">Review the delivery date and add any notes before sending the confirmation email to the retailer.</p>
     <div class="form-row">
       <div class="fg">
@@ -474,7 +474,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('confirm-order-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmOrder()">Confirm & Send Email</button>
+      <button class="btn btn-primary" onclick="confirmOrder()">✉️ Confirm & Send Email</button>
     </div>
   </div>
 </div>
@@ -482,7 +482,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 <!-- ==================== RETAILER EDIT MODAL ==================== -->
 <div class="modal-overlay" id="retailer-modal">
   <div class="modal">
-    <div class="modal-title">Edit Retailer</div>
+    <div class="modal-title">✏️ Edit Retailer</div>
     <div class="form-row">
       <div class="fg"><label>Business Name</label><input type="text" id="er-name"/></div>
       <div class="fg"><label>Contact Person</label><input type="text" id="er-contact"/></div>
@@ -986,9 +986,9 @@ function setDeliveryFee(retailerId,fee){}
 
 // Catalog display groupings
 const PRODUCT_SECTIONS = [
-  {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
-  {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
-  {label:'Two-Pack',icon:'',products:['Two Pack Chocolate Chip']}
+  {label:'Mandelbites (Packaged)',icon:'🍪',products:['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
+  {label:'Individual Mandel Bread',icon:'🍞',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
+  {label:'Two-Pack',icon:'☕',products:['Two Pack Chocolate Chip']}
 ];
 function productOpts(sel='') {
   return PRODUCT_SECTIONS.map(sec=>
@@ -1174,21 +1174,21 @@ function bootApp() {
 // =====================================================================
 function buildAdminNav() {
   document.getElementById('main-nav').innerHTML=`
-    <button onclick="showSection('dashboard')">Dashboard</button>
-    <button onclick="showSection('analytics')">Analytics</button>
-    <button onclick="showSection('retailers')">Partners</button>
-    <button onclick="showSection('orders')">Orders</button>
-    <button onclick="showSection('auto-orders')">Auto-Orders</button>
-    <button onclick="showSection('bake')">Production</button>
-    <button onclick="showSection('settings')">Settings</button>`
+    <button onclick="showSection('dashboard')">📊 Dashboard</button>
+    <button onclick="showSection('analytics')">📈 Analytics</button>
+    <button onclick="showSection('retailers')">🏪 Partners</button>
+    <button onclick="showSection('orders')">📦 Orders</button>
+    <button onclick="showSection('auto-orders')">🔄 Auto-Orders</button>
+    <button onclick="showSection('bake')">🍞 Production</button>
+    <button onclick="showSection('settings')">⚙️ Settings</button>`
 }
 function buildRetailerNav() {
   document.getElementById('main-nav').innerHTML=`
-    <button onclick="showSection('r-home')">Home</button>
-    <button onclick="showSection('r-orders')">My Orders</button>
-    <button onclick="showSection('r-new-order')">Place Order</button>
-    <button onclick="showSection('r-auto')">Auto-Order</button>
-    <button onclick="showSection('r-account')">My Account</button>`;
+    <button onclick="showSection('r-home')">🏠 Home</button>
+    <button onclick="showSection('r-orders')">📦 My Orders</button>
+    <button onclick="showSection('r-new-order')">➕ Place Order</button>
+    <button onclick="showSection('r-auto')">🔄 Auto-Order</button>
+    <button onclick="showSection('r-account')">✏️ My Account</button>`;
 }
 
 function showSection(name) {
@@ -1228,10 +1228,10 @@ function buildAdminContent() {
   <h2 class="page-h">Dashboard</h2><p class="page-sub">Your partner overview.</p>
   <div class="stats-grid" id="stats-grid"></div>
   <div class="panel">
-    <div class="panel-title">Recent Orders</div>
+    <div class="panel-title">📦 Recent Orders</div>
     <div class="tbl-wrap"><table><thead><tr><th>Invoice</th><th>Retailer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody id="dash-orders"></tbody></table></div>
   </div>
-  <div class="panel"><div class="panel-title">Active Auto-Orders</div><div id="dash-auto"></div></div>
+  <div class="panel"><div class="panel-title">🔄 Active Auto-Orders</div><div id="dash-auto"></div></div>
 </section>
 
 <!-- ANALYTICS -->
@@ -1241,35 +1241,35 @@ function buildAdminContent() {
   <div class="analytics-grid" id="anal-kpi"></div>
   <!-- Monthly Revenue — full width -->
   <div class="panel" style="margin-top:18px;">
-    <div class="panel-title">Monthly Revenue (last 12 months)</div>
+    <div class="panel-title">📅 Monthly Revenue (last 12 months)</div>
     <div class="bar-chart" id="anal-monthly-bars" style="height:180px;gap:6px;padding:8px 0;"></div>
   </div>
   <!-- 2-column chart grid -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;">
     <div class="panel">
-      <div class="panel-title">Top Partners by Revenue</div>
+      <div class="panel-title">🏆 Top Partners by Revenue</div>
       <div id="anal-top-retailers"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">Products Sold (all time)</div>
+      <div class="panel-title">🍪 Products Sold (all time)</div>
       <div id="anal-products"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">Order Frequency by Partner</div>
+      <div class="panel-title">📊 Order Frequency by Partner</div>
       <div id="anal-freq"></div>
     </div>
     <div class="panel">
-      <div class="panel-title">Quarter-over-Quarter Revenue</div>
+      <div class="panel-title">📈 Quarter-over-Quarter Revenue</div>
       <div id="anal-qoq"></div>
     </div>
     <div class="panel" style="grid-column:span 2;">
-      <div class="panel-title">Product Movement: Current vs Prior Year</div>
+      <div class="panel-title">🔄 Product Movement: Current vs Prior Year</div>
       <div id="anal-prod-yoy"></div>
     </div>
   </div>
   <!-- Yearly Breakdown — full width -->
   <div class="panel" style="margin-top:18px;">
-    <div class="panel-title">Yearly Revenue Breakdown</div>
+    <div class="panel-title">📆 Yearly Revenue Breakdown</div>
     <div id="anal-yearly"></div>
   </div>
 </section>
@@ -1278,7 +1278,7 @@ function buildAdminContent() {
 <section class="section" id="sec-retailers">
   <h2 class="page-h">Partners</h2><p class="page-sub">Manage your partners and their portal PINs.</p>
   <div class="panel">
-    <div class="panel-title">Add New Retailer</div>
+    <div class="panel-title">➕ Add New Retailer</div>
     <div class="form-row">
       <div class="fg"><label>Business Name *</label><input id="r-name" placeholder="e.g. Sunrise Grocery"/></div>
       <div class="fg"><label>Contact Person</label><input id="r-contact" placeholder="e.g. Sarah Cohen"/></div>
@@ -1294,10 +1294,10 @@ function buildAdminContent() {
       <div class="fg"><label>Portal PIN * (4–8 chars)</label><input id="r-pin" maxlength="8" placeholder="e.g. 4821 or sunrise"/></div>
       <div class="fg"><label>Notes</label><input id="r-notes" placeholder="e.g. Back entrance"/></div>
     </div>
-    <div class="form-actions"><button class="btn btn-primary" onclick="addRetailer()">Add Retailer</button></div>
+    <div class="form-actions"><button class="btn btn-primary" onclick="addRetailer()">➕ Add Retailer</button></div>
   </div>
   <div class="panel">
-    <div class="panel-title">All Retailers</div>
+    <div class="panel-title">🏪 All Retailers</div>
     <div class="tbl-wrap"><table><thead><tr><th>Business</th><th>Contact</th><th>Email</th><th>Phone</th><th>Delivery Day</th><th>PIN</th><th>Status</th><th>Actions</th></tr></thead><tbody id="retailers-tbody"></tbody></table></div>
   </div>
 </section>
@@ -1306,7 +1306,7 @@ function buildAdminContent() {
 <section class="section" id="sec-orders">
   <h2 class="page-h">Orders</h2><p class="page-sub">Create and manage orders with invoice tracking.</p>
   <div class="panel">
-    <div class="panel-title">Create New Order</div>
+    <div class="panel-title">➕ Create New Order</div>
     <div class="form-row">
       <div class="fg"><label>Retailer *</label><select id="o-retailer" onchange="refreshOrderPricesForRetailer(this.value)"><option value="">-- Select --</option></select></div>
       <div class="fg"><label>Order Date *</label><input type="date" id="o-date"/></div>
@@ -1317,16 +1317,16 @@ function buildAdminContent() {
     <div class="prod-list" id="o-prod-list"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <button class="btn btn-outline btn-sm" onclick="addProdRow('o-prod-list')">+ Add Product</button>
-      <button class="btn btn-outline btn-sm" id="o-add-delivery-btn" onclick="addNewOrderDeliveryFee()" style="background:var(--cream-dk);">Add Delivery Fee</button>
+      <button class="btn btn-outline btn-sm" id="o-add-delivery-btn" onclick="addNewOrderDeliveryFee()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
     </div>
     <div class="form-row"><div class="fg"><label>Notes</label><input id="o-notes" placeholder="e.g. No sesame — allergy"/></div></div>
     <div class="form-actions">
-      <button class="btn btn-primary" onclick="submitNewOrder()">Create Order</button>
+      <button class="btn btn-primary" onclick="submitNewOrder()">📦 Create Order</button>
       <button class="btn btn-outline" onclick="clearOrderForm()">Clear</button>
     </div>
   </div>
   <div class="panel">
-    <div class="panel-title">All Orders</div>
+    <div class="panel-title">📦 All Orders</div>
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
       <select id="f-status" onchange="renderOrders()" style="padding:7px 11px;border:1px solid var(--tan);border-radius:8px;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown-dk);">
         <option value="">All Statuses</option><option>Pending</option><option>Confirmed</option><option>Delivered</option>
@@ -1344,7 +1344,7 @@ function buildAdminContent() {
 <section class="section" id="sec-auto-orders">
   <h2 class="page-h">Auto-Orders</h2><p class="page-sub">Recurring standing orders for partners.</p>
   <div class="panel">
-    <div class="panel-title">New Auto-Order</div>
+    <div class="panel-title">➕ New Auto-Order</div>
     <div class="form-row">
       <div class="fg"><label>Retailer *</label><select id="ao-retailer" onchange="buildAutoOrderGrid('ao-prod-grid',Number(this.value)||null)"><option value="">-- Select --</option></select></div>
       <div class="fg"><label>Frequency</label><select id="ao-freq"><option>Weekly</option><option>Bi-Weekly</option><option>Monthly</option></select></div>
@@ -1354,7 +1354,7 @@ function buildAdminContent() {
     <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brown);margin-bottom:8px;">Standing Products <span style="font-weight:400;color:var(--muted);font-size:.7rem;">(prices locked · enter 0 to exclude)</span></div>
     <div id="ao-prod-grid" style="margin-bottom:12px;"></div>
     <div class="form-row"><div class="fg"><label>Notes</label><input id="ao-notes" placeholder="e.g. Adjust holiday weeks"/></div></div>
-    <div class="form-actions"><button class="btn btn-sage" onclick="createAutoOrder()">Save Auto-Order</button></div>
+    <div class="form-actions"><button class="btn btn-sage" onclick="createAutoOrder()">🔄 Save Auto-Order</button></div>
   </div>
   <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--brown-dk);margin-bottom:14px;">All Auto-Orders</h3>
   <div class="auto-grid" id="auto-grid"></div>
@@ -1726,7 +1726,7 @@ async function addRetailer() {
   renderRetailers();fillRetailerSelects();
   ['r-name','r-contact','r-email','r-phone','r-notes','r-pin'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('r-day').value='';
-  toast('Retailer added!');
+  toast('✅ Retailer added!');
 }
 function sortedRetailers() {
   return [...db.retailers].sort((a,b) => {
@@ -1776,7 +1776,7 @@ async function saveRetailerEdit() {
   Object.assign(r,{name:updates.name,contact:updates.contact,email:updates.email,phone:updates.phone,
     day:updates.delivery_day,notes:updates.notes,pin:updates.pin,status:updates.status,
     priceOverrides:updates.price_overrides||r.priceOverrides});
-  renderRetailers();fillRetailerSelects();closeModal('retailer-modal');toast('Retailer updated!');
+  renderRetailers();fillRetailerSelects();closeModal('retailer-modal');toast('✅ Retailer updated!');
 }
 async function toggleRetailerStatus(id) {
   const r=db.retailers.find(x=>x.id===id);if(!r)return;
@@ -2050,7 +2050,7 @@ async function deleteOrder(id) {
   if(!confirm('Delete this order? Cannot be undone.'))return;
   const {error}=await sbClient.from('orders').delete().eq('id',id);
   if(error){toast('Error deleting order: '+error.message);return;}
-  db.orders=db.orders.filter(o=>o.id!==id);renderOrders();refreshDashboard();toast('🗑 Order deleted.');
+  db.orders=db.orders.filter(o=>o.id!==id);renderOrders();refreshDashboard();toast('✅ Order deleted.');
 }
 
 // =====================================================================
@@ -2116,7 +2116,7 @@ function createAutoOrder() {
   document.getElementById('ao-retailer').value='';
   buildAutoOrderGrid('ao-prod-grid',null);
   document.getElementById('ao-notes').value='';
-  toast('Auto-order saved!');
+  toast('✅ Auto-order saved!');
 }
 function renderAutoOrders() {
   const grid=document.getElementById('auto-grid');if(!grid)return;
@@ -2137,7 +2137,7 @@ function renderAutoOrders() {
     </div>`).join('');
 }
 function toggleAO(id){const ao=db.autoOrders.find(x=>x.id===id);if(!ao)return;ao.active=!ao.active;saveDB();renderAutoOrders();toast(`Auto-order ${ao.active?'resumed':'paused'}.`);}
-function deleteAO(id){if(!confirm('Delete this auto-order?'))return;db.autoOrders=db.autoOrders.filter(x=>x.id!==id);saveDB();renderAutoOrders();toast('🗑 Deleted.');}
+function deleteAO(id){if(!confirm('Delete this auto-order?'))return;db.autoOrders=db.autoOrders.filter(x=>x.id!==id);saveDB();renderAutoOrders();toast('✅ Deleted.');}
 async function genOrderFromAO(id) {
   const ao=db.autoOrders.find(x=>x.id===id);if(!ao)return;
   const total=ao.products.reduce((s,p)=>s+(p.qty*p.price),0);
@@ -2227,7 +2227,7 @@ function generateSummary() {
     <div style="text-align:right;padding:14px 0;font-family:'Playfair Display',serif;font-size:1.15rem;color:var(--brown-dk);border-top:2px solid var(--gold);margin-top:8px;">Grand Total: <strong>${fmtCur(grand)}</strong></div>
     <p style="text-align:center;color:var(--muted);font-size:.78rem;margin-top:10px;">Generated ${new Date().toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'})} · Lazar Family Bakehouse Partner Portal</p>`;
 }
-function copySummary(){navigator.clipboard.writeText(document.getElementById('sum-content').innerText).then(()=>toast('Copied!'));}
+function copySummary(){navigator.clipboard.writeText(document.getElementById('sum-content').innerText).then(()=>toast('✅ Copied!'));}
 function emailSummary(){const s=document.getElementById('sum-start').value,e=document.getElementById('sum-end').value;window.open(`mailto:?subject=${encodeURIComponent('LFB Partner Summary '+fmtDate(s)+' to '+fmtDate(e))}&body=${encodeURIComponent(document.getElementById('sum-content').innerText)}`);}
 
 // =====================================================================
@@ -2242,7 +2242,7 @@ function emailSummary(){const s=document.getElementById('sum-start').value,e=doc
 async function reseedFromMaster() {
   if(!confirm('This will reload all data from the live Supabase database. Continue?')) return;
   await loadFromSupabase();
-  toast('Data reloaded from Supabase!');
+  toast('✅ Data reloaded from Supabase!');
   showSection('dashboard');
 }
 
@@ -2256,14 +2256,14 @@ async function changeAdminPin() {
   const {error}=await sbClient.auth.updateUser({password:nw});
   if(error){toast('Error updating password: '+error.message);return;}
   ['s-cur','s-new','s-con'].forEach(id=>document.getElementById(id).value='');
-  toast('Admin password updated!');
+  toast('✅ Admin password updated!');
 }
 async function clearAllData() {
   if(!confirm('Permanently delete ALL portal data from Supabase? This cannot be undone.'))return;
   await sbClient.from('orders').delete().neq('id',0);
   await sbClient.from('retailers').delete().neq('id',0);
   db.retailers=[];db.orders=[];db.autoOrders=[];db.nextInvoice=101;
-  saveLocalExtras();toast('All data cleared.');showSection('dashboard');
+  saveLocalExtras();toast('✅ All data cleared.');showSection('dashboard');
 }
 
 //  [18b] PRODUCT PHOTO MANAGEMENT
@@ -2291,7 +2291,7 @@ function saveProductImages() {
   });
   try{localStorage.setItem('lfb_product_images',JSON.stringify(PRODUCT_IMAGES));}catch(e){}
   buildCatalogGrid();
-  toast('Product photos saved!');
+  toast('✅ Product photos saved!');
 }
 
 // =====================================================================
@@ -2316,7 +2316,7 @@ function downloadTemplate(type) {
   else XLSX.utils.sheet_add_aoa(ws,[['Sunrise Grocery','2025-01-06','2025-01-07','Delivered','','Sourdough Loaf','10','6.50','Challah','4','8.00','','','','','','','','','']],{origin:'A2'});
   XLSX.utils.book_append_sheet(wb,ws,type==='retailers'?'Retailers':'Orders');
   XLSX.writeFile(wb,`lfb-${type}-template.xlsx`);
-  toast('Template downloaded!');
+  toast('✅ Template downloaded!');
 }
 function dzDrag(e,t){e.preventDefault();document.getElementById('dz-'+t).classList.add('drag');}
 function dzLeave(t){document.getElementById('dz-'+t).classList.remove('drag');}
@@ -3283,7 +3283,7 @@ async function saveEditOrder() {
     <div class="prod-list" id="eo-prod-list"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <button class="btn btn-outline btn-sm" onclick="addProdRow('eo-prod-list')">+ Add Product</button>
-      <button class="btn btn-outline btn-sm" id="eo-add-delivery-btn" onclick="addDeliveryFeeRow()" style="background:var(--cream-dk);">Add Delivery Fee</button>
+      <button class="btn btn-outline btn-sm" id="eo-add-delivery-btn" onclick="addDeliveryFeeRow()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
     </div>
     <div style="background:var(--cream);border-radius:9px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-weight:700;color:var(--brown-dk);">Order Total</span>
