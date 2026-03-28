@@ -1017,8 +1017,10 @@ function setLoginMode(m) {
 }
 function toggleAdminLogin(){
   const form=document.getElementById('admin-login-form');
+  const card=document.querySelector('.login-card');
   const showing=form.style.display!=='none';
   form.style.display=showing?'none':'';
+  if(card) card.style.display=showing?'':'none';
   if(!showing) { setLoginMode('admin'); document.getElementById('admin-pin-input').focus(); }
   else { setLoginMode('retailer'); }
 }
