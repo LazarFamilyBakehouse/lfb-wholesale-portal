@@ -900,6 +900,7 @@ const PRODUCT_PRICES = {
   'CC Mandelbites':6.00,'Funfetti Mandelbites':6.00,'Gluten-Free Chocolate-Chip':6.20,'Funfetti':6.00,'Almond':6.40,
   'Indiv. Mandel - Chocolate Chip':1.50,'Indiv. Mandel - Almond':1.50,'Indiv. Mandel - Funfetti':1.50,'Indiv. Mandel - GF Choc Chip':1.50,
   'Two Pack Chocolate Chip':2.50,'CC Mandel Bread':16.00,
+  'Ice Cream Sandwich Cookies':1.50,
   // Legacy SKUs (historical orders)
   'Individual Mandel Bread':1.50,'Two Packs':2.50
 };
@@ -914,6 +915,7 @@ const PRODUCT_DESC = {
   'Indiv. Mandel - Funfetti':'Single-serve Funfetti Mandel Bread, individually wrapped. A pop of color for events and catering.',
   'Indiv. Mandel - GF Choc Chip':'Single-serve Gluten-Free Chocolate-Chip Mandel Bread, individually wrapped.',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate-Chip Mandel Bread. Built for coffee service, hotel catering, and premium display cases.',
+  'Ice Cream Sandwich Cookies':'Freshly baked cookie sandwiches filled with creamy ice cream. A premium frozen treat your customers will love.',
   // Legacy SKUs (historical orders)
   'Individual Mandel Bread':'Single-serve traditional mandel bread piece.',
   'Two Packs':'Two-pack of mandel bread.'
@@ -931,7 +933,8 @@ const PRODUCT_DISPLAY_NAMES = {
   'Indiv. Mandel - Funfetti':'Individual Mandel Bread — Funfetti',
   'Indiv. Mandel - GF Choc Chip':'Individual Mandel Bread — Gluten-Free Chocolate Chip',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate Chip',
-  'CC Mandel Bread':'Chocolate-Chip Mandel Bread (Red Bag)'
+  'CC Mandel Bread':'Chocolate-Chip Mandel Bread (Red Bag)',
+  'Ice Cream Sandwich Cookies':'Ice Cream Sandwich Cookies'
 };
 function getProductDisplayName(p){return PRODUCT_DISPLAY_NAMES[p]||p;}
 
@@ -943,7 +946,8 @@ const PRODUCT_IMAGES = {
   'Indiv. Mandel - Chocolate Chip':'images/indiv-choc-chip-mandel-bread.jpg',
   'Indiv. Mandel - Almond':'images/indiv-almond-mandel-bread.jpg',
   'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg',
-  'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg'
+  'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg',
+  'Ice Cream Sandwich Cookies':''
 };
 // Load saved product images from localStorage (only override if saved value is non-empty)
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k])PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
@@ -973,12 +977,14 @@ function addDeliveryFeeRow(){
 const PRODUCT_MOQ = {
   'CC Mandelbites':8,'Funfetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
   'Indiv. Mandel - Chocolate Chip':40,'Indiv. Mandel - Almond':40,'Indiv. Mandel - GF Choc Chip':40,
-  'Two Pack Chocolate Chip':25
+  'Two Pack Chocolate Chip':25,
+  'Ice Cream Sandwich Cookies':40
 };
 const PRODUCT_INCREMENT = {
   'CC Mandelbites':8,'Funfetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
   'Indiv. Mandel - Chocolate Chip':40,'Indiv. Mandel - Almond':40,'Indiv. Mandel - GF Choc Chip':40,
-  'Two Pack Chocolate Chip':25
+  'Two Pack Chocolate Chip':25,
+  'Ice Cream Sandwich Cookies':40
 };
 // Delivery fees removed — no longer applicable
 function getDeliveryFee(retailerId){return 0;}
@@ -988,7 +994,8 @@ function setDeliveryFee(retailerId,fee){}
 const PRODUCT_SECTIONS = [
   {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
   {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
-  {label:'Two-Pack',icon:'',products:['Two Pack Chocolate Chip']}
+  {label:'Two-Pack',icon:'',products:['Two Pack Chocolate Chip']},
+  {label:'Ice Cream',icon:'',products:['Ice Cream Sandwich Cookies']}
 ];
 function productOpts(sel='') {
   return PRODUCT_SECTIONS.map(sec=>
@@ -1896,7 +1903,7 @@ function renderOrders() {
     <td style="vertical-align:middle;white-space:nowrap;">
       <button class="btn btn-outline btn-sm" onclick="viewOrderDetail(${o.id})">👁</button>
       <button class="btn btn-primary btn-sm" onclick="openEditOrder(${o.id})">✏️</button>
-      <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})"></button>
+      <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})">🧾 Invoice</button>
       <button class="btn btn-danger btn-sm" onclick="deleteOrder(${o.id})">🗑</button>
     </td>
   </tr>`).join('');
