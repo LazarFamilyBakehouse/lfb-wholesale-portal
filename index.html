@@ -1455,6 +1455,14 @@ function buildAdminContent() {
     <div class="form-actions"><button class="btn btn-primary" onclick="addNotification()">Post Notification</button></div>
     <div id="notif-list" style="margin-top:14px;"></div>
   </div>
+  <div class="panel" style="max-width:580px;margin-top:20px;">
+    <div class="panel-title">Weekly Restock Reminders</div>
+    <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Send a friendly reminder email to all active retailers who haven't placed an order in the last 7 days. This runs automatically every Wednesday at 3 PM, but you can also trigger it manually below.</p>
+    <div class="form-actions">
+      <button class="btn" style="background:var(--brown);color:var(--white);" onclick="sendWeeklyReminders()" id="btn-send-reminders">Send Reminders Now</button>
+    </div>
+    <div id="reminder-result" style="margin-top:12px;font-size:.85rem;display:none;"></div>
+  </div>
   <div class="panel" style="max-width:460px;margin-top:20px;">
     <div class="panel-title">Refresh Data from Server</div>
     <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Reloads all retailers and orders from the live Supabase database. Use this if the portal ever shows stale data.</p>
@@ -2241,6 +2249,32 @@ function emailSummary(){const s=document.getElementById('sum-start').value,e=doc
 //  [18] SETTINGS
 //  changeAdminPin(), clearAllData(), reseedFromMaster().
 // =====================================================================
+async function sendWeeklyReminders() {
+  const btn=document.getElementById('btn-send-reminders');
+  const res=document.getElementById('reminder-result');
+  if(!confirm('Send restock reminder emails to all retailers who haven\'t ordered in 7+ days?')) return;
+  btn.disabled=true; btn.textContent='Sending…';
+  res.style.display='none';
+  try {
+    const resp=await fetch(SUPABASE_URL+'/functions/v1/weekly-reminder',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'}
+    });
+    const data=await resp.json();
+    if(data.error) throw new Error(data.error);
+    res.style.display='block';
+    res.style.color='var(--positive)';
+    res.innerHTML=`Sent <strong>${data.sent}</strong> reminder${data.sent!==1?'s':''} · ${data.skipped||0} retailer${(data.skipped||0)!==1?'s':''} already ordered this week`;
+    if(data.errors) { res.innerHTML+=`<br><span style="color:var(--danger);font-size:.8rem;">${data.errors.length} failed — check console</span>`; console.warn('[LFB] Reminder errors:',data.errors); }
+    toast(`Sent ${data.sent} reminder email${data.sent!==1?'s':''}!`);
+  } catch(e) {
+    res.style.display='block';
+    res.style.color='var(--danger)';
+    res.textContent='Failed: '+e.message;
+    toast('Reminder send failed: '+e.message);
+  } finally { btn.disabled=false; btn.textContent='Send Reminders Now'; }
+}
+
 async function reseedFromMaster() {
   if(!confirm('This will reload all data from the live Supabase database. Continue?')) return;
   await loadFromSupabase();
