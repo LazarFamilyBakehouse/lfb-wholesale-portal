@@ -1887,7 +1887,7 @@ function renderOrders() {
   // Update summary chip
   const sumEl=document.getElementById('orders-summary');
   if(sumEl){
-    const filtTotal=orders.reduce((s,o)=>s+(o.total||0),0);
+    const filtTotal=orders.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty*(Number(p.price)||0)),0),0);
     const filtUnits=orders.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
     sumEl.innerHTML=`<strong>${orders.length}</strong> order${orders.length!==1?'s':''} &nbsp;·&nbsp; <strong>${filtUnits}</strong> units &nbsp;·&nbsp; <strong>${fmtCur(filtTotal)}</strong>`;
   }
@@ -2859,19 +2859,31 @@ function refreshAnalytics() {
       </div>`).join(''):'<p style="color:var(--muted);font-style:italic;">No data yet.</p>';
   }
 
-  // Order frequency + avg reorder time — ALL active partners (ordered last 2 months)
+  // Order frequency + avg reorder time — ALL partners who have ever ordered
   const freqEl=document.getElementById('anal-freq'); if(freqEl){
-    const retStats=db.retailers.filter(r=>activeRetailerIds.has(r.id)).map(r=>{
-      const orders=db.orders.filter(o=>o.retailerId===r.id&&o.date).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const retStats=db.retailers.map(r=>{
+      const orders=db.orders.filter(o=>o.retailerId===r.id&&o.date).sort((a,b)=>new Date(a.date+'T12:00:00')-new Date(b.date+'T12:00:00'));
       let avgDays=null;
       if(orders.length>=2){
         const gaps=[];
-        for(let i=1;i<orders.length;i++){gaps.push((new Date(orders[i].date)-new Date(orders[i-1].date))/(1000*60*60*24));}
+        for(let i=1;i<orders.length;i++){gaps.push((new Date(orders[i].date+'T12:00:00')-new Date(orders[i-1].date+'T12:00:00'))/(1000*60*60*24));}
         avgDays=Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length);
       }
-      const lastOrder=orders.length?orders[orders.length-1].date:'';
-      return {name:r.name,count:orders.length,avgDays,lastOrder};
-    }).sort((a,b)=>b.count-a.count);
+      // Use max timestamp to defensively find last order regardless of sort
+      let lastOrder='';
+      if(orders.length){
+        let maxTs=0;
+        orders.forEach(o=>{const t=new Date(o.date+'T12:00:00').getTime(); if(!isNaN(t)&&t>maxTs){maxTs=t;lastOrder=o.date;}});
+      }
+      // Days since last order — useful for spotting stale accounts
+      const daysSince=lastOrder?Math.floor((now-new Date(lastOrder+'T12:00:00'))/(1000*60*60*24)):null;
+      return {name:r.name,count:orders.length,avgDays,lastOrder,daysSince};
+    }).filter(r=>r.count>0).sort((a,b)=>{
+      // Most recent order first, then by count
+      if(!a.lastOrder&&!b.lastOrder)return b.count-a.count;
+      if(!a.lastOrder)return 1; if(!b.lastOrder)return -1;
+      return b.lastOrder.localeCompare(a.lastOrder);
+    });
     const maxF=retStats[0]?retStats[0].count:1;
     freqEl.innerHTML=retStats.length?`
       <div style="display:grid;grid-template-columns:1fr 52px 90px 96px;gap:0 14px;">
@@ -2883,10 +2895,10 @@ function refreshAnalytics() {
           <span style="font-weight:600;font-size:.83rem;padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${esc(r.name)}</span>
           <span style="text-align:right;font-size:.83rem;font-weight:700;color:var(--brown-dk);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.count}</span>
           <span style="text-align:right;font-size:.78rem;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.avgDays!==null?r.avgDays+' days':'—'}</span>
-          <span style="text-align:right;font-size:.78rem;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.lastOrder?fmtDate(r.lastOrder):'—'}</span>
+          <span style="text-align:right;font-size:.78rem;color:${r.daysSince!==null&&r.daysSince>60?'#b24a2a':'var(--muted)'};padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;" title="${r.daysSince!==null?r.daysSince+' days ago':''}">${r.lastOrder?fmtDate(r.lastOrder):'—'}</span>
         `).join('')}
       </div>
-    `:'<p style="color:var(--muted);font-style:italic;">No active partners in the last 2 months.</p>';
+    `:'<p style="color:var(--muted);font-style:italic;">No partner orders yet.</p>';
   }
 
   // ── Quarter-over-Quarter Revenue ──
