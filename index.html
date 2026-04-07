@@ -895,12 +895,12 @@ function setupRetailerRealtime(rid,pin) {
 
 const PRODUCTS = ['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond',
   'Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip',
-  'Two Pack Chocolate Chip'];
+  'Two Pack Chocolate Chip','Ice Cream Sandwich Cookies'];
 const PRODUCT_PRICES = {
   'CC Mandelbites':6.00,'Funfetti Mandelbites':6.00,'Gluten-Free Chocolate-Chip':6.20,'Funfetti':6.00,'Almond':6.40,
   'Indiv. Mandel - Chocolate Chip':1.50,'Indiv. Mandel - Almond':1.50,'Indiv. Mandel - Funfetti':1.50,'Indiv. Mandel - GF Choc Chip':1.50,
   'Two Pack Chocolate Chip':2.50,'CC Mandel Bread':16.00,
-  'Ice Cream Sandwich Cookies':1.50,
+  'Ice Cream Sandwich Cookies':1.75,
   // Legacy SKUs (historical orders)
   'Individual Mandel Bread':1.50,'Two Packs':2.50
 };
@@ -915,7 +915,7 @@ const PRODUCT_DESC = {
   'Indiv. Mandel - Funfetti':'Single-serve Funfetti Mandel Bread, individually wrapped. A pop of color for events and catering.',
   'Indiv. Mandel - GF Choc Chip':'Single-serve Gluten-Free Chocolate-Chip Mandel Bread, individually wrapped.',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate-Chip Mandel Bread. Built for coffee service, hotel catering, and premium display cases.',
-  'Ice Cream Sandwich Cookies':'Freshly baked cookie sandwiches filled with creamy ice cream. A premium frozen treat your customers will love.',
+  'Ice Cream Sandwich Cookies':'Freshly baked 60g cookie rounds — perfect for display cases on their own or as premium ice cream sandwiches. A versatile, eye-catching item your customers will love.',
   // Legacy SKUs (historical orders)
   'Individual Mandel Bread':'Single-serve traditional mandel bread piece.',
   'Two Packs':'Two-pack of mandel bread.'
@@ -994,8 +994,7 @@ function setDeliveryFee(retailerId,fee){}
 const PRODUCT_SECTIONS = [
   {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
   {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
-  {label:'Two-Pack',icon:'',products:['Two Pack Chocolate Chip']},
-  {label:'Ice Cream',icon:'',products:['Ice Cream Sandwich Cookies']}
+  {label:'Specialty Items',icon:'',products:['Two Pack Chocolate Chip','Ice Cream Sandwich Cookies']}
 ];
 function productOpts(sel='') {
   return PRODUCT_SECTIONS.map(sec=>
@@ -1462,11 +1461,18 @@ function buildAdminContent() {
     <div class="form-actions"><button class="btn btn-primary" onclick="addNotification()">Post Notification</button></div>
     <div id="notif-list" style="margin-top:14px;"></div>
   </div>
-  <div class="panel" style="max-width:580px;margin-top:20px;">
-    <div class="panel-title">Weekly Restock Reminders</div>
-    <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Send a friendly reminder email to all active retailers who haven't placed an order in the last 7 days. This runs automatically every Wednesday at 3 PM, but you can also trigger it manually below.</p>
-    <div class="form-actions">
-      <button class="btn" style="background:var(--brown);color:var(--white);" onclick="sendWeeklyReminders()" id="btn-send-reminders">Send Reminders Now</button>
+  <div class="panel" style="max-width:620px;margin-top:20px;">
+    <div class="panel-title">Partner Reminder Emails</div>
+    <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Two automated email tracks keep partners engaged. You can also trigger each manually below.</p>
+    <div style="padding:12px 14px;background:var(--cream);border-left:3px solid var(--brown);margin-bottom:12px;">
+      <div style="font-weight:700;font-size:.9rem;color:var(--brown-dk);margin-bottom:4px;">Restock Nudge · Biweekly Tuesdays</div>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px;">Goes to active partners (ordered in the last 60 days) who haven't placed an order in 14+ days.</p>
+      <button class="btn" style="background:var(--brown);color:var(--white);" onclick="sendReminders('active')" id="btn-send-active">Send Restock Nudge Now</button>
+    </div>
+    <div style="padding:12px 14px;background:var(--cream);border-left:3px solid var(--gold);margin-bottom:12px;">
+      <div style="font-weight:700;font-size:.9rem;color:var(--brown-dk);margin-bottom:4px;">We Miss You · Monthly (1st Tuesday)</div>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px;">Friendly check-in for partners who haven't ordered in 60+ days. No discount — just a warm re-engagement.</p>
+      <button class="btn btn-gold" onclick="sendReminders('inactive')" id="btn-send-inactive">Send Re-Engagement Now</button>
     </div>
     <div id="reminder-result" style="margin-top:12px;font-size:.85rem;display:none;"></div>
   </div>
@@ -2256,31 +2262,42 @@ function emailSummary(){const s=document.getElementById('sum-start').value,e=doc
 //  [18] SETTINGS
 //  changeAdminPin(), clearAllData(), reseedFromMaster().
 // =====================================================================
-async function sendWeeklyReminders() {
-  const btn=document.getElementById('btn-send-reminders');
+async function sendReminders(track) {
+  const isActive=track==='active';
+  const btnId=isActive?'btn-send-active':'btn-send-inactive';
+  const btn=document.getElementById(btnId);
   const res=document.getElementById('reminder-result');
-  if(!confirm('Send restock reminder emails to all retailers who haven\'t ordered in 7+ days?')) return;
+  const label=isActive?'Send Restock Nudge Now':'Send Re-Engagement Now';
+  const confirmMsg=isActive
+    ? 'Send biweekly restock reminder to active partners who haven\'t ordered in 14+ days?'
+    : 'Send re-engagement email to inactive partners (no order in 60+ days)?';
+  if(!confirm(confirmMsg)) return;
   btn.disabled=true; btn.textContent='Sending…';
   res.style.display='none';
   try {
-    const resp=await fetch(SUPABASE_URL+'/functions/v1/weekly-reminder',{
+    const resp=await fetch(SUPABASE_URL+'/functions/v1/weekly-reminder?track='+track,{
       method:'POST',
-      headers:{'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'}
+      headers:{'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
+      body:JSON.stringify({track})
     });
     const data=await resp.json();
     if(data.error) throw new Error(data.error);
     res.style.display='block';
     res.style.color='var(--positive)';
-    res.innerHTML=`Sent <strong>${data.sent}</strong> reminder${data.sent!==1?'s':''} · ${data.skipped||0} retailer${(data.skipped||0)!==1?'s':''} already ordered this week`;
+    const kind=isActive?'restock nudge':'re-engagement';
+    res.innerHTML=`Sent <strong>${data.sent}</strong> ${kind} email${data.sent!==1?'s':''}${data.total?` · ${data.total} targeted`:''}`;
+    if(data.message) res.innerHTML+=`<br><span style="color:var(--muted);font-size:.8rem;">${data.message}</span>`;
     if(data.errors) { res.innerHTML+=`<br><span style="color:var(--danger);font-size:.8rem;">${data.errors.length} failed — check console</span>`; console.warn('[LFB] Reminder errors:',data.errors); }
-    toast(`Sent ${data.sent} reminder email${data.sent!==1?'s':''}!`);
+    toast(`Sent ${data.sent} ${kind} email${data.sent!==1?'s':''}!`);
   } catch(e) {
     res.style.display='block';
     res.style.color='var(--danger)';
     res.textContent='Failed: '+e.message;
     toast('Reminder send failed: '+e.message);
-  } finally { btn.disabled=false; btn.textContent='Send Reminders Now'; }
+  } finally { btn.disabled=false; btn.textContent=label; }
 }
+// Back-compat alias
+async function sendWeeklyReminders(){ return sendReminders('active'); }
 
 async function reseedFromMaster() {
   if(!confirm('This will reload all data from the live Supabase database. Continue?')) return;
