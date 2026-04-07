@@ -122,7 +122,7 @@ serve(async (req: Request) => {
           },
           body: JSON.stringify({
             from: FROM_EMAIL,
-            to: [retailer.email],
+            to: retailer.email.split(",").map((e: string) => e.trim()).filter(Boolean),
             reply_to: REPLY_TO,
             subject,
             html,
