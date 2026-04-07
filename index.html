@@ -947,7 +947,7 @@ const PRODUCT_IMAGES = {
   'Indiv. Mandel - Almond':'images/indiv-almond-mandel-bread.jpg',
   'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg',
   'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg',
-  'Ice Cream Sandwich Cookies':''
+  'Ice Cream Sandwich Cookies':'images/ice-cream-sandwich-cookies.jpg'
 };
 // Load saved product images from localStorage (only override if saved value is non-empty)
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k])PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
@@ -1069,7 +1069,8 @@ function resetInactivityTimer() {
 
 function populateLoginRetailers() {
   const sel=document.getElementById('retailer-select-login');
-  const sorted=[...db.retailers].filter(r=>r.status==='Active').sort((a,b)=>a.name.localeCompare(b.name));
+  const TEST_ACCOUNT_IDS=[29]; // hidden from partner login dropdown; still usable via admin
+  const sorted=[...db.retailers].filter(r=>r.status==='Active'&&!TEST_ACCOUNT_IDS.includes(r.id)).sort((a,b)=>a.name.localeCompare(b.name));
   sel.innerHTML='<option value="">-- Select your store --</option>'+
     sorted.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
 }
