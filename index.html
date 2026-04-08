@@ -633,6 +633,8 @@ const SEED_DATA = {
     {id:43, name:"Melco Resorts (Manila)",     contact:"Steve Sasso",    email:"stevesasso77@gmail.com",         phone:"", day:"", notes:"Intro via Mitch Lazar 3/12/26 · GM at Melco Resorts Manila · International / future export opportunity", pin:"3025", status:"Inactive", joined:"2026-03-12"},
     {id:44, name:"Atlantis",                   contact:"Maria Torres",   email:"marie.torres@mac.com",           phone:"", day:"", notes:"Intro via Mitch Lazar 3/12/26 · CMO at Atlantis · International / luxury resort opportunity",           pin:"3026", status:"Inactive", joined:"2026-03-12"},
     {id:45, name:"Landy Labadie",              contact:"Landy Labadie",  email:"landy30@aol.com",                phone:"", day:"", notes:"Intro via Mitch Lazar 3/12/26 · Hospitality industry contact",                                         pin:"3027", status:"Inactive", joined:"2026-03-12"},
+    // ── TEST ACCOUNT (hidden from partner dropdown) ──
+    {id:46, name:"Jake's Cafe",               contact:"Jake",           email:"jake@lazar.tv",                  phone:"", day:"", notes:"Internal test account",                                                                                pin:"4001", status:"Active",   joined:"2026-04-07"},
   ],
   orders: [
     // ── Spinelli's Market ── (verified $950.00)
@@ -1069,7 +1071,7 @@ function resetInactivityTimer() {
 
 function populateLoginRetailers() {
   const sel=document.getElementById('retailer-select-login');
-  const TEST_ACCOUNT_IDS=[29]; // hidden from partner login dropdown; still usable via admin
+  const TEST_ACCOUNT_IDS=[29,46]; // hidden from partner login dropdown; still usable via admin (29=Supabase ID, 46=seed ID)
   const sorted=[...db.retailers].filter(r=>r.status==='Active'&&!TEST_ACCOUNT_IDS.includes(r.id)).sort((a,b)=>a.name.localeCompare(b.name));
   sel.innerHTML='<option value="">-- Select your store --</option>'+
     sorted.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
