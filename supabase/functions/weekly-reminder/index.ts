@@ -168,7 +168,7 @@ function buildActiveHtml(firstName: string, storeName: string): string {
     <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">
       We hope you're doing well! Just a friendly follow-up to see if
       <strong>${storeName}</strong> needs a restock. Our Mandelbites, Mandel Bread,
-      and Two-Packs move fast with your customers — and we'd hate for you to run low.
+      and Two-Packs move fast with your customers, and we'd hate for you to run low.
     </p>
     <p style="font-size:16px;line-height:1.7;margin:0 0 24px;">
       Placing a new order takes just a minute through your partner portal:
@@ -194,7 +194,7 @@ function buildInactiveHtml(firstName: string, storeName: string, lastOrderDate: 
        </p>`
     : "";
   return shell(`
-    <h1 style="font-family:Georgia,'Playfair Display',serif;font-size:22px;color:#2d1b0e;margin:0;">
+    <h1 style="font-family:Georgia,'Playfair Display',serif;font-size:22px;color:#ff0000;margin:0;">
       We Miss You!
     </h1>
   `, `
@@ -205,16 +205,13 @@ function buildInactiveHtml(firstName: string, storeName: string, lastOrderDate: 
     </p>
     ${lastLine}
     <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">
-      A few things that are new since we last connected:
+      Our Mandelbites come in four flavors: Chocolate Chip, Funfetti, Gluten-Free Chocolate Chip, and Almond.
+      We also have <strong>Mandel Bread Rounds</strong>, a great addition to any bakery display case that also
+      make for delicious ice cream sandwiches.
     </p>
-    <ul style="font-size:15px;line-height:1.8;color:#2d1b0e;margin:0 0 20px;padding-left:20px;">
-      <li><strong>Ice Cream Sandwich Cookies</strong> — our newest premium frozen treat, flying off shelves.</li>
-      <li>Same great Mandelbites, Mandel Bread, and Two-Packs your customers love.</li>
-      <li>Same easy ordering through your partner portal.</li>
-    </ul>
     <p style="font-size:16px;line-height:1.7;margin:0 0 24px;">
-      If anything's changed on your side — a different buyer, new delivery preferences,
-      or just questions about what's working — we'd love to hear from you. Just hit reply.
+      If anything's changed on your side, like a different buyer, new delivery preferences,
+      or questions about what's working, we'd love to hear from you. Just hit reply.
     </p>
     ${ctaButton("Visit the Portal")}
     <p style="font-size:16px;line-height:1.7;margin:0;">
@@ -237,18 +234,18 @@ function shell(header: string, body: string): string {
 <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background-color:#fdf6ee;font-family:'Nunito',Helvetica,Arial,sans-serif;color:#2d1b0e;">
   <div style="max-width:600px;margin:0 auto;padding:32px 20px;">
-    <div style="text-align:center;padding-bottom:24px;border-bottom:2px solid #e4d8c8;">
+    <div style="text-align:center;padding-bottom:24px;border-bottom:2px solid #ff0000;">
       <img src="${LOGO_URL}" alt="Lazar Family Bakehouse" width="180" style="margin-bottom:16px;"/>
       ${header}
     </div>
     <div style="padding:28px 0;">${body}</div>
-    <div style="border-top:2px solid #e4d8c8;padding-top:20px;text-align:center;">
-      <p style="font-size:13px;color:#5c4a3a;margin:0 0 6px;">Lazar Family Bakehouse · Greenwood Village, CO</p>
+    <div style="border-top:2px solid #ff0000;padding-top:20px;text-align:center;">
+      <p style="font-size:13px;color:#5c4a3a;margin:0 0 6px;">Lazar Family Bakehouse · Englewood, CO</p>
       <p style="font-size:13px;color:#5c4a3a;margin:0 0 6px;">
         <a href="mailto:info@lazarfamilybakehouse.com" style="color:#3a2518;text-decoration:underline;">info@lazarfamilybakehouse.com</a>
       </p>
       <p style="font-size:11px;color:#8a7968;margin:12px 0 0;">
-        You're receiving this because you're a wholesale partner. To opt out, reply to this email or contact us directly.
+        You're receiving this because you're our partner. To opt out, reply to this email or contact us directly.
       </p>
     </div>
   </div>
