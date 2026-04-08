@@ -15,7 +15,7 @@ const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FROM_EMAIL = "Lazar Family Bakehouse <orders@lazarfamilybakehouse.com>";
 const REPLY_TO = "info@lazarfamilybakehouse.com";
 const PORTAL_URL = "https://partners.lazarfamilybakehouse.com";
-const LOGO_URL = "https://www.lazarfamilybakehouse.com/cdn/shop/files/New-Logo.svg";
+const LOGO_URL = "https://partners.lazarfamilybakehouse.com/images/lfb-logo-transparent.png";
 
 const ACTIVE_WINDOW_DAYS = 60;   // "active" = ordered within 60 days
 const RESTOCK_QUIET_DAYS = 14;   // don't nudge if ordered in last 14 days
@@ -168,7 +168,7 @@ function buildActiveHtml(firstName: string, storeName: string): string {
     <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">
       We hope you're doing well! Just a friendly follow-up to see if
       <strong>${storeName}</strong> needs a restock. Our Mandelbites, Mandel Bread,
-      and Two-Packs move fast with your customers, and we'd hate for you to run low.
+      Two-Packs, and Mandel Bread Rounds move fast with your customers, and we'd hate for you to run low.
     </p>
     <p style="font-size:16px;line-height:1.7;margin:0 0 24px;">
       Placing a new order takes just a minute through your partner portal:
@@ -179,6 +179,7 @@ function buildActiveHtml(firstName: string, storeName: string): string {
       <li>Mandelbites pouches — 8 units (increments of 8)</li>
       <li>Two-Pack — 25 units (increments of 25)</li>
       <li>Individual pieces — 40 units (increments of 40)</li>
+      <li>Mandel Bread Rounds — 40 units (increments of 40). Our classic mandel bread reimagined in cookie form.</li>
     </ul>
     <p style="font-size:16px;line-height:1.7;margin:0;">
       Thanks for being part of the Lazar Family Bakehouse family — we truly appreciate your partnership!
@@ -194,7 +195,7 @@ function buildInactiveHtml(firstName: string, storeName: string, lastOrderDate: 
        </p>`
     : "";
   return shell(`
-    <h1 style="font-family:Georgia,'Playfair Display',serif;font-size:22px;color:#ff0000;margin:0;">
+    <h1 style="font-family:Georgia,'Playfair Display',serif;font-size:22px;color:#2d1b0e;margin:0;">
       We Miss You!
     </h1>
   `, `
