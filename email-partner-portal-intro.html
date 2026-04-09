@@ -2,19 +2,7 @@
 <html><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="color-scheme" content="light only"/>
-<meta name="supported-color-schemes" content="light only"/>
 <style>
-  :root { color-scheme: light only; }
-  [data-ogsc] body, [data-ogsb] body { background-color:#fdf6ee !important; color:#2d1b0e !important; }
-  @media (prefers-color-scheme: dark) {
-    body, .email-container { background-color:#fdf6ee !important; color:#2d1b0e !important; }
-    .login-box { background-color:#fff8f0 !important; }
-    .header-title, h1 { color:#2d1b0e !important; }
-    .product-table tr { background-color:#ffffff !important; }
-    .product-table tr:nth-child(odd) { background-color:#fff8f0 !important; }
-    .product-table tr:first-child { background-color:#3a2518 !important; color:#ffffff !important; }
-  }
   @media only screen and (max-width:480px) {
     .email-container { padding:20px 14px !important; }
     .header-title { font-size:19px !important; }
@@ -62,13 +50,13 @@
 
       <!-- CTA BUTTON -->
       <div style="text-align:center;margin:0 0 28px;">
-        <a class="cta-btn" href="https://partners.lazarfamilybakehouse.com" style="display:inline-block;background:#3a2518;color:#ffffff;text-decoration:none;padding:14px 36px;font-size:16px;font-weight:700;letter-spacing:.04em;border-radius:4px;">
+        <a class="cta-btn" href="https://partners.lazarfamilybakehouse.com" style="display:inline-block;background-color:#3a2518;color:#ffffff;text-decoration:none;padding:14px 36px;font-size:16px;font-weight:700;letter-spacing:.04em;border-radius:4px;">
           Visit the Partner Portal
         </a>
       </div>
 
       <!-- LOGIN DETAILS -->
-      <div class="login-box" style="background:#fff8f0;border:1px solid #e8d5c0;border-radius:6px;padding:20px 24px;margin:0 0 24px;">
+      <div class="login-box" style="background-color:#fff8f0;border:1px solid #e8d5c0;border-radius:6px;padding:20px 24px;margin:0 0 24px;">
         <p style="font-size:15px;font-weight:700;color:#2d1b0e;margin:0 0 10px;">Your login details:</p>
         <p style="font-size:15px;line-height:1.7;margin:0 0 4px;">
           <strong>Store:</strong> {{STORE_NAME}}
@@ -93,12 +81,12 @@
 
       <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 0 24px;">
         <table class="product-table" style="width:100%;border-collapse:collapse;font-size:14px;min-width:300px;">
-          <tr style="background:#3a2518;color:#ffffff;">
+          <tr style="background-color:#3a2518;color:#ffffff;">
             <th style="text-align:left;padding:10px 12px;">Product</th>
             <th style="text-align:right;padding:10px 12px;white-space:nowrap;">Price</th>
             <th style="text-align:right;padding:10px 12px;white-space:nowrap;">Min. Order</th>
           </tr>
-          <tr style="background:#fff8f0;">
+          <tr style="background-color:#fff8f0;">
             <td class="product-name" style="padding:10px 12px;border-bottom:1px solid #e8d5c0;">Chocolate-Chip MandelBites (8oz)</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">$6.00</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">8 units</td>
@@ -108,7 +96,7 @@
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">$6.00</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">8 units</td>
           </tr>
-          <tr style="background:#fff8f0;">
+          <tr style="background-color:#fff8f0;">
             <td class="product-name" style="padding:10px 12px;border-bottom:1px solid #e8d5c0;">GF Choc-Chip MandelBites (8oz)</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">$6.20</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">8 units</td>
@@ -118,7 +106,7 @@
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">$6.40</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">8 units</td>
           </tr>
-          <tr style="background:#fff8f0;">
+          <tr style="background-color:#fff8f0;">
             <td class="product-name" style="padding:10px 12px;border-bottom:1px solid #e8d5c0;">Two-Pack Chocolate Chip</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">$2.50</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">25 units</td>
@@ -128,7 +116,7 @@
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">$1.50</td>
             <td style="padding:10px 12px;border-bottom:1px solid #e8d5c0;text-align:right;white-space:nowrap;">40 units</td>
           </tr>
-          <tr style="background:#fff8f0;">
+          <tr style="background-color:#fff8f0;">
             <td class="product-name" style="padding:10px 12px;">Mandel Bread Rounds <span style="color:#ff0000;font-weight:700;font-size:11px;">NEW</span></td>
             <td style="padding:10px 12px;text-align:right;white-space:nowrap;">$1.75</td>
             <td style="padding:10px 12px;text-align:right;white-space:nowrap;">40 units</td>
@@ -142,7 +130,7 @@
       </p>
 
       <p class="body-text" style="font-size:16px;line-height:1.7;margin:24px 0 0;">
-        Feel free to poke around the portal. You can update your contact details in Settings anytime. If you have any questions or want to chat about what's working for your store, just hit reply. And if something's not working quite right, please let us know. We'd love to make this ordering experience as seamless as possible.
+        We invite you to explore the different parts of the portal. You can update your contact details in Settings anytime. If you have any questions or want to chat about what's working for you, just hit reply. And if something's not working quite right, please let us know. We'd love to make this ordering experience as seamless as possible.
       </p>
 
       <p class="body-text" style="font-size:16px;line-height:1.7;margin:18px 0 0;">
