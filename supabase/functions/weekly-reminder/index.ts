@@ -106,12 +106,33 @@ serve(async (req: Request) => {
       ? "Time to Restock? A Quick Check-In from Lazar Family Bakehouse"
       : "We Miss You — A Note from Lazar Family Bakehouse";
 
+    // CC overrides: retailer name -> emails that should be CC'd instead of TO
+    const CC_OVERRIDES: Record<string, string[]> = {
+      "SkyMarket": ["Brandon.McFadden@JAFConcessions.com"],
+    };
+
     for (const retailer of targets) {
       const firstName = (retailer.contact || retailer.name || "").split(" ")[0] || "Partner";
       const last = lastOrderMap.get(retailer.id) || null;
       const html = track === "active"
         ? buildActiveHtml(firstName, retailer.name)
         : buildInactiveHtml(firstName, retailer.name, last);
+
+      // Split emails into TO and CC based on overrides
+      const allEmails = retailer.email.split(",").map((e: string) => e.trim()).filter(Boolean);
+      const ccList = CC_OVERRIDES[retailer.name] || [];
+      const ccLower = ccList.map((e: string) => e.toLowerCase());
+      const toEmails = allEmails.filter((e: string) => !ccLower.includes(e.toLowerCase()));
+      const ccEmails = allEmails.filter((e: string) => ccLower.includes(e.toLowerCase()));
+
+      const emailPayload: any = {
+        from: FROM_EMAIL,
+        to: toEmails,
+        reply_to: REPLY_TO,
+        subject,
+        html,
+      };
+      if (ccEmails.length) emailPayload.cc = ccEmails;
 
       try {
         const res = await fetch("https://api.resend.com/emails", {
@@ -120,13 +141,7 @@ serve(async (req: Request) => {
             Authorization: `Bearer ${RESEND_API_KEY}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            from: FROM_EMAIL,
-            to: retailer.email.split(",").map((e: string) => e.trim()).filter(Boolean),
-            reply_to: REPLY_TO,
-            subject,
-            html,
-          }),
+          body: JSON.stringify(emailPayload),
         });
         if (res.ok) sent++;
         else errors.push(`${retailer.name}: ${await res.text()}`);
