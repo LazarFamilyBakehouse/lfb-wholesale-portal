@@ -912,10 +912,10 @@ const PRODUCT_DESC = {
   'Gluten-Free Chocolate-Chip':'Chocolate-Chip Mandel Bread bites, 100% gluten-free. All the flavor, none of the gluten. Our fastest-growing SKU.',
   'Funfetti':'Mandel Bread packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
   'Almond':'Lightly sweet Almond Mandel Bread bites. A refined, traditional take.',
-  'Indiv. Mandel - Chocolate Chip':'Single-serve Chocolate-Chip Mandel Bread, individually wrapped. Perfect for cafés, hotel service, and gift displays.',
-  'Indiv. Mandel - Almond':'Single-serve Almond Mandel Bread, individually wrapped. Elegant and lightly sweet.',
-  'Indiv. Mandel - Funfetti':'Single-serve Funfetti Mandel Bread, individually wrapped. A pop of color for events and catering.',
-  'Indiv. Mandel - GF Choc Chip':'Single-serve Gluten-Free Chocolate-Chip Mandel Bread, individually wrapped.',
+  'Indiv. Mandel - Chocolate Chip':'Single-serve Chocolate-Chip Mandel Bread, delivered in a large pouch. Perfect for cafés, hotel service, and gift displays.',
+  'Indiv. Mandel - Almond':'Single-serve Almond Mandel Bread, delivered in a large pouch. Elegant and lightly sweet.',
+  'Indiv. Mandel - Funfetti':'Single-serve Funfetti Mandel Bread, delivered in a large pouch. A pop of color for events and catering.',
+  'Indiv. Mandel - GF Choc Chip':'Single-serve Gluten-Free Chocolate-Chip Mandel Bread, delivered in a large pouch.',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate-Chip Mandel Bread. Built for coffee service, hotel catering, and premium display cases.',
   'Mandel Bread Rounds':'Our classic mandel bread reimagined in cookie form. Perfect for display cases or as ice cream sandwiches.',
   // Legacy SKUs (historical orders)
@@ -1692,6 +1692,10 @@ function isHotelAccount(r) {
   const n=r.name.toLowerCase();
   return n.includes('hotel')||n.includes('suites')||n.includes('jacquard')||n.includes('hilton')||n.includes('hyatt')||n.includes('intercontinental')||n.includes('claret')||n.includes('msc');
 }
+function isNet15Account(r) {
+  if(!r||!r.name) return false;
+  return isHotelAccount(r);
+}
 function getPriceForRetailer(product, retailerId) {
   if(retailerId) {
     const r=db.retailers.find(x=>x.id===Number(retailerId));
@@ -2059,7 +2063,7 @@ function showInvoice(id) {
       ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--muted);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
       <p style="margin:16px 0 8px;font-size:.8rem;color:var(--muted);font-style:italic;line-height:1.5;text-align:center;">Please reference the delivered invoice for the final amount.</p>
       <div class="inv-footer">Thank you for your partnership with Lazar Family Bakehouse<br>
-        ${/hilton|hotel/i.test(o.retailerName) ? 'Payment due <strong>Net 15</strong> from delivery date. ' : 'Please remit payment within <strong>30 days of delivery</strong>. '}
+        ${(() => { const ret=db.retailers.find(x=>x.id===o.retailerId); return isNet15Account(ret) ? 'Payment due <strong>Net 15</strong> from delivery date. ' : 'Please remit payment within <strong>30 days of delivery</strong>. '; })()}
         Payment by check only — payable to <em>Lazar Family Bakehouse</em>, 4351 E. Perry Pkwy, Greenwood Village, CO 80121.</div>
     </div>`;
   openModal('invoice-modal');
@@ -2517,7 +2521,7 @@ function renderRetailerHome() {
   // Update payment terms text based on account type
   const ptEl=document.getElementById('payment-terms-text');
   if(ptEl){
-    if(/hilton|hotel/i.test(r.name)){
+    if(isNet15Account(r)){
       ptEl.innerHTML='Hotel accounts are on <strong>Net 15 terms</strong> from delivery date. Payment by check only:';
     } else {
       ptEl.innerHTML='All invoices are due <strong>within 30 days of delivery</strong>. Payment by check only:';
