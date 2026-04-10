@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+  @media only screen and (max-width:480px) {
+    .email-container { padding:20px 14px !important; }
+    .header-title { font-size:19px !important; }
+    .body-text { font-size:15px !important; }
+    .cta-btn { padding:14px 24px !important; font-size:15px !important; width:100% !important; box-sizing:border-box !important; text-align:center !important; }
+    .login-box { padding:16px 16px !important; }
+  }
+</style>
+</head>
+<body style="margin:0;padding:0;background-color:#fdf6ee;font-family:'Nunito',Helvetica,Arial,sans-serif;color:#2d1b0e;-webkit-text-size-adjust:100%;-ms-text-size-adjust:100%;">
+  <div class="email-container" style="max-width:600px;margin:0 auto;padding:32px 20px;">
+    <!-- HEADER -->
+    <div style="text-align:center;padding-bottom:24px;border-bottom:2px solid #ff0000;">
+      <img src="https://partners.lazarfamilybakehouse.com/images/lfb-logo-transparent.png" alt="Lazar Family Bakehouse" width="180" style="margin-bottom:16px;max-width:180px;height:auto;display:inline-block;"/>
+      <h1 class="header-title" style="font-family:Georgia,'Playfair Display',serif;font-size:22px;color:#2d1b0e;margin:0;">
+        Welcome to the Partner Portal
+      </h1>
+    </div>
+
+    <!-- BODY -->
+    <div style="padding:28px 0;">
+      <p class="body-text" style="font-size:16px;line-height:1.7;margin:0 0 18px;">Hi {{FIRST_NAME}},</p>
+
+      <p class="body-text" style="font-size:16px;line-height:1.7;margin:0 0 18px;">
+        Welcome to the Lazar Family Bakehouse family! We're excited to have <strong>{{STORE_NAME}}</strong> as a partner.
+      </p>
+
+      <p class="body-text" style="font-size:16px;line-height:1.7;margin:0 0 18px;">
+        We've set up a <strong>Partner Portal</strong> to make ordering as easy as possible. From there you can place orders, view invoices, browse our full product catalog, and manage your account details — all in one place.
+      </p>
+
+      <!-- CTA BUTTON -->
+      <div style="text-align:center;margin:0 0 28px;">
+        <a class="cta-btn" href="https://partners.lazarfamilybakehouse.com" style="display:inline-block;background-color:#3a2518;color:#ffffff;text-decoration:none;padding:14px 36px;font-size:16px;font-weight:700;letter-spacing:.04em;border-radius:4px;">
+          Visit the Partner Portal
+        </a>
+      </div>
+
+      <!-- LOGIN DETAILS -->
+      <div class="login-box" style="background-color:#fff8f0;border:1px solid #e8d5c0;border-radius:6px;padding:20px 24px;margin:0 0 24px;">
+        <p style="font-size:15px;font-weight:700;color:#2d1b0e;margin:0 0 10px;">Your login details:</p>
+        <p style="font-size:15px;line-height:1.7;margin:0 0 4px;">
+          <strong>Store:</strong> {{STORE_NAME}}
+        </p>
+        <p style="font-size:15px;line-height:1.7;margin:0 0 4px;">
+          <strong>PIN:</strong> {{PIN}}
+        </p>
+        <p style="font-size:13px;color:#5c4a3a;margin:8px 0 0;">
+          Select your store name from the dropdown on the portal, then enter your PIN to log in.
+        </p>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <p class="body-text" style="font-size:16px;line-height:1.7;margin:0 0 18px;">
+        <strong>Here's how it works:</strong> Once you're logged in, you'll see our full product lineup with live pricing and order minimums. Just select what you need, hit submit, and we'll take it from there. You'll get an email confirmation with your order details, and another when it's on its way.
+      </p>
+
+      <p class="body-text" style="font-size:16px;line-height:1.7;margin:0 0 18px;">
+        You'll also receive a friendly restock check-in from us roughly every two weeks — just a nudge, not a commitment. If your shelves are full, no action needed.
+      </p>
+
+      <p class="body-text" style="font-size:16px;line-height:1.7;margin:0 0 18px;">
+        Feel free to poke around the portal and update your contact details in Settings. If anything isn't working quite right or you have questions, just hit reply — we'd love to hear from you.
+      </p>
+
+      <p class="body-text" style="font-size:16px;line-height:1.7;margin:18px 0 0;">
+        Warm regards,<br/>
+        <strong>Jake &amp; Victoria Lazar</strong><br/>
+        <span style="font-size:14px;color:#5c4a3a;">Lazar Family Bakehouse</span>
+      </p>
+    </div>
+
+    <!-- FOOTER -->
+    <div style="border-top:2px solid #ff0000;padding-top:20px;text-align:center;">
+      <p style="font-size:13px;color:#5c4a3a;margin:0 0 6px;">Lazar Family Bakehouse · Englewood, CO</p>
+      <p style="font-size:13px;color:#5c4a3a;margin:0 0 6px;">
+        <a href="mailto:info@lazarfamilybakehouse.com" style="color:#3a2518;text-decoration:underline;">info@lazarfamilybakehouse.com</a>
+      </p>
+    </div>
+  </div>
+</body></html>

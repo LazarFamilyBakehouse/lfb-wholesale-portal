@@ -385,9 +385,16 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   </div>
   <div class="login-card">
     <div id="retailer-login-form">
-      <div class="lf">
+      <div class="lf" style="position:relative;">
         <label>Your Store</label>
-        <select id="retailer-select-login"><option value="">-- Select your store --</option></select>
+        <input type="hidden" id="retailer-select-login" value=""/>
+        <div id="store-picker" style="position:relative;">
+          <input type="text" id="store-search" placeholder="-- Select your store --" autocomplete="off"
+            style="width:100%;cursor:pointer;padding:11px 14px;border:1px solid var(--tan);border-radius:4px;font-family:'Nunito',sans-serif;font-size:.95rem;background:var(--cream);color:var(--brown-dk);"
+            onfocus="openStorePicker()" oninput="filterStores()" onkeydown="if(event.key==='Enter'){document.getElementById('store-list').style.display='none';document.getElementById('retailer-pin-input').focus();}"/>
+          <div id="store-list" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:100;background:var(--white);border:1px solid var(--tan);border-top:none;border-radius:0 0 6px 6px;max-height:200px;overflow-y:auto;box-shadow:0 6px 20px rgba(59,35,20,.12);">
+          </div>
+        </div>
       </div>
       <div class="lf">
         <label>Your PIN</label>
@@ -1073,13 +1080,42 @@ function resetInactivityTimer() {
   document.addEventListener(evt, resetInactivityTimer, {passive:true})
 );
 
+let _storePickerData=[];
 function populateLoginRetailers() {
-  const sel=document.getElementById('retailer-select-login');
-  const TEST_ACCOUNT_IDS=[29,46]; // hidden from partner login dropdown; still usable via admin (29=Supabase ID, 46=seed ID)
-  const sorted=[...db.retailers].filter(r=>r.status==='Active'&&!TEST_ACCOUNT_IDS.includes(r.id)).sort((a,b)=>a.name.localeCompare(b.name));
-  sel.innerHTML='<option value="">-- Select your store --</option>'+
-    sorted.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  const TEST_ACCOUNT_IDS=[29,46];
+  _storePickerData=[...db.retailers].filter(r=>r.status==='Active'&&!TEST_ACCOUNT_IDS.includes(r.id)).sort((a,b)=>a.name.localeCompare(b.name));
+  renderStoreList(_storePickerData);
 }
+function renderStoreList(list) {
+  const container=document.getElementById('store-list');
+  container.innerHTML=list.map(r=>`<div class="store-option" data-id="${r.id}" onclick="selectStore(${r.id},'${r.name.replace(/'/g,"\\&#39;")}')" style="padding:10px 14px;cursor:pointer;font-size:.93rem;border-bottom:1px solid #f0e6d8;transition:background .15s;"
+    onmouseenter="this.style.background='#fff8f0'" onmouseleave="this.style.background='transparent'">${r.name}</div>`).join('');
+  if(list.length===0) container.innerHTML='<div style="padding:10px 14px;color:var(--muted);font-size:.9rem;">No matching stores</div>';
+}
+function selectStore(id,name) {
+  document.getElementById('retailer-select-login').value=id;
+  document.getElementById('store-search').value=name;
+  document.getElementById('store-list').style.display='none';
+}
+function openStorePicker() {
+  const search=document.getElementById('store-search');
+  search.select();
+  document.getElementById('store-list').style.display='block';
+  renderStoreList(_storePickerData);
+}
+function filterStores() {
+  const q=document.getElementById('store-search').value.toLowerCase();
+  const filtered=_storePickerData.filter(r=>r.name.toLowerCase().includes(q));
+  renderStoreList(filtered);
+  document.getElementById('store-list').style.display='block';
+  // clear hidden value if user is typing (hasn't selected yet)
+  document.getElementById('retailer-select-login').value='';
+}
+document.addEventListener('click',function(e){
+  if(!document.getElementById('store-picker').contains(e.target)){
+    document.getElementById('store-list').style.display='none';
+  }
+});
 
 async function doLogin() {
   const err=document.getElementById('login-error');
