@@ -14,11 +14,17 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FROM_EMAIL = "Lazar Family Bakehouse <orders@lazarfamilybakehouse.com>";
 const REPLY_TO = "info@lazarfamilybakehouse.com";
+const BCC_EMAIL = "info@lazarfamilybakehouse.com";   // you get a copy of every send
 const PORTAL_URL = "https://partners.lazarfamilybakehouse.com";
 const LOGO_URL = "https://partners.lazarfamilybakehouse.com/images/lfb-logo-transparent.png";
 
-const ACTIVE_WINDOW_DAYS = 60;   // "active" = ordered within 60 days
 const RESTOCK_QUIET_DAYS = 14;   // don't nudge if ordered in last 14 days
+
+// Partners excluded from biweekly active emails
+const EXCLUDED_PARTNERS: string[] = [
+  "Lucky's Market Boulder",
+  "Lucky's Market Fort Collins",
+];
 
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -35,6 +41,7 @@ serve(async (req: Request) => {
     // Determine track from query string or body (default: active)
     const url = new URL(req.url);
     let track = url.searchParams.get("track") || "active";
+    const force = url.searchParams.get("force") === "true";
     if (req.method === "POST") {
       try {
         const body = await req.json();
@@ -43,12 +50,43 @@ serve(async (req: Request) => {
     }
     if (track !== "active" && track !== "inactive") track = "active";
 
+    // ─────────────── DEFENSIVE DATE GATE (third safety layer) ───────────────
+    // Refuses to send unless today is a scheduled send day.
+    //   Active track  → 2nd Tuesday OR 4th Tuesday of month (day 8–14 or 22–28)
+    //   Inactive track → 2nd Tuesday only (day 8–14)
+    // Admin portal manual triggers must pass ?force=true to bypass.
+    if (!force) {
+      const now = new Date();
+      const dow = now.getUTCDay();   // 0 = Sun, 2 = Tue
+      const dom = now.getUTCDate();
+      const isTuesday = dow === 2;
+      const is2ndTue = isTuesday && dom >= 8 && dom <= 14;
+      const is4thTue = isTuesday && dom >= 22 && dom <= 28;
+
+      if (track === "active" && !(is2ndTue || is4thTue)) {
+        return jsonResp({
+          sent: 0,
+          track,
+          skipped: true,
+          reason: `Blocked by date gate. Active track only fires on the 2nd or 4th Tuesday of the month. Today (UTC) is ${now.toISOString().slice(0, 10)} dow=${dow} dom=${dom}. Pass ?force=true to override.`,
+        });
+      }
+      if (track === "inactive" && !is2ndTue) {
+        return jsonResp({
+          sent: 0,
+          track,
+          skipped: true,
+          reason: `Blocked by date gate. Inactive track only fires on the 2nd Tuesday of the month. Today (UTC) is ${now.toISOString().slice(0, 10)} dow=${dow} dom=${dom}. Pass ?force=true to override.`,
+        });
+      }
+    }
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
     // 1. All active retailers with email addresses
     const { data: retailers, error: retErr } = await supabase
       .from("retailers")
-      .select("id, name, contact, email")
+      .select("id, name, contact, email, created_at, pin")
       .eq("status", "Active")
       .neq("email", "");
     if (retErr) throw retErr;
@@ -79,19 +117,32 @@ serve(async (req: Request) => {
     // 3. Filter retailers per track
     let targets: any[] = [];
     if (track === "active") {
-      // Ordered within 60 days, but NOT within last 14 days
+      // Active track: all partners EXCEPT excluded ones.
+      // Include if: ordered in 2026+ OR newly added (created_at in 2026+).
+      // Skip if: ordered within last 14 days (just restocked).
       targets = retailers.filter((r: any) => {
+        // Exclude specific partners
+        if (EXCLUDED_PARTNERS.includes(r.name)) return false;
+
         const last = lastOrderMap.get(r.id);
-        if (!last) return false;
-        const days = daysBetween(last);
-        return days >= RESTOCK_QUIET_DAYS && days <= ACTIVE_WINDOW_DAYS;
+
+        // Skip if they just ordered recently (within 14 days)
+        if (last && daysBetween(last) < RESTOCK_QUIET_DAYS) return false;
+
+        // Include if they ordered in 2026 or later
+        if (last && last >= "2026-01-01") return true;
+
+        // Include if they were added in 2026 or later (new partner)
+        if (r.created_at && r.created_at >= "2026-01-01") return true;
+
+        return false;
       });
     } else {
       // Inactive: never ordered, or last order > 60 days ago
       targets = retailers.filter((r: any) => {
         const last = lastOrderMap.get(r.id);
         if (!last) return true; // never ordered
-        return daysBetween(last) > ACTIVE_WINDOW_DAYS;
+        return daysBetween(last) > 60;
       });
     }
 
@@ -114,9 +165,10 @@ serve(async (req: Request) => {
     for (const retailer of targets) {
       const firstName = (retailer.contact || retailer.name || "").split(" ")[0] || "Partner";
       const last = lastOrderMap.get(retailer.id) || null;
+      const pin = retailer.pin || "";
       const html = track === "active"
-        ? buildActiveHtml(firstName, retailer.name)
-        : buildInactiveHtml(firstName, retailer.name, last);
+        ? buildActiveHtml(firstName, retailer.name, pin)
+        : buildInactiveHtml(firstName, retailer.name, last, pin);
 
       // Split emails into TO and CC based on overrides
       const allEmails = retailer.email.split(",").map((e: string) => e.trim()).filter(Boolean);
@@ -129,6 +181,7 @@ serve(async (req: Request) => {
         from: FROM_EMAIL,
         to: toEmails,
         reply_to: REPLY_TO,
+        bcc: [BCC_EMAIL],   // silent copy to the owner mailbox so you see every send
         subject,
         html,
       };
@@ -173,7 +226,7 @@ function jsonResp(data: any, status = 200) {
 }
 
 // ───────────────────────── ACTIVE (biweekly restock nudge) ─────────────────────────
-function buildActiveHtml(firstName: string, storeName: string): string {
+function buildActiveHtml(firstName: string, storeName: string, pin: string): string {
   return shell(`
     <h1 style="font-family:Georgia,'Playfair Display',serif;font-size:22px;color:#2d1b0e;margin:0;">
       Time to Restock?
@@ -189,6 +242,7 @@ function buildActiveHtml(firstName: string, storeName: string): string {
       Placing a new order takes just a minute through your partner portal:
     </p>
     ${ctaButton("Place an Order")}
+    ${loginBox(storeName, pin)}
     <p style="font-size:14px;line-height:1.6;color:#5c4a3a;margin:0 0 8px;">As a reminder, here are our minimums:</p>
     <ul style="font-size:14px;line-height:1.8;color:#5c4a3a;margin:0 0 24px;padding-left:20px;">
       <li>Mandelbites pouches — 8 units (increments of 8)</li>
@@ -203,7 +257,7 @@ function buildActiveHtml(firstName: string, storeName: string): string {
 }
 
 // ───────────────────────── INACTIVE (monthly check-in) ─────────────────────────
-function buildInactiveHtml(firstName: string, storeName: string, lastOrderDate: string | null): string {
+function buildInactiveHtml(firstName: string, storeName: string, lastOrderDate: string | null, pin: string): string {
   const lastLine = lastOrderDate
     ? `<p style="font-size:14px;line-height:1.7;color:#5c4a3a;margin:0 0 18px;font-style:italic;">
          Your last order with us was on ${formatPretty(lastOrderDate)}.
@@ -230,10 +284,28 @@ function buildInactiveHtml(firstName: string, storeName: string, lastOrderDate: 
       or questions about what's working, we'd love to hear from you. Just hit reply.
     </p>
     ${ctaButton("Visit the Portal")}
+    ${loginBox(storeName, pin)}
     <p style="font-size:16px;line-height:1.7;margin:0;">
       Whenever you're ready, we're here. Thanks for being part of the LFB family.
     </p>
   `);
+}
+
+function loginBox(storeName: string, pin: string): string {
+  if (!pin) return "";
+  return `
+    <div style="background-color:#fff8f0;border:1px solid #e8d5c0;border-radius:6px;padding:20px 24px;margin:0 0 24px;">
+      <p style="font-size:15px;font-weight:700;color:#2d1b0e;margin:0 0 10px;">Your login details:</p>
+      <p style="font-size:15px;line-height:1.7;margin:0 0 4px;">
+        <strong>Store:</strong> ${storeName}
+      </p>
+      <p style="font-size:15px;line-height:1.7;margin:0 0 4px;">
+        <strong>PIN:</strong> ${pin}
+      </p>
+      <p style="font-size:13px;color:#5c4a3a;margin:8px 0 0;">
+        Select your store from the dropdown, enter your PIN, and you're in.
+      </p>
+    </div>`;
 }
 
 function ctaButton(label: string): string {

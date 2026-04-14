@@ -513,6 +513,15 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
       <div class="fg"><label>Status</label><select id="er-status"><option>Active</option><option>Inactive</option></select></div>
     </div>
     <div class="form-row">
+      <div class="fg"><label>Email Enrollment <span style="font-weight:400;color:var(--muted);">(controls biweekly/monthly reminder sends)</span></label>
+        <select id="er-email-enrollment">
+          <option>Active</option>
+          <option>New - Don't Send Yet</option>
+          <option>Previously Ordered</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
       <div class="fg"><label>Custom Minis Price <span style="font-weight:400;color:var(--muted);">(leave blank for default $2.50)</span></label>
         <input type="number" min="0" step="0.01" id="er-minis-price" placeholder="e.g. 3.00 for hotel accounts"/>
       </div>
@@ -792,6 +801,7 @@ async function loadFromSupabase() {
     retMap[r.id]=r.name;
     return {id:r.id,name:r.name,contact:r.contact||'',email:r.email||'',phone:r.phone||'',
             day:r.delivery_day||'',notes:r.notes||'',pin:r.pin||'',status:r.status||'Active',
+            emailEnrollment:r.email_enrollment||"New - Don't Send Yet",
             joined:r.joined_date||'',priceOverrides:r.price_overrides||undefined,
             deliveryFee:getDeliveryFee(r.id)};
   });
@@ -1827,6 +1837,8 @@ function editRetailer(id) {
   const r=db.retailers.find(x=>x.id===id);if(!r)return;
   document.getElementById('er-id').value=id;
   ['name','contact','email','phone','day','notes','pin','status'].forEach(f=>{ const el=document.getElementById('er-'+f); if(el) el.value=r[f]||''; });
+  const eeEl=document.getElementById('er-email-enrollment');
+  if(eeEl) eeEl.value=r.emailEnrollment||"New - Don't Send Yet";
   const mpEl=document.getElementById('er-minis-price');
   if(mpEl) mpEl.value=(r.priceOverrides&&r.priceOverrides['Minis'])?r.priceOverrides['Minis']:'';
   openModal('retailer-modal');
@@ -1838,13 +1850,15 @@ async function saveRetailerEdit() {
   if(newPin&&db.retailers.some(x=>x.id!==id&&x.pin===newPin)){toast('PIN already in use.');return;}
   const updates={name:v('er-name'),contact:v('er-contact'),email:document.getElementById('er-email').value.trim(),
     phone:document.getElementById('er-phone').value.trim(),delivery_day:document.getElementById('er-day').value,
-    notes:v('er-notes'),pin:newPin,status:document.getElementById('er-status').value};
+    notes:v('er-notes'),pin:newPin,status:document.getElementById('er-status').value,
+    email_enrollment:document.getElementById('er-email-enrollment').value};
   const mpVal=parseFloat(document.getElementById('er-minis-price').value);
   if(!isNaN(mpVal)&&mpVal>0) updates.price_overrides={...(r.priceOverrides||{}),Minis:mpVal};
   const {error}=await sbClient.from('retailers').update(updates).eq('id',id);
   if(error){toast('Error updating retailer: '+error.message);return;}
   Object.assign(r,{name:updates.name,contact:updates.contact,email:updates.email,phone:updates.phone,
     day:updates.delivery_day,notes:updates.notes,pin:updates.pin,status:updates.status,
+    emailEnrollment:updates.email_enrollment,
     priceOverrides:updates.price_overrides||r.priceOverrides});
   renderRetailers();fillRetailerSelects();closeModal('retailer-modal');toast('✅ Retailer updated!');
 }
