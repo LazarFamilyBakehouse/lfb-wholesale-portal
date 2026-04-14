@@ -46,6 +46,7 @@ serve(async (req: Request) => {
     const force = url.searchParams.get("force") === "true";
     const dryrun = url.searchParams.get("dryrun") === "true";
     const dryrunEmail = url.searchParams.get("dryrun_email") || "info@lazarfamilybakehouse.com";
+    const testRetailer = url.searchParams.get("retailer") || "";  // filter to single retailer by name
     if (req.method === "POST") {
       try {
         const body = await req.json();
@@ -139,8 +140,13 @@ serve(async (req: Request) => {
       targets = retailers.filter((r: any) => r.email_enrollment === "Previously Ordered");
     }
 
+    // Optional: filter to a single retailer for testing
+    if (testRetailer) {
+      targets = targets.filter((r: any) => r.name.toLowerCase() === testRetailer.toLowerCase());
+    }
+
     if (!targets.length) {
-      return jsonResp({ sent: 0, track, message: `No ${track} partners need an email right now.` });
+      return jsonResp({ sent: 0, track, message: `No ${track} partners need an email right now.${testRetailer ? ` (filtered for "${testRetailer}")` : ''}` });
     }
 
     // 4. Send via Resend
