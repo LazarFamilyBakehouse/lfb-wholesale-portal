@@ -6,8 +6,8 @@ The reminder system now has **two tracks** that replace the old single Wednesday
 
 | Track | Who Gets It | Cadence | When |
 |---|---|---|---|
-| **Restock Nudge** (`?track=active`) | Partners who ordered in last 60 days but not in last 14 days | Biweekly | 1st & 3rd Tuesday, 3 PM MT |
-| **We Miss You** (`?track=inactive`) | Partners with no order in 60+ days (or never ordered) | Monthly | 1st Tuesday only, 3 PM MT |
+| **Restock Nudge** (`?track=active`) | Partners marked "Active" in email enrollment who haven't ordered in 14+ days | Biweekly | 2nd & 4th Tuesday, 3 PM MT |
+| **We Miss You** (`?track=inactive`) | Partners marked "Previously Ordered" in email enrollment | Monthly | 2nd Tuesday only, 3 PM MT |
 
 Same Edge Function (`weekly-reminder`) handles both — just pass `?track=active` or `?track=inactive`.
 
@@ -39,10 +39,10 @@ SELECT cron.unschedule('lfb-weekly-reminder');
 Paste and run in the SQL Editor:
 
 ```sql
--- Biweekly restock nudge — Tuesdays of weeks 1 & 3 of the month, 3 PM MT (21 UTC)
+-- Biweekly restock nudge — 2nd & 4th Tuesdays of the month, 3 PM MT (21 UTC)
 SELECT cron.schedule(
   'lfb-restock-nudge-biweekly',
-  '0 21 1-7,15-21 * 2',
+  '0 21 8-14,22-28 * 2',
   $$
   SELECT net.http_post(
     url := 'https://YOUR-PROJECT-REF.supabase.co/functions/v1/weekly-reminder?track=active',
@@ -55,10 +55,10 @@ SELECT cron.schedule(
   $$
 );
 
--- Monthly re-engagement — first Tuesday of the month, 3 PM MT (21 UTC)
+-- Monthly re-engagement — 2nd Tuesday of the month, 3 PM MT (21 UTC)
 SELECT cron.schedule(
   'lfb-reengagement-monthly',
-  '0 21 1-7 * 2',
+  '0 21 8-14 * 2',
   $$
   SELECT net.http_post(
     url := 'https://YOUR-PROJECT-REF.supabase.co/functions/v1/weekly-reminder?track=inactive',
@@ -96,7 +96,7 @@ You should see both `lfb-restock-nudge-biweekly` and `lfb-reengagement-monthly` 
 
 ## Cron Schedule Reference
 
-- `0 21 1-7,15-21 * 2` → Tuesdays of the first week AND third week, 21:00 UTC = 3 PM MDT / 2 PM MST
-- `0 21 1-7 * 2` → Tuesday of the first week only, 21:00 UTC
+- `0 21 8-14,22-28 * 2` → Tuesdays of the second week AND fourth week, 21:00 UTC = 3 PM MDT / 2 PM MST
+- `0 21 8-14 * 2` → Tuesday of the second week only, 21:00 UTC
 
 Note: during MST (Nov–Mar), these fire at 2 PM MT instead of 3 PM. If you want to lock in 3 PM year-round, use `0 22 …` for the MST months or switch cron UTC offsets manually.

@@ -1523,9 +1523,14 @@ function buildAdminContent() {
       <button class="btn" style="background:var(--brown);color:var(--white);" onclick="sendReminders('active')" id="btn-send-active">Send Restock Nudge Now</button>
     </div>
     <div style="padding:12px 14px;background:var(--cream);border-left:3px solid var(--gold);margin-bottom:12px;">
-      <div style="font-weight:700;font-size:.9rem;color:var(--brown-dk);margin-bottom:4px;">We Miss You · Monthly (1st Tuesday)</div>
+      <div style="font-weight:700;font-size:.9rem;color:var(--brown-dk);margin-bottom:4px;">We Miss You · Monthly (2nd Tuesday)</div>
       <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px;">Friendly check-in for partners who haven't ordered in 60+ days. No discount — just a warm re-engagement.</p>
       <button class="btn btn-gold" onclick="sendReminders('inactive')" id="btn-send-inactive">Send Re-Engagement Now</button>
+    </div>
+    <div style="padding:12px 14px;background:#fff3e0;border-left:3px solid #e65100;margin-bottom:12px;">
+      <div style="font-weight:700;font-size:.9rem;color:#e65100;margin-bottom:4px;">🧪 Dry Run Test</div>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px;">Sends ALL matching emails to your inbox only (info@lazarfamilybakehouse.com). No partners will be contacted.</p>
+      <button class="btn" style="background:#e65100;color:var(--white);" onclick="sendReminders('active', true)" id="btn-dryrun">Dry Run — Active Track</button>
     </div>
     <div id="reminder-result" style="margin-top:12px;font-size:.85rem;display:none;"></div>
   </div>
@@ -2323,20 +2328,24 @@ function emailSummary(){const s=document.getElementById('sum-start').value,e=doc
 //  [18] SETTINGS
 //  changeAdminPin(), clearAllData(), reseedFromMaster().
 // =====================================================================
-async function sendReminders(track) {
+async function sendReminders(track, dryrun=false) {
   const isActive=track==='active';
-  const btnId=isActive?'btn-send-active':'btn-send-inactive';
+  const btnId=dryrun?'btn-dryrun':(isActive?'btn-send-active':'btn-send-inactive');
   const btn=document.getElementById(btnId);
   const res=document.getElementById('reminder-result');
-  const label=isActive?'Send Restock Nudge Now':'Send Re-Engagement Now';
-  const confirmMsg=isActive
+  const label=dryrun?'Dry Run — Active Track':(isActive?'Send Restock Nudge Now':'Send Re-Engagement Now');
+  const confirmMsg=dryrun
+    ? 'Send a DRY RUN of the active track? All emails go to your inbox only — no partners contacted.'
+    : isActive
     ? 'Send biweekly restock reminder to active partners who haven\'t ordered in 14+ days?'
     : 'Send re-engagement email to inactive partners (no order in 60+ days)?';
   if(!confirm(confirmMsg)) return;
   btn.disabled=true; btn.textContent='Sending…';
   res.style.display='none';
   try {
-    const resp=await fetch(SUPABASE_URL+'/functions/v1/weekly-reminder?track='+track,{
+    let qp='track='+track+'&force=true';
+    if(dryrun) qp+='&dryrun=true';
+    const resp=await fetch(SUPABASE_URL+'/functions/v1/weekly-reminder?'+qp,{
       method:'POST',
       headers:{'Authorization':'Bearer '+SUPABASE_ANON,'Content-Type':'application/json'},
       body:JSON.stringify({track})
@@ -2346,7 +2355,8 @@ async function sendReminders(track) {
     res.style.display='block';
     res.style.color='var(--positive)';
     const kind=isActive?'restock nudge':'re-engagement';
-    res.innerHTML=`Sent <strong>${data.sent}</strong> ${kind} email${data.sent!==1?'s':''}${data.total?` · ${data.total} targeted`:''}`;
+    const dryLabel=data.dryrun?'<span style="color:#e65100;font-weight:700;">[DRY RUN]</span> ':'';
+    res.innerHTML=`${dryLabel}Sent <strong>${data.sent}</strong> ${kind} email${data.sent!==1?'s':''}${data.total?` · ${data.total} targeted`:''}${data.dryrun_email?' · all routed to '+data.dryrun_email:''}`;
     if(data.message) res.innerHTML+=`<br><span style="color:var(--muted);font-size:.8rem;">${data.message}</span>`;
     if(data.errors) { res.innerHTML+=`<br><span style="color:var(--danger);font-size:.8rem;">${data.errors.length} failed — check console</span>`; console.warn('[LFB] Reminder errors:',data.errors); }
     toast(`Sent ${data.sent} ${kind} email${data.sent!==1?'s':''}!`);

@@ -1,9 +1,11 @@
 // LFB Partner Reminder Edge Function
 // Two tracks:
-//   ?track=active   → Biweekly (Tuesdays). Emails partners who ordered in last 60 days
-//                     but NOT in the last 14 days. Restock nudge.
-//   ?track=inactive → Monthly (first Tuesday). Emails partners who haven't ordered in 60+ days.
+//   ?track=active   → Biweekly (2nd & 4th Tuesdays). Emails "Active" partners
+//                     who haven't ordered in 14+ days. Restock nudge.
+//   ?track=inactive → Monthly (2nd Tuesday only). Emails "Previously Ordered" partners.
 //                     Friendly re-engagement check-in, no discount.
+//   ?dryrun=true    → Routes ALL emails to dryrun_email (default: info@lazarfamilybakehouse.com).
+//                     No partners receive emails. Subject prefixed with [DRY RUN].
 // Triggered by pg_cron or manual via admin portal buttons.
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
@@ -42,6 +44,8 @@ serve(async (req: Request) => {
     const url = new URL(req.url);
     let track = url.searchParams.get("track") || "active";
     const force = url.searchParams.get("force") === "true";
+    const dryrun = url.searchParams.get("dryrun") === "true";
+    const dryrunEmail = url.searchParams.get("dryrun_email") || "info@lazarfamilybakehouse.com";
     if (req.method === "POST") {
       try {
         const body = await req.json();
@@ -83,10 +87,14 @@ serve(async (req: Request) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-    // 1. All active retailers with email addresses
+    // 1. All active retailers with email addresses and their email_enrollment setting.
+    //    email_enrollment drives targeting:
+    //      'Active'              → biweekly restock nudge
+    //      'Previously Ordered'  → monthly "We Miss You" check-in
+    //      'New - Don't Send Yet'→ never emailed by the cron
     const { data: retailers, error: retErr } = await supabase
       .from("retailers")
-      .select("id, name, contact, email, created_at, pin")
+      .select("id, name, contact, email, created_at, pin, email_enrollment")
       .eq("status", "Active")
       .neq("email", "");
     if (retErr) throw retErr;
@@ -95,6 +103,7 @@ serve(async (req: Request) => {
     }
 
     // 2. Pull all orders so we can compute each retailer's last-order date
+    //    (still needed for the "last order date" line in the inactive email body).
     const { data: allOrders, error: ordErr } = await supabase
       .from("orders")
       .select("retailer_id, order_date");
@@ -114,36 +123,20 @@ serve(async (req: Request) => {
       return Math.floor((today.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
     };
 
-    // 3. Filter retailers per track
+    // 3. Filter retailers per track, driven entirely by email_enrollment.
     let targets: any[] = [];
     if (track === "active") {
-      // Active track: all partners EXCEPT excluded ones.
-      // Include if: ordered in 2026+ OR newly added (created_at in 2026+).
-      // Skip if: ordered within last 14 days (just restocked).
+      // Active track: only partners explicitly marked 'Active'.
+      // Skip if they just ordered within the last RESTOCK_QUIET_DAYS (avoid nudging right after a restock).
       targets = retailers.filter((r: any) => {
-        // Exclude specific partners
-        if (EXCLUDED_PARTNERS.includes(r.name)) return false;
-
+        if (r.email_enrollment !== "Active") return false;
         const last = lastOrderMap.get(r.id);
-
-        // Skip if they just ordered recently (within 14 days)
         if (last && daysBetween(last) < RESTOCK_QUIET_DAYS) return false;
-
-        // Include if they ordered in 2026 or later
-        if (last && last >= "2026-01-01") return true;
-
-        // Include if they were added in 2026 or later (new partner)
-        if (r.created_at && r.created_at >= "2026-01-01") return true;
-
-        return false;
+        return true;
       });
     } else {
-      // Inactive: never ordered, or last order > 60 days ago
-      targets = retailers.filter((r: any) => {
-        const last = lastOrderMap.get(r.id);
-        if (!last) return true; // never ordered
-        return daysBetween(last) > 60;
-      });
+      // Inactive track: only partners explicitly marked 'Previously Ordered'.
+      targets = retailers.filter((r: any) => r.email_enrollment === "Previously Ordered");
     }
 
     if (!targets.length) {
@@ -177,15 +170,17 @@ serve(async (req: Request) => {
       const toEmails = allEmails.filter((e: string) => !ccLower.includes(e.toLowerCase()));
       const ccEmails = allEmails.filter((e: string) => ccLower.includes(e.toLowerCase()));
 
+      // In dryrun mode, redirect ALL recipients to the dryrun email
+      // so real partners never get emailed during testing.
       const emailPayload: any = {
         from: FROM_EMAIL,
-        to: toEmails,
+        to: dryrun ? [dryrunEmail] : toEmails,
         reply_to: REPLY_TO,
-        bcc: [BCC_EMAIL],   // silent copy to the owner mailbox so you see every send
-        subject,
+        bcc: dryrun ? [] : [BCC_EMAIL],
+        subject: dryrun ? `[DRY RUN — for ${retailer.name}] ${subject}` : subject,
         html,
       };
-      if (ccEmails.length) emailPayload.cc = ccEmails;
+      if (!dryrun && ccEmails.length) emailPayload.cc = ccEmails;
 
       try {
         const res = await fetch("https://api.resend.com/emails", {
@@ -208,6 +203,8 @@ serve(async (req: Request) => {
     return jsonResp({
       sent,
       track,
+      dryrun: dryrun || undefined,
+      dryrun_email: dryrun ? dryrunEmail : undefined,
       total: targets.length,
       skipped: retailers.length - targets.length,
       errors: errors.length ? errors : undefined,
