@@ -1092,7 +1092,7 @@ function resetInactivityTimer() {
 
 let _storePickerData=[];
 function populateLoginRetailers() {
-  const TEST_ACCOUNT_IDS=[29];
+  const TEST_ACCOUNT_IDS=[];
   _storePickerData=[...db.retailers].filter(r=>r.status==='Active'&&!TEST_ACCOUNT_IDS.includes(r.id)).sort((a,b)=>a.name.localeCompare(b.name));
   renderStoreList(_storePickerData);
 }
