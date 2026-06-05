@@ -2267,13 +2267,14 @@ function refreshDashboard() {
   // Avg items per week (last 52 weeks)
   const totalUnits=orders52.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
   const avgPerWeek=Math.round(totalUnits/52);
+  const revAll=db.orders.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty*(Number(p.price)||0)),0),0);
   sg.innerHTML=`
     <div class="stat-card"><div class="si">🏪</div><div class="sl">Total Partners</div><div class="sv">${db.retailers.length}</div></div>
     <div class="stat-card"><div class="si"></div><div class="sl">Active Partners</div><div class="sv">${db.retailers.filter(r=>r.status==='Active').length} of ${db.retailers.length}</div></div>
     <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${db.orders.length}</div></div>
     <div class="stat-card"><div class="si">🍪</div><div class="sl">Avg Items / Week</div><div class="sv">${avgPerWeek}</div></div>
     <div class="stat-card"><div class="si">🔄</div><div class="sl">Auto-Orders</div><div class="sv">${db.autoOrders.filter(a=>a.active).length}</div></div>
-    <div class="stat-card"><div class="si">💰</div><div class="sl">Last 52 Weeks Revenue</div><div class="sv">${fmtCur(rev52)}</div>${yoyChange!==null?`<div style="font-size:.72rem;margin-top:3px;color:${yoyChange>=0?'#2e7d4f':'var(--danger)'};">${yoyChange>=0?'▲':'▼'} ${Math.abs(yoyChange)}% vs prior year</div>`:''}</div>`;
+    <div class="stat-card"><div class="si">💰</div><div class="sl">Total Revenue</div><div class="sv">${fmtCur(revAll)}</div>${yoyChange!==null?`<div style="font-size:.72rem;margin-top:3px;color:${yoyChange>=0?'#2e7d4f':'var(--danger)'};">${yoyChange>=0?'▲':'▼'} ${Math.abs(yoyChange)}% vs prior year</div>`:''}</div>`;
   const recent=[...db.orders].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
   const dob=document.getElementById('dash-orders');
   dob.innerHTML=recent.length?recent.map(o=>`<tr><td><strong>${invNum(o.invoiceNum)}</strong></td><td>${esc(o.retailerName)}</td><td>${fmtDate(o.date)}</td><td><strong>${fmtCur(o.total)}</strong></td><td><span class="badge ${sBadge(o.status)}">${o.status}</span></td></tr>`).join(''):
