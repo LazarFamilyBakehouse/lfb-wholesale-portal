@@ -202,6 +202,10 @@ serve(async (req: Request) => {
       } catch (e: any) {
         errors.push(`${retailer.name}: ${e.message}`);
       }
+
+      // Pause 3s between sends to stay under Resend free-tier rate limit
+      // and avoid Gmail spam/threading triggers from rapid-fire sends
+      await new Promise((r) => setTimeout(r, 3000));
     }
 
     console.log(`[LFB Reminder:${track}] Sent ${sent}/${targets.length}. Errors: ${errors.length}`);

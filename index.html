@@ -653,8 +653,8 @@ const SEED_DATA = {
     {id:43, name:"Melco Resorts (Manila)",     contact:"Steve Sasso",    email:"stevesasso77@gmail.com",         phone:"", day:"", notes:"Intro via Mitch Lazar 3/12/26 · GM at Melco Resorts Manila · International / future export opportunity", pin:"3025", status:"Inactive", joined:"2026-03-12"},
     {id:44, name:"Atlantis",                   contact:"Maria Torres",   email:"marie.torres@mac.com",           phone:"", day:"", notes:"Intro via Mitch Lazar 3/12/26 · CMO at Atlantis · International / luxury resort opportunity",           pin:"3026", status:"Inactive", joined:"2026-03-12"},
     {id:45, name:"Landy Labadie",              contact:"Landy Labadie",  email:"landy30@aol.com",                phone:"", day:"", notes:"Intro via Mitch Lazar 3/12/26 · Hospitality industry contact",                                         pin:"3027", status:"Inactive", joined:"2026-03-12"},
-    // ── TEST ACCOUNT (hidden from partner dropdown) ──
-    {id:46, name:"Jake's Cafe",               contact:"Jake",           email:"jake@lazar.tv",                  phone:"", day:"", notes:"Internal test account",                                                                                pin:"4001", status:"Active",   joined:"2026-04-07"},
+    // ── Jake's Cafe ──
+    {id:46, name:"Jake's Cafe",               contact:"Jake",           email:"jake@lazar.tv",                  phone:"", day:"", notes:"",                                                                                                     pin:"4001", status:"Active",   joined:"2026-04-07"},
   ],
   orders: [
     // ── Spinelli's Market ── (verified $950.00)
@@ -1092,7 +1092,7 @@ function resetInactivityTimer() {
 
 let _storePickerData=[];
 function populateLoginRetailers() {
-  const TEST_ACCOUNT_IDS=[29,46];
+  const TEST_ACCOUNT_IDS=[29];
   _storePickerData=[...db.retailers].filter(r=>r.status==='Active'&&!TEST_ACCOUNT_IDS.includes(r.id)).sort((a,b)=>a.name.localeCompare(b.name));
   renderStoreList(_storePickerData);
 }
