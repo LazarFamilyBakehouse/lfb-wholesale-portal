@@ -1725,6 +1725,7 @@ function buildRetailerContent() {
   const t=new Date(), iso=d=>d.toISOString().split('T')[0];
   const nxt=new Date(t); nxt.setDate(t.getDate()+7);
   document.getElementById('ro-delivery').value=iso(nxt);
+  document.getElementById('ro-delivery').min=iso(nxt);
   document.getElementById('rao-start').value=iso(t);
   buildCatalogGrid();
   buildAutoOrderGrid('rao-prod-grid',session&&session.retailer?session.retailer.id:null);
@@ -3204,7 +3205,9 @@ async function retailerPlaceCatalogOrder() {
     if(item.qty<moq){toast(`⚠️ Minimum order for ${getProductDisplayName(item.product)} is ${moq} units.`);return;}
   }
   const delivery=document.getElementById('ro-delivery').value;
-  if(delivery && delivery < todayStr()){toast('⚠️ Delivery date cannot be in the past.');return;}
+  const minDeliv=new Date();minDeliv.setDate(minDeliv.getDate()+7);
+  const minDelivStr=minDeliv.toISOString().split('T')[0];
+  if(delivery && delivery < minDelivStr){toast('⚠️ Delivery date must be at least 7 days from today.');return;}
   const notes=v('ro-notes');
   const allItems=[...products];
   // Invoice numbers are assigned by admin only — retailer orders start at 0 (TBD)
