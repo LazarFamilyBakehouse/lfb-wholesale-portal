@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=1200, initial-scale=0.42, user-scalable=yes" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 <title>Partner Portal – Lazar Family Bakehouse</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico"/>
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png"/>
@@ -230,43 +230,48 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 @media(max-width:640px){
   /* ── Layout ── */
-  main{padding:14px 12px;}
-  header{padding:10px 12px;}
-  .hdr-text h1{font-size:1.2rem;}
-  .hdr-text p{font-size:.62rem;letter-spacing:.08em;}
+  main{padding:14px 10px;}
+  header{padding:10px 12px;flex-wrap:wrap;gap:6px;}
+  .hdr-text h1{font-size:1.15rem;}
+  .hdr-text p{font-size:.58rem;letter-spacing:.08em;}
   .hdr-right{position:static;margin-left:auto;}
   .hdr-center{width:100%;justify-content:space-between;}
-  header{flex-wrap:wrap;gap:6px;}
   .hdr-user{display:none;}
   .btn-logout{padding:5px 10px;font-size:.72rem;}
 
-  /* ── Nav ── */
-  nav button{padding:10px 14px;font-size:.74rem;letter-spacing:.04em;}
+  /* ── Nav: scrollable, finger-friendly ── */
+  nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:0;}
+  nav::-webkit-scrollbar{display:none;}
+  nav button{padding:12px 16px;font-size:.8rem;letter-spacing:.02em;flex-shrink:0;}
 
   /* ── Page headings ── */
   .page-h{font-size:1.3rem;}
-  .page-sub{font-size:.82rem;margin-bottom:16px;}
+  .page-sub{font-size:.72rem;margin-bottom:14px;}
 
   /* ── Panels ── */
-  .panel{padding:14px 13px;}
-  .panel-title{font-size:.97rem;}
+  .panel{padding:14px 12px;}
+  .panel-title{font-size:.95rem;}
 
   /* ── Stats / KPI grids ── */
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .stat-card{padding:13px 11px;}
-  .stat-card .sv{font-size:1.55rem;}
-  .analytics-grid{grid-template-columns:repeat(3,1fr);gap:10px;}
-  .anal-card .av{font-size:1.35rem;}
+  .stat-card{padding:12px 10px;}
+  .stat-card .sv{font-size:1.4rem;}
+  .stat-card .sl{font-size:.65rem;}
+  .analytics-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px;}
+  .anal-card{padding:12px;}
+  .anal-card .av{font-size:1.2rem;}
+  .anal-card .al{font-size:.65rem;}
 
   /* ── Forms ── */
-  .form-row{flex-direction:column;gap:10px;}
+  .form-row{grid-template-columns:1fr !important;gap:10px;}
   .fg{min-width:unset;}
-  .prod-item{grid-template-columns:1fr 70px 80px auto;}
+  .fg input,.fg select,.fg textarea{font-size:16px;}
+  .prod-item{grid-template-columns:1fr 70px 80px auto;font-size:.82rem;}
   .form-actions{flex-direction:column;gap:8px;}
   .form-actions .btn{width:100%;text-align:center;}
 
   /* ── Tables ── */
-  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   table{min-width:520px;}
   .modal table{min-width:400px;}
 
@@ -277,6 +282,9 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
   /* ── Analytics charts ── */
   #anal-charts-row{grid-template-columns:1fr !important;}
+  .bar-chart{height:100px;gap:2px;}
+  .bar-label{font-size:.55rem !important;}
+  .bar-val{font-size:.55rem !important;}
 
   /* ── Catalog ── */
   .catalog-grid{grid-template-columns:1fr !important;}
@@ -291,12 +299,13 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   .modal-actions .btn{width:100%;text-align:center;}
 
   /* ── Misc ── */
-  .notif-item{padding:10px 12px;}
+  .notif-item{padding:10px 12px;font-size:.8rem;}
   .retailer-welcome{flex-direction:column;gap:10px;padding:16px 14px;}
   .retailer-welcome .rw-icon{font-size:1.8rem;}
-  .btn{padding:9px 14px;font-size:.83rem;}
-  .btn-sm{padding:5px 10px;font-size:.75rem;}
-  .hdr-right .hdr-user{display:none;}
+  .btn{padding:10px 16px;font-size:.85rem;}
+  .btn-sm{padding:6px 12px;font-size:.78rem;}
+  .auto-grid{grid-template-columns:1fr !important;}
+  #toast{right:10px;left:10px;bottom:16px;font-size:.84rem;}
 }
 
 /* ===================== NOTIFICATION BANNER ===================== */
