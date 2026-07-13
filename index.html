@@ -231,13 +231,13 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 @media(max-width:640px){
   /* ── Layout ── */
   main{padding:14px 10px;}
-  header{padding:10px 12px;flex-wrap:wrap;gap:6px;}
-  .hdr-text h1{font-size:1.15rem;}
-  .hdr-text p{font-size:.58rem;letter-spacing:.08em;}
-  .hdr-right{position:static;margin-left:auto;}
-  .hdr-center{width:100%;justify-content:space-between;}
+  header{padding:8px 12px;flex-wrap:wrap;gap:4px;justify-content:space-between !important;overflow:visible;}
+  .hdr-text h1{font-size:1.05rem;white-space:nowrap;}
+  .hdr-text p{font-size:.55rem;letter-spacing:.06em;}
+  .hdr-right{position:static !important;right:auto !important;margin-left:auto;flex-shrink:0;}
+  .hdr-center{flex:1;min-width:0;}
   .hdr-user{display:none;}
-  .btn-logout{padding:5px 10px;font-size:.72rem;}
+  .btn-logout{padding:4px 10px;font-size:.7rem;}
 
   /* ── Nav: scrollable, finger-friendly ── */
   nav{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:0;}
