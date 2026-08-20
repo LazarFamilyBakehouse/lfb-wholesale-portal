@@ -1,0 +1,38 @@
+# ── Internal strategy & sales docs — never publish to the web ──
+buyer_tracking_sheet.md
+whova_buyer_dms.md
+whova_buyer_touch2.md
+whova_booth_content.md
+tomorrow_action_plan.md
+
+# ── Internal security documentation ──
+docs/SECURITY.md
+
+# ── Automation logs (can contain push output / credentials) ──
+autopush_log.txt
+*.log
+
+# ── Secrets — never commit ──
+.env
+.env.*
+*.pem
+*.key
+secrets.json
+
+# ── OS / editor noise ──
+Thumbs.db
+desktop.ini
+.DS_Store
+*.swp
+~$*
+
+# ── Scripts that are local-only ──
+REMOVE_FROM_WEB.bat
+
+# Local-only helper scripts (RESTORE_TOKEN.bat contains a credential)
+FIX_TOKEN.bat
+RESTORE_TOKEN.bat
+*.bat.bak
+index_LOCAL_BACKUP.html
+gitignore_BACKUP.txt
+SYNC_REPO.bat
