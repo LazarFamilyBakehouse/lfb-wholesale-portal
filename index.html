@@ -102,7 +102,7 @@ main { padding:26px 30px;max-width:1200px;margin:0 auto;flex:1; }
 .stats-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px; }
 .stat-card { background:var(--white);border:1px solid var(--tan);border-radius:4px;padding:18px;box-shadow:none;border-top:3px solid var(--red); }
 .stat-card .sl { font-size:.73rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted); }
-.stat-card .sv { font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--brown-dk);margin-top:4px; }
+.stat-card .sv { font-family:'Playfair Display',serif;font-size:clamp(1.25rem,1.1vw + .85rem,1.9rem);font-weight:700;color:var(--brown-dk);margin-top:4px;overflow-wrap:anywhere;line-height:1.15; }
 .stat-card .si { font-size:1.4rem;float:right;margin-top:-2px; }
 
 /* ===================== BUTTONS ===================== */
@@ -593,6 +593,9 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
         </div>
         <div class="fg" id="cal-ev-qty-wrap" style="display:none;"><label># Packages</label>
           <input type="number" id="cal-ev-qty" min="1" value="1" style="width:80px;"/>
+        </div>
+        <div class="fg" id="cal-ev-amt-wrap" style="display:none;"><label>Your payout $ (from GB)</label>
+          <input type="number" id="cal-ev-amt" min="0" step="0.01" placeholder="optional" style="width:110px;"/>
         </div>
       </div>
       <div class="fg"><label>Title / Notes (optional)</label>
@@ -1432,6 +1435,7 @@ function buildAdminContent() {
       <h3 id="cal-month-label"></h3>
       <button class="btn btn-outline btn-sm" onclick="calNav(1)">▶</button>
       <button class="btn btn-outline btn-sm" onclick="calNav(0)">Today</button>
+      <label style="display:flex;align-items:center;gap:5px;font-size:.78rem;color:var(--muted);cursor:pointer;margin-left:4px;"><input type="checkbox" id="cal-show-done" checked onchange="renderCalendar()"/> Show completed</label>
       <div class="cal-legend">
         <span><span class="cal-dot" style="background:#2e7d4f;"></span>Delivery</span>
         <span><span class="cal-dot" style="background:var(--gold);"></span>Bake day</span>
@@ -3075,6 +3079,18 @@ function refreshAnalytics() {
     <div class="anal-card"><div class="al">Avg Order Value</div><div class="av">${fmtCur(avgOrder)}</div><div class="ac">Per invoice</div></div>
     <div class="anal-card"><div class="al">Active Partners</div><div class="av">${activeCount}</div><div class="ac">Ordered in last 2 mo.</div></div>
     <div class="anal-card"><div class="al">Avg Orders / Mo</div><div class="av">${avgOrdersPerMonth.toFixed(1)}</div><div class="ac">Trailing 6 months</div></div>
+    ${(()=>{
+      const allGb=(db.calEvents||[]).filter(e=>e.type==='gb_ship');
+      const confirmed=allGb.filter(e=>Number(e.amount)>0);
+      const gbConf=confirmed.reduce((s,e)=>s+Number(e.amount||0),0);
+      // Projected: scanned orders awaiting their statement, valued at known per-package payout rates
+      const pending=allGb.filter(e=>!(Number(e.amount)>0)&&GB_PACKAGES[e.package_key]&&GB_PACKAGES[e.package_key].payout);
+      const gbProj=pending.reduce((s,e)=>s+(e.qty||1)*GB_PACKAGES[e.package_key].payout,0);
+      if(gbConf<=0&&gbProj<=0) return '';
+      return `
+    <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 Goldbelly Confirmed</div><div class="av">${fmtCur(gbConf)}</div><div class="ac">${confirmed.length} payout${confirmed.length!==1?'s':''} on Goldbelly statements</div></div>
+    ${gbProj>0?`<div class="anal-card" style="border-top-color:var(--danger);opacity:.85;"><div class="al">🚚 Goldbelly Projected</div><div class="av">${fmtCur(gbProj)}</div><div class="ac">${pending.length} scanned order${pending.length!==1?'s':''} awaiting statement</div></div>`:''}
+    <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">Combined Revenue</div><div class="av">${fmtCur(rev+gbConf+gbProj)}</div><div class="ac">Wholesale + GB confirmed${gbProj>0?' + projected':''}</div></div>`;})()}
     `;
 
   // Monthly bar chart — last 12 months (use noon UTC to avoid timezone off-by-one)
@@ -3434,7 +3450,7 @@ async function retailerRequestAutoOrder() {
 //  Data: db.orders (confirmed only), db.calEvents, db.autoOrders.
 // =====================================================================
 const GB_PACKAGES = {
-  'grandma-jeanne-sampler': {name:"Grandma Jeanne's Sampler", price:54.95, serves:8,
+  'grandma-jeanne-sampler': {name:"Grandma Jeanne's Sampler", price:54.95, payout:45.00, serves:8,
     summary:'Each box: 1 bag Chocolate-Chip, 1 Almond, 1 Funfetti, 1 Gluten-Free CC + 2 Mandel Bread two-packs + thank-you card, red wrap',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/grandma-jeanne-sampler',
     contents:[
@@ -3445,7 +3461,7 @@ const GB_PACKAGES = {
       {item:'Choc-Chip Mandel Bread Two-Pack — 2 oz', qty:2, img:'images/two-pack-choc-chip.jpg'},
       {item:'Thank You card + red wrap & Grandma sticker', qty:1}
     ]},
-  'the-shabbat-mandelbites-box': {name:'The Shabbat MandelBites Box', price:74.95, serves:8,
+  'the-shabbat-mandelbites-box': {name:'The Shabbat MandelBites Box', price:74.95, payout:46.80, serves:8,
     summary:'Each box: 2 bags Chocolate-Chip, 1 Almond, 1 Gluten-Free CC + thank-you card, navy & white wrap',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/the-shabbat-mandelbites-box',
     contents:[
@@ -3454,7 +3470,7 @@ const GB_PACKAGES = {
       {item:'GF Chocolate-Chip MandelBites — 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
       {item:'Thank You card + navy & white wrap', qty:1}
     ]},
-  'mandelbites-pick-your-mix-6-pack': {name:'"Pick Your Mix" 6-Pack', price:89.95, serves:12,
+  'mandelbites-pick-your-mix-6-pack': {name:'"Pick Your Mix" 6-Pack', price:89.95, payout:61.00, serves:12,
     summary:'Each box: 6 bags of MandelBites in the MIX THE CUSTOMER CHOSE (check the Goldbelly order slip!) + thank-you card',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/mandelbites-pick-your-mix-6-pack',
     note:"Customer picks the mix — check the Goldbelly order for which 6 bags. Combos: 6 CC · 6 GF · 3 CC+3 Funfetti · 3 CC+3 Almond · 3 CC+3 GF · 3 Funfetti+3 Almond · 2 CC+2 Almond+2 Funfetti.",
@@ -3462,7 +3478,7 @@ const GB_PACKAGES = {
       {item:'MandelBites 8 oz bags — customer\'s choice of mix', qty:6, img:'images/cc-mandelbites.jpg'},
       {item:'Thank You card + gift wrap', qty:1}
     ]},
-  'treat-the-office': {name:'"Treat the Office" — 24 Pack', price:124.95, serves:24,
+  'treat-the-office': {name:'"Treat the Office" — 24 Pack', price:124.95, payout:85.00, serves:24,
     summary:'Each box: 24 little pouches of Chocolate-Chip Mandel Bread (2 pieces each) + thank-you card with gift message',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/treat-the-office',
     contents:[
@@ -3516,11 +3532,15 @@ function projectAO(ao,y,m){
 // Build dateStr → [chips] for one month
 function calEventsByDate(y,m){
   const map={}; const push=(ds,ev)=>{(map[ds]=map[ds]||[]).push(ev);};
+  const showDone=document.getElementById('cal-show-done')?.checked!==false;
   db.orders.forEach(o=>{
-    if(o.delivery&&o.status!=='Pending')
-      push(o.delivery,{label:'📦 '+esc(o.retailerName),cls:'c-order',click:`viewOrderDetail(${o.id})`});
+    if(!o.delivery||o.status==='Pending')return;
+    const delivered=o.status==='Delivered';
+    if(delivered&&!showDone)return;
+    push(o.delivery,{label:(delivered?'✓ ':'')+'📦 '+esc(o.retailerName),cls:'c-order'+(delivered?' cal-done':''),click:`viewOrderDetail(${o.id})`});
   });
   db.calEvents.forEach(ev=>{
+    if(ev.done&&!showDone)return;
     if(ev.type==='gb_ship'){
       const p=GB_PACKAGES[ev.package_key];
       push(ev.event_date,{label:`🚚 ${ev.qty||1}× ${esc(p?p.name:(ev.title||'GB package'))}`,cls:'c-gb',click:`openCalEventModal(${ev.id})`,desc:p&&p.summary?p.summary:''});
@@ -3624,6 +3644,7 @@ function calEvTypeChanged(){
   const gb=document.getElementById('cal-ev-type').value==='gb_ship';
   document.getElementById('cal-ev-pkg-wrap').style.display=gb?'':'none';
   document.getElementById('cal-ev-qty-wrap').style.display=gb?'':'none';
+  document.getElementById('cal-ev-amt-wrap').style.display=gb?'':'none';
 }
 async function saveCalEvent(){
   const type=document.getElementById('cal-ev-type').value;
@@ -3632,6 +3653,8 @@ async function saveCalEvent(){
   if(type==='gb_ship'){
     row.package_key=document.getElementById('cal-ev-pkg').value;
     row.qty=Math.max(1,Number(document.getElementById('cal-ev-qty').value)||1);
+    const amt=Number(document.getElementById('cal-ev-amt').value);
+    if(amt>0) row.amount=amt;
   }
   const {data,error}=await sbClient.from('calendar_events').insert(row).select().single();
   if(error){toast('⚠️ Could not save: '+error.message);return;}
@@ -3678,7 +3701,7 @@ function openCalEventModal(id){
     const p=GB_PACKAGES[ev.package_key], q=ev.qty||1;
     document.getElementById('gb-pkg-title').textContent='🚚 '+p.name;
     body.innerHTML=`
-      <p style="font-size:.85rem;color:var(--muted);margin:0 0 10px;">Ship by <strong style="color:var(--brown-dk);">${fmtDate(ev.event_date)}</strong> · ${q} package${q!==1?'s':''} · ${fmtCur(p.price)} each · serves ${p.serves}${ev.title?` · 📝 ${esc(ev.title)}`:''}</p>
+      <p style="font-size:.85rem;color:var(--muted);margin:0 0 10px;">Ship by <strong style="color:var(--brown-dk);">${fmtDate(ev.event_date)}</strong> · ${q} package${q!==1?'s':''} · ${fmtCur(p.price)} each list · serves ${p.serves}${ev.amount?` · <strong style="color:#2e7d4f;">your payout ${fmtCur(ev.amount)}</strong>`:''}${ev.title?` · 📝 ${esc(ev.title)}`:''}</p>
       <div style="font-weight:700;font-size:.85rem;color:var(--brown-dk);margin-bottom:4px;">Each package contains:</div>
       ${p.contents.map(c=>`<div class="gb-pkg-row">${c.img?`<img src="${c.img}" alt=""/>`:'<span style="width:42px;text-align:center;font-size:1.3rem;">💌</span>'}<div style="flex:1;font-size:.85rem;">${esc(c.item)}</div><div style="font-weight:700;color:var(--brown-dk);">× ${c.qty}</div></div>`).join('')}
       ${q>1?`<div style="font-weight:700;font-size:.85rem;color:var(--brown-dk);margin:12px 0 4px;">To pack all ${q} packages:</div>${p.contents.map(c=>`<div style="display:flex;justify-content:space-between;font-size:.83rem;padding:3px 0;border-bottom:1px solid var(--cream-dk);"><span>${esc(c.item)}</span><strong>× ${c.qty*q}</strong></div>`).join('')}`:''}
