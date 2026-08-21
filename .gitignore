@@ -36,3 +36,8 @@ RESTORE_TOKEN.bat
 index_LOCAL_BACKUP.html
 gitignore_BACKUP.txt
 SYNC_REPO.bat
+index_calendar_preview.html
+CALENDAR_SETUP.sql
+index_LIVE_BACKUP*.html
+GO_LIVE.bat
+ROLLBACK_LIVE.bat

@@ -381,6 +381,34 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 /* ===================== LOGO ENHANCEMENTS ===================== */
 .hdr-logo-svg { display:flex;align-items:center;justify-content:center;flex-shrink:0; }
 .login-mark-svg { width:320px; height:auto; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+/* ── Calendar tab ── */
+.cal-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.cal-toolbar h3{font-family:'Playfair Display',serif;color:var(--brown-dk);font-size:1.25rem;margin:0 6px;min-width:190px;text-align:center;}
+.cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-left:auto;font-size:.72rem;color:var(--muted);}
+.cal-legend span{display:flex;align-items:center;gap:5px;}
+.cal-dot{width:9px;height:9px;border-radius:3px;display:inline-block;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-dow{text-align:center;font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:4px 0;}
+.cal-cell{background:var(--white);border:1px solid var(--tan);border-radius:8px;min-height:92px;padding:5px 6px;cursor:pointer;transition:box-shadow .15s;display:flex;flex-direction:column;gap:3px;overflow:hidden;}
+.cal-cell:hover{box-shadow:0 2px 8px rgba(45,27,14,.12);}
+.cal-cell.cal-other{background:var(--cream);opacity:.55;}
+.cal-cell.cal-today{border:2px solid var(--gold);}
+.cal-daynum{font-size:.78rem;font-weight:700;color:var(--brown-dk);}
+.cal-today .cal-daynum{color:var(--gold);}
+.cal-chip{font-size:.66rem;line-height:1.25;padding:2px 5px;border-radius:5px;background:var(--cream);border-left:3px solid var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--brown-dk);}
+.cal-chip:hover{filter:brightness(.95);}
+.cal-chip.c-order{border-left-color:#2e7d4f;background:#edf5ef;}
+.cal-chip.c-bake{border-left-color:var(--gold);background:#f7f0df;}
+.cal-chip.c-gb{border-left-color:var(--danger);background:#f9ecea;}
+.cal-chip.c-auto{border-left-color:#8a7a68;background:var(--cream);border-left-style:dashed;font-style:italic;}
+.cal-chip.c-note{border-left-color:#6b7a8f;background:#eef1f5;}
+.cal-chip.c-media{border-left-color:#7b5ea7;background:#f0ecf7;}
+.cal-chip.c-prospect{border-left-color:#1f7a72;background:#e8f4f2;}
+.cal-done{opacity:.5;text-decoration:line-through;}
+.cal-more{font-size:.62rem;color:var(--muted);}
+.gb-pkg-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--cream-dk);}
+.gb-pkg-row img{width:42px;height:42px;object-fit:cover;border-radius:6px;flex-shrink:0;}
+@media(max-width:640px){.cal-cell{min-height:64px;padding:3px 4px;}.cal-chip{font-size:.58rem;padding:1px 3px;}.cal-legend{display:none;}}
 </style>
 </head>
 <body>
@@ -539,6 +567,55 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('retailer-modal')">Cancel</button>
       <button class="btn btn-primary" onclick="saveRetailerEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CALENDAR DAY MODAL ==================== -->
+<div class="modal-overlay" id="cal-day-modal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-title" id="cal-day-title">📅 Day</div>
+    <div id="cal-day-events" style="margin-bottom:14px;"></div>
+    <div style="border-top:1px solid var(--tan);padding-top:12px;">
+      <div style="font-weight:700;color:var(--brown-dk);font-size:.9rem;margin-bottom:8px;">Add to this day</div>
+      <div class="form-row">
+        <div class="fg"><label>Type</label>
+          <select id="cal-ev-type" onchange="calEvTypeChanged()">
+            <option value="bake">🍞 Bake Day</option>
+            <option value="gb_ship">🚚 Goldbelly Shipment</option>
+            <option value="media">📸 Media / Content</option>
+            <option value="prospect">🤝 Potential Partner Drop/Ship</option>
+            <option value="note">📝 Note</option>
+          </select>
+        </div>
+        <div class="fg" id="cal-ev-pkg-wrap" style="display:none;"><label>Package</label>
+          <select id="cal-ev-pkg"></select>
+        </div>
+        <div class="fg" id="cal-ev-qty-wrap" style="display:none;"><label># Packages</label>
+          <input type="number" id="cal-ev-qty" min="1" value="1" style="width:80px;"/>
+        </div>
+      </div>
+      <div class="fg"><label>Title / Notes (optional)</label>
+        <input type="text" id="cal-ev-notes" placeholder="e.g. Double batch — holiday rush"/>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('cal-day-modal')">Close</button>
+      <button class="btn btn-primary" onclick="saveCalEvent()">Add to Calendar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== GB PACKAGE MODAL ==================== -->
+<div class="modal-overlay" id="gb-pkg-modal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-title" id="gb-pkg-title">📦 Package</div>
+    <div id="gb-pkg-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-sm" id="gb-pkg-delete" style="margin-right:auto;">🗑 Remove</button>
+      <button class="btn btn-outline btn-sm" id="gb-pkg-push">⏭ Push 1 week</button>
+      <button class="btn btn-primary btn-sm" id="gb-pkg-done">✓ Mark done</button>
+      <button class="btn btn-outline" onclick="closeModal('gb-pkg-modal')">Close</button>
     </div>
   </div>
 </div>
@@ -756,17 +833,40 @@ const SEED_DATA = {
 };
 
 // In-memory store – populated from Supabase on login
-let db = { retailers:[], orders:[], autoOrders:[], notifications:[], nextInvoice:101 };
+let db = { retailers:[], orders:[], autoOrders:[], calEvents:[], notifications:[], nextInvoice:101 };
 
-// Auto-orders & notifications live in localStorage (no Supabase table yet)
+// Notifications still live in localStorage. Auto-orders now live in Supabase
+// (they used to be localStorage-only, which is why partner-created ones vanished).
 function loadLocalExtras() {
-  try { const e=JSON.parse(localStorage.getItem('lfb_extras')||'{}'); db.autoOrders=e.autoOrders||[]; db.notifications=e.notifications||[]; } catch {}
+  try { const e=JSON.parse(localStorage.getItem('lfb_extras')||'{}'); db.notifications=e.notifications||[]; } catch {}
 }
 function saveLocalExtras() {
-  localStorage.setItem('lfb_extras', JSON.stringify({ autoOrders:db.autoOrders, notifications:db.notifications }));
+  localStorage.setItem('lfb_extras', JSON.stringify({ notifications:db.notifications }));
 }
-// saveDB shim for auto-order/notification code paths
+// saveDB shim for notification code paths
 function saveDB() { saveLocalExtras(); }
+
+// Map a Supabase auto_orders row → the shape the UI has always used
+function mapAO(a){return {id:a.id,retailerId:a.retailer_id,retailerName:a.retailer_name,
+  freq:a.freq,day:a.day,start:a.start_date||'',notes:a.notes||'',
+  products:a.products||[],active:a.active!==false,created:a.created_at||''};}
+
+// One-time migration: rescue any auto-orders stranded in this browser's
+// localStorage (the old storage) into Supabase, then stop using localStorage.
+async function migrateLocalAutoOrders() {
+  let legacy=[];
+  try { legacy=(JSON.parse(localStorage.getItem('lfb_extras')||'{}').autoOrders)||[]; } catch {}
+  if(!legacy.length) return;
+  const rows=legacy.map(ao=>({retailer_id:ao.retailerId,retailer_name:ao.retailerName||'',
+    freq:ao.freq||'Weekly',day:ao.day||'Monday',start_date:ao.start||null,
+    notes:ao.notes||'',products:ao.products||[],active:ao.active!==false}));
+  const {data,error}=await sbClient.from('auto_orders').insert(rows).select();
+  if(error){ lfbDiag('auto-order migration failed: '+error.message); return; }
+  db.autoOrders.push(...(data||[]).map(mapAO));
+  try { const e=JSON.parse(localStorage.getItem('lfb_extras')||'{}'); delete e.autoOrders;
+        localStorage.setItem('lfb_extras', JSON.stringify(e)); } catch {}
+  toast(`✅ Rescued ${rows.length} auto-order${rows.length!==1?'s':''} from this browser into the database.`);
+}
 
 // Load all data from Supabase (admin only)
 async function loadFromSupabase() {
@@ -836,7 +936,21 @@ async function loadFromSupabase() {
     return (b.id||0)-(a.id||0);
   });
   db.nextInvoice = db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100)+1;
-  lfbDiag(`loaded ${db.retailers.length} retailers, ${db.orders.length} orders`);
+
+  // Auto-orders — now database-backed (admin sees every partner's)
+  const { data:aoRows, error:aoErr } = await sbClient.from('auto_orders').select('*');
+  if (aoErr) { lfbDiag('auto_orders load failed (table missing? run CALENDAR_SETUP.sql): '+aoErr.message); db.autoOrders=[]; }
+  else {
+    db.autoOrders = (aoRows||[]).map(mapAO);
+    if (!db.autoOrders.length) await migrateLocalAutoOrders();
+  }
+
+  // Calendar events — bake days, Goldbelly ship deadlines, notes
+  const { data:cevRows, error:cevErr } = await sbClient.from('calendar_events').select('*');
+  if (cevErr) { lfbDiag('calendar_events load failed (table missing? run CALENDAR_SETUP.sql): '+cevErr.message); db.calEvents=[]; }
+  else db.calEvents = cevRows||[];
+
+  lfbDiag(`loaded ${db.retailers.length} retailers, ${db.orders.length} orders, ${db.autoOrders.length} auto-orders, ${db.calEvents.length} calendar events`);
   console.log(`[LFB] Loaded ${db.retailers.length} retailers, ${db.orders.length} orders`);
 }
 
@@ -960,10 +1074,10 @@ const PRODUCT_DISPLAY_NAMES = {
   'CC Mandelbites':'Chocolate-Chip MandelBites',
   'Funfetti Mandelbites':'Funfetti MandelBites',
   'Gluten-Free Chocolate-Chip':'Gluten-Free Chocolate-Chip MandelBites',
-  'Indiv. Mandel - Chocolate Chip':'Individual Mandel Bread — Chocolate Chip',
-  'Indiv. Mandel - Almond':'Individual Mandel Bread — Almond',
-  'Indiv. Mandel - Funfetti':'Individual Mandel Bread — Funfetti',
-  'Indiv. Mandel - GF Choc Chip':'Individual Mandel Bread — Gluten-Free Chocolate Chip',
+  'Indiv. Mandel - Chocolate Chip':'Individual Pieces of Mandel Bread — Chocolate Chip',
+  'Indiv. Mandel - Almond':'Individual Pieces of Mandel Bread — Almond',
+  'Indiv. Mandel - Funfetti':'Individual Pieces of Mandel Bread — Funfetti',
+  'Indiv. Mandel - GF Choc Chip':'Individual Pieces of Mandel Bread — Gluten-Free Chocolate Chip',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate Chip',
   'CC Mandel Bread':'Chocolate-Chip Mandel Bread (Red Bag)',
   'Mandel Bread Rounds':'Mandel Bread Rounds'
@@ -1194,6 +1308,9 @@ async function doLogin() {
       total:parseFloat(o.total)||0
     }));
     db.nextInvoice=db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100)+1;
+    // Load this partner's auto-orders from the database (PIN-checked RPC)
+    const {data:raoRows}=await sbClient.rpc('get_retailer_auto_orders',{p_retailer_id:rid,p_pin:pin});
+    db.autoOrders=(raoRows||[]).map(mapAO);
     loadLocalExtras(); bootApp(); setupRetailerRealtime(rid,pin);
   }
 }
@@ -1245,6 +1362,7 @@ function bootApp() {
 function buildAdminNav() {
   document.getElementById('main-nav').innerHTML=`
     <button onclick="showSection('dashboard')">📊 Dashboard</button>
+    <button onclick="showSection('calendar')">📅 Calendar</button>
     <button onclick="showSection('analytics')">📈 Analytics</button>
     <button onclick="showSection('retailers')">🏪 Partners</button>
     <button onclick="showSection('orders')">📦 Orders</button>
@@ -1266,12 +1384,13 @@ function showSection(name) {
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.classList.add('active');
-  const maps={admin:['dashboard','analytics','retailers','orders','auto-orders','bake','settings'],retailer:['r-home','r-orders','r-new-order','r-auto','r-account']};
+  const maps={admin:['dashboard','calendar','analytics','retailers','orders','auto-orders','bake','settings'],retailer:['r-home','r-orders','r-new-order','r-auto','r-account']};
   const map=session.type==='admin'?maps.admin:maps.retailer;
   const idx=map.indexOf(name);
   const navBtns=document.querySelectorAll('nav button');
   if(idx>=0&&navBtns[idx]) navBtns[idx].classList.add('active');
   if(name==='dashboard') refreshDashboard();
+  if(name==='calendar') renderCalendar();
   if(name==='analytics') refreshAnalytics();
   if(name==='retailers') renderRetailers();
   if(name==='orders'){renderOrders();fillRetailerSelects();}
@@ -1302,6 +1421,33 @@ function buildAdminContent() {
     <div class="tbl-wrap"><table><thead><tr><th>Invoice</th><th>Retailer</th><th>Date</th><th>Total</th><th>Status</th></tr></thead><tbody id="dash-orders"></tbody></table></div>
   </div>
   <div class="panel"><div class="panel-title">🔄 Active Auto-Orders</div><div id="dash-auto"></div></div>
+</section>
+
+<!-- CALENDAR -->
+<section class="section" id="sec-calendar">
+  <h2 class="page-h">Calendar</h2><p class="page-sub">Confirmed deliveries, bake days, and Goldbelly ship deadlines — click any day to add.</p>
+  <div class="panel">
+    <div class="cal-toolbar">
+      <button class="btn btn-outline btn-sm" onclick="calNav(-1)">◀</button>
+      <h3 id="cal-month-label"></h3>
+      <button class="btn btn-outline btn-sm" onclick="calNav(1)">▶</button>
+      <button class="btn btn-outline btn-sm" onclick="calNav(0)">Today</button>
+      <div class="cal-legend">
+        <span><span class="cal-dot" style="background:#2e7d4f;"></span>Delivery</span>
+        <span><span class="cal-dot" style="background:var(--gold);"></span>Bake day</span>
+        <span><span class="cal-dot" style="background:var(--danger);"></span>Goldbelly ship</span>
+        <span><span class="cal-dot" style="background:#8a7a68;"></span>Auto-order (projected)</span>
+        <span><span class="cal-dot" style="background:#7b5ea7;"></span>Media</span>
+        <span><span class="cal-dot" style="background:#1f7a72;"></span>Potential partner</span>
+        <span><span class="cal-dot" style="background:#6b7a8f;"></span>Note</span>
+      </div>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">🚚 Next 14 Days</div>
+    <div id="cal-upcoming"></div>
+  </div>
 </section>
 
 <!-- ANALYTICS -->
@@ -2203,7 +2349,7 @@ function getAutoOrderGridProducts(containerId) {
   return products;
 }
 
-function createAutoOrder() {
+async function createAutoOrder() {
   const retailerId=Number(document.getElementById('ao-retailer').value);
   const freq=document.getElementById('ao-freq').value;
   const day=document.getElementById('ao-day').value;
@@ -2213,8 +2359,13 @@ function createAutoOrder() {
   if(!retailerId){toast('Select a retailer.');return;}
   if(!products.length){toast('Add at least one product with quantity > 0.');return;}
   const retailer=db.retailers.find(r=>r.id===retailerId);
-  db.autoOrders.push({id:Date.now(),retailerId,retailerName:retailer.name,freq,day,start,notes,products,active:true,created:new Date().toISOString()});
-  saveDB();renderAutoOrders();
+  const {data,error}=await sbClient.from('auto_orders').insert({
+    retailer_id:retailerId,retailer_name:retailer.name,freq,day,
+    start_date:start||null,notes,products
+  }).select().single();
+  if(error){toast('⚠️ Error saving auto-order: '+error.message);return;}
+  db.autoOrders.push(mapAO(data));
+  renderAutoOrders();
   document.getElementById('ao-retailer').value='';
   buildAutoOrderGrid('ao-prod-grid',null);
   document.getElementById('ao-notes').value='';
@@ -2238,8 +2389,14 @@ function renderAutoOrders() {
       </div>
     </div>`).join('');
 }
-function toggleAO(id){const ao=db.autoOrders.find(x=>x.id===id);if(!ao)return;ao.active=!ao.active;saveDB();renderAutoOrders();toast(`Auto-order ${ao.active?'resumed':'paused'}.`);}
-function deleteAO(id){if(!confirm('Delete this auto-order?'))return;db.autoOrders=db.autoOrders.filter(x=>x.id!==id);saveDB();renderAutoOrders();toast('✅ Deleted.');}
+async function toggleAO(id){const ao=db.autoOrders.find(x=>x.id===id);if(!ao)return;
+  const {error}=await sbClient.from('auto_orders').update({active:!ao.active}).eq('id',id);
+  if(error){toast('⚠️ '+error.message);return;}
+  ao.active=!ao.active;renderAutoOrders();toast(`Auto-order ${ao.active?'resumed':'paused'}.`);}
+async function deleteAO(id){if(!confirm('Delete this auto-order?'))return;
+  const {error}=await sbClient.from('auto_orders').delete().eq('id',id);
+  if(error){toast('⚠️ '+error.message);return;}
+  db.autoOrders=db.autoOrders.filter(x=>x.id!==id);renderAutoOrders();toast('✅ Deleted.');}
 async function genOrderFromAO(id) {
   const ao=db.autoOrders.find(x=>x.id===id);if(!ao)return;
   const total=ao.products.reduce((s,p)=>s+(p.qty*p.price),0);
@@ -3246,7 +3403,7 @@ async function retailerPlaceCatalogOrder() {
 //  [20b] RETAILER AUTO-ORDER REQUEST
 //  retailerRequestAutoOrder() saves template to db.autoOrders (localStorage).
 // =====================================================================
-function retailerRequestAutoOrder() {
+async function retailerRequestAutoOrder() {
   const r=session.retailer;
   const freq=document.getElementById('rao-freq').value;
   const day=document.getElementById('rao-day').value;
@@ -3256,12 +3413,284 @@ function retailerRequestAutoOrder() {
   if(!products.length){toast('Add at least one product.');return;}
   // Auto-fill prices from catalog
   products.forEach(p=>{if(!p.price&&PRODUCT_PRICES[p.product])p.price=PRODUCT_PRICES[p.product];});
-  db.autoOrders.push({id:Date.now(),retailerId:r.id,retailerName:r.name,freq,day,start,notes,products,active:true,created:new Date().toISOString()});
-  saveDB();
+  // Save to the database via PIN-checked RPC (used to be localStorage-only,
+  // which silently lost partner auto-orders — the Selvasr bug)
+  const {data:newId,error}=await sbClient.rpc('retailer_save_auto_order',{
+    p_retailer_id:r.id,p_pin:session.pin,p_freq:freq,p_day:day,
+    p_start:start||null,p_notes:notes,p_products:products
+  });
+  if(error){toast('⚠️ Error saving auto-order: '+error.message);return;}
+  db.autoOrders.push({id:newId,retailerId:r.id,retailerName:r.name,freq,day,start,notes,products,active:true,created:new Date().toISOString()});
   buildAutoOrderGrid('rao-prod-grid',r.id);
   document.getElementById('rao-notes').value='';
   toast(`✅ Auto-order set up! ${freq} on ${day}s starting ${start||'immediately'}.`);
   renderRetailerAuto();
+}
+
+// =====================================================================
+//  [22c] CALENDAR + GOLDBELLY PACKAGES
+//  renderCalendar() month grid · projectAO() auto-order projection ·
+//  openCalDayModal() add bake/GB-ship/note · openCalEventModal() detail.
+//  Data: db.orders (confirmed only), db.calEvents, db.autoOrders.
+// =====================================================================
+const GB_PACKAGES = {
+  'grandma-jeanne-sampler': {name:"Grandma Jeanne's Sampler", price:54.95, serves:8,
+    summary:'Each box: 1 bag Chocolate-Chip, 1 Almond, 1 Funfetti, 1 Gluten-Free CC + 2 Mandel Bread two-packs + thank-you card, red wrap',
+    url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/grandma-jeanne-sampler',
+    contents:[
+      {item:'Chocolate-Chip MandelBites — 8 oz bag', qty:1, img:'images/cc-mandelbites.jpg'},
+      {item:'Almond MandelBites — 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg'},
+      {item:'Funfetti MandelBites — 8 oz bag', qty:1, img:'images/funfetti-mandelbites.jpg'},
+      {item:'GF Chocolate-Chip MandelBites — 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
+      {item:'Choc-Chip Mandel Bread Two-Pack — 2 oz', qty:2, img:'images/two-pack-choc-chip.jpg'},
+      {item:'Thank You card + red wrap & Grandma sticker', qty:1}
+    ]},
+  'the-shabbat-mandelbites-box': {name:'The Shabbat MandelBites Box', price:74.95, serves:8,
+    summary:'Each box: 2 bags Chocolate-Chip, 1 Almond, 1 Gluten-Free CC + thank-you card, navy & white wrap',
+    url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/the-shabbat-mandelbites-box',
+    contents:[
+      {item:'Chocolate-Chip MandelBites — 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg'},
+      {item:'Almond MandelBites — 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg'},
+      {item:'GF Chocolate-Chip MandelBites — 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
+      {item:'Thank You card + navy & white wrap', qty:1}
+    ]},
+  'mandelbites-pick-your-mix-6-pack': {name:'"Pick Your Mix" 6-Pack', price:89.95, serves:12,
+    summary:'Each box: 6 bags of MandelBites in the MIX THE CUSTOMER CHOSE (check the Goldbelly order slip!) + thank-you card',
+    url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/mandelbites-pick-your-mix-6-pack',
+    note:"Customer picks the mix — check the Goldbelly order for which 6 bags. Combos: 6 CC · 6 GF · 3 CC+3 Funfetti · 3 CC+3 Almond · 3 CC+3 GF · 3 Funfetti+3 Almond · 2 CC+2 Almond+2 Funfetti.",
+    contents:[
+      {item:'MandelBites 8 oz bags — customer\'s choice of mix', qty:6, img:'images/cc-mandelbites.jpg'},
+      {item:'Thank You card + gift wrap', qty:1}
+    ]},
+  'treat-the-office': {name:'"Treat the Office" — 24 Pack', price:124.95, serves:24,
+    summary:'Each box: 24 little pouches of Chocolate-Chip Mandel Bread (2 pieces each) + thank-you card with gift message',
+    url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/treat-the-office',
+    contents:[
+      {item:'Choc-Chip Mandel Bread 2 oz pouch (2 pieces)', qty:24, img:'images/two-pack-choc-chip.jpg'},
+      {item:'Thank You card (custom gift message) + red wrap', qty:1}
+    ]},
+  'bakehouse-tour': {name:'Bakehouse MandelBites Tour', price:114.95, serves:16,
+    summary:'Each box: 2 bags of EVERY flavor — 2 Chocolate-Chip, 2 Almond, 2 Funfetti, 2 Gluten-Free CC (8 bags) + thank-you card',
+    url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/bakehouse-tour',
+    contents:[
+      {item:'Chocolate-Chip MandelBites — 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg'},
+      {item:'Almond MandelBites — 8 oz bag', qty:2, img:'images/almond-mandelbites.jpg'},
+      {item:'Funfetti MandelBites — 8 oz bag', qty:2, img:'images/funfetti-mandelbites.jpg'},
+      {item:'GF Chocolate-Chip MandelBites — 8 oz bag', qty:2, img:'images/gf-choc-chip-mandelbites.jpg'},
+      {item:'Thank You card + red wrap & Grandma sticker', qty:1}
+    ]}
+};
+
+const _CAL_DOW=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+let _calCursor=(()=>{const n=new Date();return {y:n.getFullYear(),m:n.getMonth()};})();
+let _calSelectedDate=null;
+function dstr(y,m,d){return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+function calNav(dir){
+  if(dir===0){const n=new Date();_calCursor={y:n.getFullYear(),m:n.getMonth()};}
+  else{_calCursor.m+=dir;if(_calCursor.m<0){_calCursor.m=11;_calCursor.y--;}if(_calCursor.m>11){_calCursor.m=0;_calCursor.y++;}}
+  renderCalendar();
+}
+
+// Project an active auto-order onto the days of month (y,m).
+// Weekly → every matching weekday. Bi-Weekly → every 14 days from the start
+// date. Monthly → the same nth-weekday-of-month as the start date
+// (start on the 3rd Tuesday → repeats every 3rd Tuesday).
+function projectAO(ao,y,m){
+  const dow=_CAL_DOW.indexOf(ao.day); if(dow<0) return [];
+  const startD=ao.start?new Date(ao.start+'T12:00:00'):null;
+  const daysIn=new Date(y,m+1,0).getDate();
+  const matching=[]; for(let d=1;d<=daysIn;d++){ if(new Date(y,m,d).getDay()===dow) matching.push(d); }
+  const ok=d=>!startD||new Date(y,m,d,12)>=startD;
+  if(ao.freq==='Weekly') return matching.filter(ok);
+  if(ao.freq==='Bi-Weekly'){
+    const anchor=startD||new Date(y,m,matching[0]||1,12);
+    return matching.filter(d=>{const dt=new Date(y,m,d,12);if(dt<anchor)return false;
+      return Math.round((dt-anchor)/(7*864e5))%2===0;});
+  }
+  // Monthly
+  const nth=startD?Math.ceil(startD.getDate()/7):1;
+  const d=matching[Math.min(nth,matching.length)-1];
+  return (d&&ok(d))?[d]:[];
+}
+
+// Build dateStr → [chips] for one month
+function calEventsByDate(y,m){
+  const map={}; const push=(ds,ev)=>{(map[ds]=map[ds]||[]).push(ev);};
+  db.orders.forEach(o=>{
+    if(o.delivery&&o.status!=='Pending')
+      push(o.delivery,{label:'📦 '+esc(o.retailerName),cls:'c-order',click:`viewOrderDetail(${o.id})`});
+  });
+  db.calEvents.forEach(ev=>{
+    if(ev.type==='gb_ship'){
+      const p=GB_PACKAGES[ev.package_key];
+      push(ev.event_date,{label:`🚚 ${ev.qty||1}× ${esc(p?p.name:(ev.title||'GB package'))}`,cls:'c-gb',click:`openCalEventModal(${ev.id})`,desc:p&&p.summary?p.summary:''});
+    } else if(ev.type==='bake')
+      push(ev.event_date,{label:'🍞 '+esc(ev.title||'Bake day'),cls:'c-bake',click:`openCalEventModal(${ev.id})`});
+    else if(ev.type==='media')
+      push(ev.event_date,{label:'📸 '+esc(ev.title||'Media'),cls:'c-media',click:`openCalEventModal(${ev.id})`});
+    else if(ev.type==='prospect')
+      push(ev.event_date,{label:'🤝 '+esc(ev.title||'Potential partner'),cls:'c-prospect',click:`openCalEventModal(${ev.id})`});
+    else
+      push(ev.event_date,{label:'📝 '+esc(ev.title||'Note'),cls:'c-note',click:`openCalEventModal(${ev.id})`});
+    if(ev.done){const arr=map[ev.event_date];const last=arr[arr.length-1];last.label='✓ '+last.label;last.cls+=' cal-done';}
+  });
+  db.autoOrders.filter(a=>a.active).forEach(ao=>{
+    projectAO(ao,y,m).forEach(d=>push(dstr(y,m,d),{label:'🔄 '+esc(ao.retailerName),cls:'c-auto',click:`showSection('auto-orders')`}));
+  });
+  return map;
+}
+
+function renderCalendar(){
+  const grid=document.getElementById('cal-grid'); if(!grid) return;
+  const {y,m}=_calCursor;
+  document.getElementById('cal-month-label').textContent=new Date(y,m,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  const evMap=calEventsByDate(y,m);
+  const first=new Date(y,m,1).getDay(), daysIn=new Date(y,m+1,0).getDate(), daysPrev=new Date(y,m,0).getDate();
+  const today=todayStr();
+  let html=_CAL_DOW.map(d=>`<div class="cal-dow">${d.slice(0,3)}</div>`).join('');
+  const cells=Math.ceil((first+daysIn)/7)*7;
+  for(let i=0;i<cells;i++){
+    const dnum=i-first+1;
+    if(dnum<1){html+=`<div class="cal-cell cal-other"><span class="cal-daynum">${daysPrev+dnum}</span></div>`;continue;}
+    if(dnum>daysIn){html+=`<div class="cal-cell cal-other"><span class="cal-daynum">${dnum-daysIn}</span></div>`;continue;}
+    const ds=dstr(y,m,dnum), evs=evMap[ds]||[], shown=evs.slice(0,4);
+    html+=`<div class="cal-cell${ds===today?' cal-today':''}" onclick="openCalDayModal('${ds}')">
+      <span class="cal-daynum">${dnum}</span>
+      ${shown.map(e=>`<div class="cal-chip ${e.cls}" onclick="event.stopPropagation();${e.click}">${e.label}</div>`).join('')}
+      ${evs.length>4?`<span class="cal-more">+${evs.length-4} more</span>`:''}
+    </div>`;
+  }
+  grid.innerHTML=html;
+  renderCalUpcoming();
+}
+
+function renderCalUpcoming(){
+  const el=document.getElementById('cal-upcoming'); if(!el) return;
+  const t=new Date(); t.setHours(12,0,0,0);
+  const monthMaps={}, rows=[];
+  for(let i=0;i<14;i++){
+    const d=new Date(t); d.setDate(t.getDate()+i);
+    const mk=d.getFullYear()+'-'+d.getMonth();
+    if(!monthMaps[mk]) monthMaps[mk]=calEventsByDate(d.getFullYear(),d.getMonth());
+    const ds=dstr(d.getFullYear(),d.getMonth(),d.getDate());
+    (monthMaps[mk][ds]||[]).forEach(e=>rows.push(
+      `<div style="display:flex;gap:10px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--cream-dk);">
+        <span style="font-size:.78rem;color:var(--muted);min-width:96px;flex-shrink:0;">${fmtDate(ds)}</span>
+        <div style="flex:1;">
+          <div class="cal-chip ${e.cls}" style="cursor:pointer;max-width:none;display:inline-block;" onclick="${e.click}">${e.label}</div>
+          ${e.desc?`<div style="font-size:.74rem;color:var(--muted);padding-top:2px;line-height:1.4;">${esc(e.desc)}</div>`:''}
+        </div>
+      </div>`));
+  }
+  el.innerHTML=rows.length?rows.join(''):'<p style="color:var(--muted);font-style:italic;">Nothing in the next two weeks.</p>';
+}
+
+function openCalDayModal(ds){
+  _calSelectedDate=ds;
+  document.getElementById('cal-day-title').textContent='📅 '+fmtDate(ds);
+  const items=[];
+  db.orders.filter(o=>o.delivery===ds&&o.status!=='Pending').forEach(o=>{
+    const what=o.products.filter(p=>p.product!=='Delivery').map(p=>`${p.qty}× ${getProductDisplayName(p.product)}`).join(', ');
+    items.push(`<div style="margin:3px 0 8px;">
+      <div class="cal-chip c-order" style="cursor:pointer;white-space:normal;" onclick="closeModal('cal-day-modal');viewOrderDetail(${o.id})">📦 ${esc(o.retailerName)} — ${invNum(o.invoiceNum)} · ${fmtCur(o.total)} (${o.status})</div>
+      ${what?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">What's in it: ${esc(what)}</div>`:''}
+    </div>`);
+  });
+  db.calEvents.filter(e=>e.event_date===ds).forEach(e=>{
+    const p=e.type==='gb_ship'?GB_PACKAGES[e.package_key]:null;
+    const ICONS={gb_ship:'🚚',bake:'🍞',media:'📸',prospect:'🤝',note:'📝'};
+    const NAMES={bake:'Bake day',media:'Media',prospect:'Potential partner drop',note:'Note'};
+    const CLASSES={gb_ship:'c-gb',bake:'c-bake',media:'c-media',prospect:'c-prospect',note:'c-note'};
+    const icon=ICONS[e.type]||'📝';
+    const lbl=e.type==='gb_ship'?`${e.qty||1}× ${p?p.name:(e.title||'GB package')}`:(e.title||NAMES[e.type]||'Note');
+    const cls=(CLASSES[e.type]||'c-note')+(e.done?' cal-done':'');
+    items.push(`<div style="margin:3px 0 8px;">
+      <div style="display:flex;align-items:center;gap:6px;">
+        <div class="cal-chip ${cls}" style="flex:1;cursor:pointer;white-space:normal;" onclick="closeModal('cal-day-modal');openCalEventModal(${e.id})">${e.done?'✓ ':''}${icon} ${esc(lbl)}</div>
+        <button class="btn-icon" style="color:${e.done?'var(--muted)':'#2e7d4f'};" title="${e.done?'Mark as not done':'Mark as done — stops the day-before reminder'}" onclick="toggleCalDone(${e.id})">${e.done?'↩':'✓'}</button>
+        <button class="btn-icon" style="color:var(--gold);" title="Push out one week" onclick="pushCalEvent(${e.id})">⏭</button>
+        <button class="btn-icon" title="Remove" onclick="deleteCalEvent(${e.id})">🗑</button>
+      </div>
+      ${p&&p.summary&&!e.done?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">${esc(p.summary)}${(e.qty||1)>1?` — and you're shipping ${e.qty} of these boxes`:''} <span style="color:var(--gold);">(click for photos)</span></div>`:''}
+    </div>`);
+  });
+  document.getElementById('cal-day-events').innerHTML=items.join('')||'<p style="color:var(--muted);font-style:italic;font-size:.85rem;">Nothing scheduled yet.</p>';
+  const sel=document.getElementById('cal-ev-pkg');
+  sel.innerHTML=Object.entries(GB_PACKAGES).map(([k,p])=>`<option value="${k}">${esc(p.name)} — ${fmtCur(p.price)}</option>`).join('');
+  calEvTypeChanged();
+  openModal('cal-day-modal');
+}
+function calEvTypeChanged(){
+  const gb=document.getElementById('cal-ev-type').value==='gb_ship';
+  document.getElementById('cal-ev-pkg-wrap').style.display=gb?'':'none';
+  document.getElementById('cal-ev-qty-wrap').style.display=gb?'':'none';
+}
+async function saveCalEvent(){
+  const type=document.getElementById('cal-ev-type').value;
+  const title=v('cal-ev-notes');
+  const row={event_date:_calSelectedDate,type,title,notes:''};
+  if(type==='gb_ship'){
+    row.package_key=document.getElementById('cal-ev-pkg').value;
+    row.qty=Math.max(1,Number(document.getElementById('cal-ev-qty').value)||1);
+  }
+  const {data,error}=await sbClient.from('calendar_events').insert(row).select().single();
+  if(error){toast('⚠️ Could not save: '+error.message);return;}
+  db.calEvents.push(data);
+  document.getElementById('cal-ev-notes').value='';
+  renderCalendar(); openCalDayModal(_calSelectedDate);
+  toast('✅ Added to calendar.');
+}
+async function deleteCalEvent(id){
+  if(!confirm('Remove this from the calendar?'))return;
+  const {error}=await sbClient.from('calendar_events').delete().eq('id',id);
+  if(error){toast('⚠️ '+error.message);return;}
+  db.calEvents=db.calEvents.filter(e=>e.id!==id);
+  renderCalendar(); if(_calSelectedDate) openCalDayModal(_calSelectedDate);
+}
+async function toggleCalDone(id){
+  const e=db.calEvents.find(x=>x.id===id);if(!e)return;
+  const {error}=await sbClient.from('calendar_events').update({done:!e.done}).eq('id',id);
+  if(error){toast('⚠️ Could not update — did you run the new SQL? '+error.message);return;}
+  e.done=!e.done;
+  renderCalendar(); if(_calSelectedDate) openCalDayModal(_calSelectedDate);
+  toast(e.done?'✓ Done — no reminder will be sent for this.':'↩ Back on the reminder list.');
+}
+async function pushCalEvent(id){
+  const e=db.calEvents.find(x=>x.id===id);if(!e)return;
+  const p=e.event_date.split('-').map(Number);
+  const d=new Date(p[0],p[1]-1,p[2]+7);
+  const nd=dstr(d.getFullYear(),d.getMonth(),d.getDate());
+  const {error}=await sbClient.from('calendar_events').update({event_date:nd}).eq('id',id);
+  if(error){toast('⚠️ '+error.message);return;}
+  e.event_date=nd;
+  renderCalendar(); closeModal('cal-day-modal');
+  toast('⏭ Moved to '+fmtDate(nd));
+}
+function openCalEventModal(id){
+  const ev=db.calEvents.find(e=>e.id===id); if(!ev) return;
+  const body=document.getElementById('gb-pkg-body');
+  document.getElementById('gb-pkg-delete').onclick=()=>{closeModal('gb-pkg-modal');deleteCalEvent(id);};
+  const doneBtn=document.getElementById('gb-pkg-done');
+  doneBtn.textContent=ev.done?'↩ Not done':'✓ Mark done';
+  doneBtn.onclick=()=>{closeModal('gb-pkg-modal');toggleCalDone(id);};
+  document.getElementById('gb-pkg-push').onclick=()=>{closeModal('gb-pkg-modal');pushCalEvent(id);};
+  if(ev.type==='gb_ship'&&GB_PACKAGES[ev.package_key]){
+    const p=GB_PACKAGES[ev.package_key], q=ev.qty||1;
+    document.getElementById('gb-pkg-title').textContent='🚚 '+p.name;
+    body.innerHTML=`
+      <p style="font-size:.85rem;color:var(--muted);margin:0 0 10px;">Ship by <strong style="color:var(--brown-dk);">${fmtDate(ev.event_date)}</strong> · ${q} package${q!==1?'s':''} · ${fmtCur(p.price)} each · serves ${p.serves}${ev.title?` · 📝 ${esc(ev.title)}`:''}</p>
+      <div style="font-weight:700;font-size:.85rem;color:var(--brown-dk);margin-bottom:4px;">Each package contains:</div>
+      ${p.contents.map(c=>`<div class="gb-pkg-row">${c.img?`<img src="${c.img}" alt=""/>`:'<span style="width:42px;text-align:center;font-size:1.3rem;">💌</span>'}<div style="flex:1;font-size:.85rem;">${esc(c.item)}</div><div style="font-weight:700;color:var(--brown-dk);">× ${c.qty}</div></div>`).join('')}
+      ${q>1?`<div style="font-weight:700;font-size:.85rem;color:var(--brown-dk);margin:12px 0 4px;">To pack all ${q} packages:</div>${p.contents.map(c=>`<div style="display:flex;justify-content:space-between;font-size:.83rem;padding:3px 0;border-bottom:1px solid var(--cream-dk);"><span>${esc(c.item)}</span><strong>× ${c.qty*q}</strong></div>`).join('')}`:''}
+      ${p.note?`<p style="font-size:.78rem;color:var(--muted);margin-top:10px;">⚠️ ${esc(p.note)}</p>`:''}
+      <p style="margin-top:10px;font-size:.8rem;"><a href="${p.url}" target="_blank" rel="noopener" style="color:var(--gold);">View listing on Goldbelly ↗</a></p>`;
+  } else {
+    const icons={bake:'🍞',media:'📸',prospect:'🤝',note:'📝'};
+    const names={bake:'Bake Day',media:'Media / Content',prospect:'Potential Partner Drop/Ship',note:'Note'};
+    document.getElementById('gb-pkg-title').textContent=(icons[ev.type]||'📝')+' '+(ev.title||names[ev.type]||'Note');
+    body.innerHTML=`<p style="font-size:.9rem;color:var(--brown-dk);">${fmtDate(ev.event_date)}${ev.done?' · <span style="color:#2e7d4f;">✓ Done</span>':''}</p>${ev.notes?`<p style="font-size:.85rem;color:var(--muted);">${esc(ev.notes)}</p>`:''}${ev.type==='prospect'?'<p style="font-size:.78rem;color:var(--muted);">Tentative — use ⏭ below to slide it a week if plans move.</p>':''}`;
+  }
+  openModal('gb-pkg-modal');
 }
 
 // =====================================================================
