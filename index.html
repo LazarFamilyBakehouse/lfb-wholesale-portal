@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-<title>Partner Portal – Lazar Family Bakehouse</title>
+<!-- CSP enforced in the page itself so it works on GitHub Pages (netlify.toml headers do not apply there) -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://ylvoswzsijigyezqvaat.supabase.co wss://ylvoswzsijigyezqvaat.supabase.co https://api.emailjs.com; object-src 'none'; base-uri 'self'; form-action 'self'"/>
+<title>Partner Portal - Lazar Family Bakehouse</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico"/>
 <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png"/>
 <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16.png"/>
@@ -456,7 +458,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 <!-- ==================== APP ==================== -->
 <div id="app">
-<div id="lfb-err-banner" style="display:none;background:var(--danger);color:#fff;padding:10px 18px;font-size:.85rem;font-weight:700;text-align:center;position:sticky;top:0;z-index:9999;cursor:pointer;" onclick="this.style.display='none'">Loading error — tap to dismiss</div>
+<div id="lfb-err-banner" style="display:none;background:var(--danger);color:#fff;padding:10px 18px;font-size:.85rem;font-weight:700;text-align:center;position:sticky;top:0;z-index:9999;cursor:pointer;" onclick="this.style.display='none'">Loading error - tap to dismiss</div>
   <header>
     <div class="hdr-center">
       <div class="hdr-text">
@@ -546,7 +548,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
       <div class="fg"><label>Notes</label><input type="text" id="er-notes"/></div>
     </div>
     <div class="form-row">
-      <div class="fg"><label>Portal PIN (4–8 chars)</label><input type="text" id="er-pin" maxlength="8" placeholder="Unique login PIN"/></div>
+      <div class="fg"><label>Portal PIN (4-8 chars)</label><input type="text" id="er-pin" maxlength="8" placeholder="Unique login PIN"/></div>
       <div class="fg"><label>Status</label><select id="er-status"><option>Active</option><option>Inactive</option></select></div>
     </div>
     <div class="form-row">
@@ -599,7 +601,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
         </div>
       </div>
       <div class="fg"><label>Title / Notes (optional)</label>
-        <input type="text" id="cal-ev-notes" placeholder="e.g. Double batch — holiday rush"/>
+        <input type="text" id="cal-ev-notes" placeholder="e.g. Double batch - holiday rush"/>
       </div>
     </div>
     <div class="modal-actions">
@@ -627,7 +629,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 <script>
 // ╔══════════════════════════════════════════════════════════════════════╗
-// ║        LAZAR FAMILY BAKEHOUSE — PARTNER PORTAL                    ║
+// ║        LAZAR FAMILY BAKEHOUSE - PARTNER PORTAL                    ║
 // ║        Single-file app · All HTML/CSS/JS in one document            ║
 // ╠══════════════════════════════════════════════════════════════════════╣
 // ║  QUICK-REFERENCE TABLE OF CONTENTS                                  ║
@@ -659,12 +661,12 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 // ╠══════════════════════════════════════════════════════════════════════╣
 // ║  KEY OBJECTS & CONSTANTS (edit these to change business logic)      ║
 // ║  PRODUCTS[]        Active SKU list (order catalog + analytics)      ║
-// ║  PRODUCT_PRICES{}  Base prices — override per retailer in db        ║
+// ║  PRODUCT_PRICES{}  Base prices - override per retailer in db        ║
 // ║  PRODUCT_SECTIONS[] Catalog groupings shown to retailers            ║
 // ║  PRODUCT_MOQ{}     Min order qty enforced on retailer submit        ║
 // ║  PRODUCT_INCREMENT{} Snap-to increment per SKU                      ║
 // ║  (delivery fees removed)                                            ║
-// ║  PROD_COLORS[]     Chart bar colors — one per active SKU            ║
+// ║  PROD_COLORS[]     Chart bar colors - one per active SKU            ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 
 // =====================================================================
@@ -712,7 +714,7 @@ const SEED_DATA = {
     {id:16, name:"Urban Provisions Market",            contact:"",                 email:"", phone:"",             day:"", notes:"",                                 pin:"2008", status:"Inactive", joined:"2025-08-14"},
     {id:17, name:"Royals Ice Cream",                   contact:"",                 email:"", phone:"720-985-1675", day:"", notes:"",                                 pin:"2009", status:"Inactive", joined:"2025-10-31"},
     {id:18, name:"Temple Emanuel",                     contact:"",                 email:"", phone:"303-388-4013", day:"", notes:"",                                 pin:"2010", status:"Inactive", joined:"2025-11-26"},
-    // ── PROSPECTS (from email — not yet ordering) ──
+    // ── PROSPECTS (from email - not yet ordering) ──
     {id:19, name:"The Jacquard",               contact:"Zacc Smith",     email:"Zacc.smith@thejacquard.com",    phone:"707-710-6657", day:"", notes:"Front Office Manager · 222 Milwaukee St Denver CO 80206 · Samples dropped 3/16/26 · Also: Tommy Lloyd tommy.lloyd@thejacquard.com (earlier contact from Grandma's Goodies era 3/2/26)", pin:"3001", status:"Inactive", joined:"2026-03-02"},
     {id:20, name:"Hotel Boulderado",           contact:"Alex Hindman",   email:"ahindman@boulderado.com",       phone:"", day:"", notes:"F&B Director · 2115 13th St Boulder · Also contact: Kayla Simmering ksimmering@boulderado.com", pin:"3002", status:"Inactive", joined:"2026-03-13"},
     {id:21, name:"Hotel Renegade",             contact:"Baily Entrikin", email:"BEntrikin@hotelrenegade.com",   phone:"208-912-0155", day:"Saturday", notes:"Director of Rooms · 1110 W Grove St, Boise ID 83702 · Hotel: 208-776-1110 · Direct: 208-912-0155 · In-person sample visit scheduled Sat Mar 21 (8am-5pm)",    pin:"3003", status:"Inactive", joined:"2026-03-10"},
@@ -835,7 +837,7 @@ const SEED_DATA = {
   ]
 };
 
-// In-memory store – populated from Supabase on login
+// In-memory store - populated from Supabase on login
 let db = { retailers:[], orders:[], autoOrders:[], calEvents:[], notifications:[], nextInvoice:101 };
 
 // Notifications still live in localStorage. Auto-orders now live in Supabase
@@ -875,7 +877,7 @@ async function migrateLocalAutoOrders() {
 async function loadFromSupabase() {
   lfbDiag('loadFromSupabase: start');
 
-  // Fetch retailers — no ORDER BY to avoid column-name mismatches; sort client-side
+  // Fetch retailers - no ORDER BY to avoid column-name mismatches; sort client-side
   const { data:retailers, error:retErr } = await sbClient.from('retailers').select('*');
   lfbDiag('retailers → data:'+(retailers?retailers.length:'null')+' err:'+(retErr?retErr.message:'none'));
   if (retErr) {
@@ -883,7 +885,7 @@ async function loadFromSupabase() {
     return;
   }
 
-  // Fetch orders — no server-side ORDER BY (avoids 42703 if date column name differs); sort client-side below
+  // Fetch orders - no server-side ORDER BY (avoids 42703 if date column name differs); sort client-side below
   let orders, orderItems;
   const { data:ordersJoined, error:ordJoinErr } = await sbClient.from('orders').select('*, order_items(*)');
   lfbDiag('orders+items join → data:'+(ordersJoined?ordersJoined.length:'null')+' err:'+(ordJoinErr?ordJoinErr.message:'none'));
@@ -906,7 +908,7 @@ async function loadFromSupabase() {
     orderItems = null; // items embedded in each order row
   }
 
-  if (!retailers) { lfbShowErr('retailers is null after fetch — unexpected'); return; }
+  if (!retailers) { lfbShowErr('retailers is null after fetch - unexpected'); return; }
 
   const retMap={};
   db.retailers = retailers.map(r=>{
@@ -940,7 +942,7 @@ async function loadFromSupabase() {
   });
   db.nextInvoice = db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100)+1;
 
-  // Auto-orders — now database-backed (admin sees every partner's)
+  // Auto-orders - now database-backed (admin sees every partner's)
   const { data:aoRows, error:aoErr } = await sbClient.from('auto_orders').select('*');
   if (aoErr) { lfbDiag('auto_orders load failed (table missing? run CALENDAR_SETUP.sql): '+aoErr.message); db.autoOrders=[]; }
   else {
@@ -948,7 +950,7 @@ async function loadFromSupabase() {
     if (!db.autoOrders.length) await migrateLocalAutoOrders();
   }
 
-  // Calendar events — bake days, Goldbelly ship deadlines, notes
+  // Calendar events - bake days, Goldbelly ship deadlines, notes
   const { data:cevRows, error:cevErr } = await sbClient.from('calendar_events').select('*');
   if (cevErr) { lfbDiag('calendar_events load failed (table missing? run CALENDAR_SETUP.sql): '+cevErr.message); db.calEvents=[]; }
   else db.calEvents = cevRows||[];
@@ -1008,7 +1010,7 @@ async function lfbRunDiagnostic() {
 function setupRealtime() {
   sbClient.channel('lfb-admin-rt')
     .on('postgres_changes',{event:'*',schema:'public',table:'orders'}, async ()=>{
-      if (_writeActive) return; // Skip — we're mid-write; our code will reload when done
+      if (_writeActive) return; // Skip - we're mid-write; our code will reload when done
       await loadFromSupabase();
       refreshDashboard();
       if(document.getElementById('sec-orders')?.classList.contains('active')) renderOrders();
@@ -1069,7 +1071,7 @@ const PRODUCT_DESC = {
   'Individual Mandel Bread':'Single-serve traditional mandel bread piece.',
   'Two Packs':'Two-pack of mandel bread.'
 };
-// Product image URLs — admin can update these via Settings → Product Photos
+// Product image URLs - admin can update these via Settings → Product Photos
 // Full display names for analytics / reporting (maps short SKU names to full names)
 const PRODUCT_DISPLAY_NAMES = {
   'Funfetti':'Funfetti MandelBites',
@@ -1077,10 +1079,10 @@ const PRODUCT_DISPLAY_NAMES = {
   'CC Mandelbites':'Chocolate-Chip MandelBites',
   'Funfetti Mandelbites':'Funfetti MandelBites',
   'Gluten-Free Chocolate-Chip':'Gluten-Free Chocolate-Chip MandelBites',
-  'Indiv. Mandel - Chocolate Chip':'Individual Pieces of Mandel Bread — Chocolate Chip',
-  'Indiv. Mandel - Almond':'Individual Pieces of Mandel Bread — Almond',
-  'Indiv. Mandel - Funfetti':'Individual Pieces of Mandel Bread — Funfetti',
-  'Indiv. Mandel - GF Choc Chip':'Individual Pieces of Mandel Bread — Gluten-Free Chocolate Chip',
+  'Indiv. Mandel - Chocolate Chip':'Individual Pieces of Mandel Bread - Chocolate Chip',
+  'Indiv. Mandel - Almond':'Individual Pieces of Mandel Bread - Almond',
+  'Indiv. Mandel - Funfetti':'Individual Pieces of Mandel Bread - Funfetti',
+  'Indiv. Mandel - GF Choc Chip':'Individual Pieces of Mandel Bread - Gluten-Free Chocolate Chip',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate Chip',
   'CC Mandel Bread':'Chocolate-Chip Mandel Bread (Red Bag)',
   'Mandel Bread Rounds':'Mandel Bread Rounds'
@@ -1100,9 +1102,9 @@ const PRODUCT_IMAGES = {
 };
 // Load saved product images from localStorage (only override if saved value is non-empty)
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k])PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
-// Logo image reference — reuse the login logo for header & invoices
+// Logo image reference - reuse the login logo for header & invoices
 const LFB_LOGO_SRC = document.querySelector('.login-mark-svg img')?.src || '';
-// Logo removed from portal header — kept only for invoices
+// Logo removed from portal header - kept only for invoices
 function addNewOrderDeliveryFee(){
   const list=document.getElementById('o-prod-list');
   if(list.querySelector('.delivery-row'))return;
@@ -1135,7 +1137,7 @@ const PRODUCT_INCREMENT = {
   'Two Pack Chocolate Chip':25,
   'Mandel Bread Rounds':40
 };
-// Delivery fees removed — no longer applicable
+// Delivery fees removed - no longer applicable
 function getDeliveryFee(retailerId){return 0;}
 function setDeliveryFee(retailerId,fee){}
 
@@ -1428,7 +1430,7 @@ function buildAdminContent() {
 
 <!-- CALENDAR -->
 <section class="section" id="sec-calendar">
-  <h2 class="page-h">Calendar</h2><p class="page-sub">Confirmed deliveries, bake days, and Goldbelly ship deadlines — click any day to add.</p>
+  <h2 class="page-h">Calendar</h2><p class="page-sub">Confirmed deliveries, bake days, and Goldbelly ship deadlines - click any day to add.</p>
   <div class="panel">
     <div class="cal-toolbar">
       <button class="btn btn-outline btn-sm" onclick="calNav(-1)">◀</button>
@@ -1459,7 +1461,7 @@ function buildAdminContent() {
   <h2 class="page-h">Analytics</h2><p class="page-sub">Revenue trends, top partners, and product insights.</p>
   <!-- KPI Row -->
   <div class="analytics-grid" id="anal-kpi"></div>
-  <!-- Monthly Revenue — full width -->
+  <!-- Monthly Revenue - full width -->
   <div class="panel" style="margin-top:18px;">
     <div class="panel-title">📅 Monthly Revenue (last 12 months)</div>
     <div class="bar-chart" id="anal-monthly-bars" style="height:auto;min-height:210px;gap:8px;padding:8px 0;flex-wrap:wrap;align-items:flex-end;"></div>
@@ -1497,12 +1499,12 @@ function buildAdminContent() {
       <div id="anal-prod-yoy"></div>
     </div>
   </div>
-  <!-- Yearly Breakdown — full width -->
+  <!-- Yearly Breakdown - full width -->
   <div class="panel" style="margin-top:18px;">
     <div class="panel-title">📆 Yearly Revenue Breakdown</div>
     <div id="anal-yearly"></div>
   </div>
-  <!-- All-time totals — deliberately at the bottom -->
+  <!-- All-time totals - deliberately at the bottom -->
   <div class="analytics-grid" style="margin-top:18px;" id="anal-alltime"></div>
 </section>
 
@@ -1523,7 +1525,7 @@ function buildAdminContent() {
       </div>
     </div>
     <div class="form-row">
-      <div class="fg"><label>Portal PIN * (4–8 chars)</label><input id="r-pin" maxlength="8" placeholder="e.g. 4821 or sunrise"/></div>
+      <div class="fg"><label>Portal PIN * (4-8 chars)</label><input id="r-pin" maxlength="8" placeholder="e.g. 4821 or sunrise"/></div>
       <div class="fg"><label>Notes</label><input id="r-notes" placeholder="e.g. Back entrance"/></div>
     </div>
     <div class="form-actions"><button class="btn btn-primary" onclick="addRetailer()">➕ Add Retailer</button></div>
@@ -1556,7 +1558,7 @@ function buildAdminContent() {
       <div class="fg"><label>Customer Email / Phone</label><input id="co-contact" placeholder="optional"/></div>
       <div class="fg" style="flex:1.4;"><label>Why / Occasion</label><input id="co-reason" placeholder="e.g. Shiva platter for the Cohens"/></div>
     </div>
-    <div class="form-row"><div class="fg"><label>Notes</label><input id="o-notes" placeholder="e.g. No sesame — allergy"/></div></div>
+    <div class="form-row"><div class="fg"><label>Notes</label><input id="o-notes" placeholder="e.g. No sesame - allergy"/></div></div>
     <div class="form-actions">
       <button class="btn btn-primary" onclick="submitNewOrder()">📦 Create Order</button>
       <button class="btn btn-outline" onclick="clearOrderForm()">Clear</button>
@@ -1677,7 +1679,7 @@ function buildAdminContent() {
     <div class="panel-title">Site Notifications</div>
     <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Pin important messages at the top of the portal for all users to see.</p>
     <div class="form-row">
-      <div class="fg" style="flex:2;"><label>Message *</label><input type="text" id="notif-msg" placeholder="e.g. Holiday orders close Dec 20th — order early!"/></div>
+      <div class="fg" style="flex:2;"><label>Message *</label><input type="text" id="notif-msg" placeholder="e.g. Holiday orders close Dec 20th - order early!"/></div>
       <div class="fg"><label>Type</label>
         <select id="notif-type">
           <option value="info">Info (blue)</option>
@@ -1700,7 +1702,7 @@ function buildAdminContent() {
     </div>
     <div style="padding:12px 14px;background:var(--cream);border-left:3px solid var(--gold);margin-bottom:12px;">
       <div style="font-weight:700;font-size:.9rem;color:var(--brown-dk);margin-bottom:4px;">We Miss You · Monthly (2nd Tuesday)</div>
-      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px;">Friendly check-in for partners who haven't ordered in 60+ days. No discount — just a warm re-engagement.</p>
+      <p style="font-size:.82rem;color:var(--muted);margin:0 0 10px;">Friendly check-in for partners who haven't ordered in 60+ days. No discount - just a warm re-engagement.</p>
       <button class="btn btn-gold" onclick="sendReminders('inactive')" id="btn-send-inactive">Send Re-Engagement Now</button>
     </div>
     <div style="padding:12px 14px;background:#fff3e0;border-left:3px solid #e65100;margin-bottom:12px;">
@@ -1709,7 +1711,7 @@ function buildAdminContent() {
       <div style="margin-bottom:10px;">
         <input type="text" id="dryrun-retailer" placeholder="Retailer name (leave blank for all)" style="width:100%;padding:8px;border:1px solid #e8d5c0;border-radius:6px;font-family:inherit;font-size:.85rem;box-sizing:border-box;"/>
       </div>
-      <button class="btn" style="background:#e65100;color:var(--white);" onclick="sendReminders('active', true)" id="btn-dryrun">Dry Run — Active Track</button>
+      <button class="btn" style="background:#e65100;color:var(--white);" onclick="sendReminders('active', true)" id="btn-dryrun">Dry Run - Active Track</button>
     </div>
     <div id="reminder-result" style="margin-top:12px;font-size:.85rem;display:none;"></div>
   </div>
@@ -1742,7 +1744,7 @@ function buildAdminContent() {
   </div>
   <div class="panel" style="max-width:680px;margin-top:20px;">
     <div class="panel-title">🔍 Connection Diagnostic</div>
-    <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Run this if data isn't loading — it checks each Supabase table and shows exactly what's working or failing.</p>
+    <p style="font-size:.86rem;color:var(--muted);margin-bottom:14px;">Run this if data isn't loading - it checks each Supabase table and shows exactly what's working or failing.</p>
     <button class="btn btn-gold" onclick="lfbRunDiagnostic()">Run Diagnostic</button>
     <pre id="lfb-diag-out" style="margin-top:14px;background:var(--cream-dk);padding:14px;border-radius:8px;font-size:.78rem;white-space:pre-wrap;word-break:break-all;display:block;max-height:320px;overflow-y:auto;"></pre>
   </div>
@@ -1835,17 +1837,17 @@ function buildRetailerContent() {
 </section>
 
 <section class="section" id="sec-r-new-order">
-  <h2 class="page-h">Place an Order</h2><p class="page-sub">Choose your products below — prices are pre-filled. We'll confirm within 24 hours.</p>
+  <h2 class="page-h">Place an Order</h2><p class="page-sub">Choose your products below - prices are pre-filled. We'll confirm within 24 hours.</p>
 
   <div class="payment-box">
     <h3>Payment &amp; Terms</h3>
     <p id="payment-terms-text">All invoices are due <strong>within 30 days of delivery</strong>. Payment by check only:</p>
-    <div class="payment-method-row"><strong>Check:</strong> Payable to <em>Lazar Family Bakehouse</em> — mail to <strong>4351 E. Perry Pkwy, Greenwood Village, CO 80121</strong></div>
-    <p class="terms-note">Minimum orders: Mandelbites pouches — 8 units (increments of 8) · Two Pack — 25 units (increments of 25) · Individual pieces — 40 units (increments of 40). Questions? Email <a href="mailto:info@lazarfamilybakehouse.com" style="color:var(--brown-dk);">info@lazarfamilybakehouse.com</a></p>
+    <div class="payment-method-row"><strong>Check:</strong> Payable to <em>Lazar Family Bakehouse</em> - mail to <strong>4351 E. Perry Pkwy, Greenwood Village, CO 80121</strong></div>
+    <p class="terms-note">Minimum orders: Mandelbites pouches - 8 units (increments of 8) · Two Pack - 25 units (increments of 25) · Individual pieces - 40 units (increments of 40). Questions? Email <a href="mailto:info@lazarfamilybakehouse.com" style="color:var(--brown-dk);">info@lazarfamilybakehouse.com</a></p>
   </div>
 
   <div class="panel">
-    <div class="panel-title">Product Catalog — Select Your Quantities</div>
+    <div class="panel-title">Product Catalog - Select Your Quantities</div>
     <div class="catalog-grid" id="catalog-grid"></div>
     <div style="border-top:2px solid var(--gold);padding-top:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
       <div>
@@ -1867,13 +1869,13 @@ function buildRetailerContent() {
 
   <div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:4px;padding:18px 22px;margin-top:18px;">
     <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown-dk);margin-bottom:10px;">Save Time with an Auto-Order</div>
-    <p style="font-size:.85rem;color:var(--brown);line-height:1.6;margin-bottom:10px;">Don't want to come back each week to re-order? Set up a standing auto-order and we'll schedule your recurring shipments automatically — you'll only need to log in if you'd like to make changes.</p>
+    <p style="font-size:.85rem;color:var(--brown);line-height:1.6;margin-bottom:10px;">Don't want to come back each week to re-order? Set up a standing auto-order and we'll schedule your recurring shipments automatically - you'll only need to log in if you'd like to make changes.</p>
     <button class="btn btn-outline btn-sm" onclick="showSection('r-auto')">Set Up an Auto-Order →</button>
   </div>
 
   <div style="background:var(--white);border:1px solid var(--tan);border-radius:4px;padding:18px 22px;margin-top:14px;">
-    <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown-dk);margin-bottom:10px;">Stay in the Loop — Weekly Restock Reminders</div>
-    <p style="font-size:.85rem;color:var(--brown);line-height:1.6;">Once you submit an order, you'll automatically be added to our weekly partner email list. Every week you'll receive a friendly reminder to check your stock levels and re-up when you're running low. It's simply a helpful nudge — no pressure, no spam — just a note from us to make sure you're never out.</p>
+    <div style="font-family:'Playfair Display',serif;font-size:1rem;color:var(--brown-dk);margin-bottom:10px;">Stay in the Loop - Weekly Restock Reminders</div>
+    <p style="font-size:.85rem;color:var(--brown);line-height:1.6;">Once you submit an order, you'll automatically be added to our weekly partner email list. Every week you'll receive a friendly reminder to check your stock levels and re-up when you're running low. It's simply a helpful nudge - no pressure, no spam - just a note from us to make sure you're never out.</p>
   </div>
 </section>
 
@@ -2005,11 +2007,11 @@ function renderRetailers() {
   const list=sortedRetailers();
   tbody.innerHTML=list.map(r=>`<tr>
     <td><strong>${esc(r.name)}</strong></td>
-    <td>${esc(r.contact||'—')}</td>
-    <td>${r.email?`<a href="mailto:${esc(r.email)}" style="color:var(--brown)">${esc(r.email)}</a>`:'—'}</td>
-    <td>${esc(r.phone||'—')}</td>
-    <td>${esc(r.day||'—')}</td>
-    <td><code style="background:var(--cream-dk);padding:2px 7px;border-radius:5px;font-size:.82rem;">${esc(r.pin||'—')}</code></td>
+    <td>${esc(r.contact||' - ')}</td>
+    <td>${r.email?`<a href="mailto:${esc(r.email)}" style="color:var(--brown)">${esc(r.email)}</a>`:' - '}</td>
+    <td>${esc(r.phone||' - ')}</td>
+    <td>${esc(r.day||' - ')}</td>
+    <td><code style="background:var(--cream-dk);padding:2px 7px;border-radius:5px;font-size:.82rem;">${esc(r.pin||' - ')}</code></td>
     <td><span class="badge ${r.status==='Active'?'b-active':'b-inactive'}">${r.status}</span></td>
     <td style="display:flex;gap:5px;flex-wrap:wrap;">
       <button class="btn btn-outline btn-sm" onclick="editRetailer(${r.id})">Edit</button>
@@ -2073,7 +2075,7 @@ async function deleteRetailer(id, name) {
 //  submitNewOrder() → admin creates order, inserts into orders + order_items.
 //  renderOrders() → renders filterable order table with per-retailer totals.
 //  showInvoice() → generates printable invoice modal with delivery terms.
-//  unit_price must NEVER be null — always use Number(p.price)||0.
+//  unit_price must NEVER be null - always use Number(p.price)||0.
 //  [12] ORDERS (ADMIN)
 //  submitNewOrder(), renderOrders(), showInvoice(), deleteOrder().
 //  All order_items inserts must use Number(p.price)||0 for unit_price.
@@ -2095,7 +2097,7 @@ async function submitNewOrder() {
   if(document.getElementById('o-custom-wrap')?.style.display!=='none'){
     const cn=v('co-name'), cc=v('co-contact'), cr=v('co-reason');
     if(cn||cc||cr){
-      const tag='Custom for: '+(cn||'?')+(cc?' ('+cc+')':'')+(cr?' — '+cr:'');
+      const tag='Custom for: '+(cn||'?')+(cc?' ('+cc+')':'')+(cr?' - '+cr:'');
       notes=notes?tag+' · '+notes:tag;
     }
   }
@@ -2161,7 +2163,7 @@ function renderOrders() {
     <td style="vertical-align:middle;"><strong>${invNum(o.invoiceNum)}</strong></td>
     <td style="vertical-align:middle;">${esc(o.retailerName)}</td>
     <td style="vertical-align:middle;">${fmtDate(o.date)}</td>
-    <td style="vertical-align:middle;">${o.delivery?fmtDate(o.delivery):'—'}</td>
+    <td style="vertical-align:middle;">${o.delivery?fmtDate(o.delivery):' - '}</td>
     <td style="vertical-align:middle;">${o.products.filter(p=>p.product!=='Delivery').length} item${o.products.filter(p=>p.product!=='Delivery').length!==1?'s':''}</td>
     <td style="vertical-align:middle;"><strong>${fmtCur(o.total)}</strong></td>
     <td style="vertical-align:middle;"><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
@@ -2181,9 +2183,9 @@ function viewOrderDetail(id) {
     <table style="width:100%;margin-bottom:14px;">
       <tr><td style="color:var(--muted);width:130px;padding:5px 0;">Invoice</td><td><strong>${invNum(o.invoiceNum)}</strong></td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Retailer</td><td>${esc(o.retailerName)}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0;">Contact</td><td>${esc(retailer.contact||'—')} · ${esc(retailer.email||'—')}</td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0;">Contact</td><td>${esc(retailer.contact||' - ')} · ${esc(retailer.email||' - ')}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Order Date</td><td>${fmtDate(o.date)}</td></tr>
-      <tr><td style="color:var(--muted);padding:5px 0;">Delivery</td><td>${o.delivery?fmtDate(o.delivery):'—'}</td></tr>
+      <tr><td style="color:var(--muted);padding:5px 0;">Delivery</td><td>${o.delivery?fmtDate(o.delivery):' - '}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Status</td><td><span class="badge ${sBadge(o.status)}">${o.status}</span></td></tr>
       ${o.notes?`<tr><td style="color:var(--muted);padding:5px 0;">Notes</td><td>${esc(o.notes)}</td></tr>`:''}
     </table>
@@ -2256,7 +2258,7 @@ async function confirmOrder() {
       .catch(err=>console.warn('[LFB] Could not save retailer email:',err));
   }
   if(retailerEmail) {
-    // Retailer confirmation — tells the PARTNER their order is confirmed
+    // Retailer confirmation - tells the PARTNER their order is confirmed
     const productItems=o.products.filter(p=>p.product!=='Delivery');
     const confirmParams = {
       retailer_name: o.retailerName,
@@ -2276,7 +2278,7 @@ async function confirmOrder() {
       .then(res=>{console.log('[LFB] Confirmation email sent successfully:', res);toast('📧 Confirmation email sent to '+retailerEmail);})
       .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);toast('Order confirmed but email failed: '+(err.text||err));});
   } else {
-    console.warn('[LFB] No retailer email found — cannot send confirmation. Retailer:', o.retailerName);
+    console.warn('[LFB] No retailer email found - cannot send confirmation. Retailer:', o.retailerName);
     toast('Order confirmed but no email on file for '+o.retailerName+'. Add their email in Partners to send confirmations.');
   }
   closeModal('confirm-order-modal');
@@ -2316,7 +2318,7 @@ function showInvoice(id) {
       <p style="margin:16px 0 8px;font-size:.8rem;color:var(--muted);font-style:italic;line-height:1.5;text-align:center;">Please reference the delivered invoice for the final amount.</p>
       <div class="inv-footer">Thank you for your partnership with Lazar Family Bakehouse<br>
         ${(() => { const ret=db.retailers.find(x=>x.id===o.retailerId); return isNet15Account(ret) ? 'Payment due <strong>Net 15</strong> from delivery date. ' : 'Please remit payment within <strong>30 days of delivery</strong>. '; })()}
-        Payment by check only — payable to <em>Lazar Family Bakehouse</em>, 4351 E. Perry Pkwy, Greenwood Village, CO 80121.</div>
+        Payment by check only - payable to <em>Lazar Family Bakehouse</em>, 4351 E. Perry Pkwy, Greenwood Village, CO 80121.</div>
     </div>`;
   openModal('invoice-modal');
 }
@@ -2340,13 +2342,13 @@ async function deleteOrder(id) {
 //  createAutoOrder() → saves recurring order template to localStorage.
 //  genOrderFromAO() → admin manually fires an auto-order → Supabase.
 //  retailerPlaceFromAO() → retailer places order from their own template.
-//  Auto-orders are localStorage only (not Supabase) — saveDB() persists.
+//  Auto-orders are localStorage only (not Supabase) - saveDB() persists.
 //  [14] AUTO-ORDERS (ADMIN)
 //  createAutoOrder(), genOrderFromAO(), toggleAO(), deleteAO().
 //  Stored in localStorage (db.autoOrders). Not in Supabase.
 // =====================================================================
 // =====================================================================
-//  AUTO-ORDER PRODUCT GRID — mirrors catalog layout with locked prices
+//  AUTO-ORDER PRODUCT GRID - mirrors catalog layout with locked prices
 // =====================================================================
 function buildAutoOrderGrid(containerId, retailerId) {
   const container=document.getElementById(containerId); if(!container) return;
@@ -2471,7 +2473,7 @@ function refreshDashboard() {
     .reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
   const avgPerWeek=Math.round(totalUnits/weeksElapsed);
   const revAll=db.orders.reduce((s,o)=>s+(o.total||0),0);
-  // Online (Goldbelly) revenue for the current year — confirmed or projected at known rates
+  // Online (Goldbelly) revenue for the current year - confirmed or projected at known rates
   const gbYearDash=(db.calEvents||[]).filter(e=>{if(e.type!=='gb_ship'||!e.event_date)return false;const d=new Date(e.event_date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===curYear;})
     .reduce((s,e)=>s+(Number(e.amount)>0?Number(e.amount):((GB_PACKAGES[e.package_key]&&GB_PACKAGES[e.package_key].payout)?(e.qty||1)*GB_PACKAGES[e.package_key].payout:0)),0);
   sg.innerHTML=`
@@ -2490,7 +2492,7 @@ function refreshDashboard() {
   da.innerHTML=active.length?active.map(ao=>`
     <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--tan);">
       <span style="font-size:1.3rem;">🔄</span>
-      <div><strong>${esc(ao.retailerName)}</strong> — ${ao.freq} on ${ao.day}s <span style="color:var(--muted);font-size:.8rem;margin-left:8px;">${ao.products.length} product${ao.products.length!==1?'s':''}</span></div>
+      <div><strong>${esc(ao.retailerName)}</strong> - ${ao.freq} on ${ao.day}s <span style="color:var(--muted);font-size:.8rem;margin-left:8px;">${ao.products.length} product${ao.products.length!==1?'s':''}</span></div>
       <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="genOrderFromAO(${ao.id});showSection('orders');">Create Order Now</button>
     </div>`).join(''):
     '<p style="color:var(--muted);font-style:italic;">No active auto-orders.</p>';
@@ -2508,12 +2510,12 @@ function generateSummary() {
   if(ret) orders=orders.filter(o=>o.retailerId===Number(ret));
   const out=document.getElementById('summary-out'),cont=document.getElementById('sum-content');
   out.style.display='block';cont.scrollIntoView({behavior:'smooth',block:'start'});
-  if(!orders.length){cont.innerHTML=`<div class="sum-hdr"><h2>Lazar Family Bakehouse</h2><p>${fmtDate(start)} – ${fmtDate(end)}</p></div><p style="text-align:center;color:var(--muted);font-style:italic;padding:20px;">No orders in this period.</p>`;return;}
+  if(!orders.length){cont.innerHTML=`<div class="sum-hdr"><h2>Lazar Family Bakehouse</h2><p>${fmtDate(start)} - ${fmtDate(end)}</p></div><p style="text-align:center;color:var(--muted);font-style:italic;padding:20px;">No orders in this period.</p>`;return;}
   const byR={};
   orders.forEach(o=>{if(!byR[o.retailerId])byR[o.retailerId]={name:o.retailerName,orders:[]};byR[o.retailerId].orders.push(o);});
   const grand=orders.reduce((s,o)=>s+(o.total||0),0);
   cont.innerHTML=`
-    <div class="sum-hdr"><h2>🍞 Lazar Family Bakehouse</h2><p>Partner Summary · ${fmtDate(start)} – ${fmtDate(end)}</p></div>
+    <div class="sum-hdr"><h2>🍞 Lazar Family Bakehouse</h2><p>Partner Summary · ${fmtDate(start)} - ${fmtDate(end)}</p></div>
     ${Object.values(byR).map(g=>{
       const rt=g.orders.reduce((s,o)=>s+(o.total||0),0);
       const prods={};g.orders.forEach(o=>o.products.filter(p=>p.product&&p.product!=='Delivery').forEach(p=>prods[p.product]=(prods[p.product]||0)+p.qty));
@@ -2533,7 +2535,7 @@ function emailSummary(){const s=document.getElementById('sum-start').value,e=doc
 //  [18] SETTINGS
 //  changeAdminPin() → updates Supabase auth password.
 //  saveProductImages() → saves product photo URLs to localStorage (lfb_product_images).
-//  clearAllData() → nuclear option — wipes all Supabase orders/retailers.
+//  clearAllData() → nuclear option - wipes all Supabase orders/retailers.
 //  reseedFromMaster() → reloads static seed data into Supabase.
 //  [18] SETTINGS
 //  changeAdminPin(), clearAllData(), reseedFromMaster().
@@ -2543,9 +2545,9 @@ async function sendReminders(track, dryrun=false) {
   const btnId=dryrun?'btn-dryrun':(isActive?'btn-send-active':'btn-send-inactive');
   const btn=document.getElementById(btnId);
   const res=document.getElementById('reminder-result');
-  const label=dryrun?'Dry Run — Active Track':(isActive?'Send Restock Nudge Now':'Send Re-Engagement Now');
+  const label=dryrun?'Dry Run - Active Track':(isActive?'Send Restock Nudge Now':'Send Re-Engagement Now');
   const confirmMsg=dryrun
-    ? 'Send a DRY RUN of the active track? All emails go to your inbox only — no partners contacted.'
+    ? 'Send a DRY RUN of the active track? All emails go to your inbox only - no partners contacted.'
     : isActive
     ? 'Send biweekly restock reminder to active partners who haven\'t ordered in 14+ days?'
     : 'Send re-engagement email to inactive partners (no order in 60+ days)?';
@@ -2572,7 +2574,7 @@ async function sendReminders(track, dryrun=false) {
     const dryLabel=data.dryrun?'<span style="color:#e65100;font-weight:700;">[DRY RUN]</span> ':'';
     res.innerHTML=`${dryLabel}Sent <strong>${data.sent}</strong> ${kind} email${data.sent!==1?'s':''}${data.total?` · ${data.total} targeted`:''}${data.dryrun_email?' · all routed to '+data.dryrun_email:''}`;
     if(data.message) res.innerHTML+=`<br><span style="color:var(--muted);font-size:.8rem;">${data.message}</span>`;
-    if(data.errors) { res.innerHTML+=`<br><span style="color:var(--danger);font-size:.8rem;">${data.errors.length} failed — check console</span>`; console.warn('[LFB] Reminder errors:',data.errors); }
+    if(data.errors) { res.innerHTML+=`<br><span style="color:var(--danger);font-size:.8rem;">${data.errors.length} failed - check console</span>`; console.warn('[LFB] Reminder errors:',data.errors); }
     toast(`Sent ${data.sent} ${kind} email${data.sent!==1?'s':''}!`);
   } catch(e) {
     res.style.display='block';
@@ -2759,7 +2761,7 @@ function renderRetailerHome() {
     const lastOrder=sorted[0];
     const lastOrderUnits=lastOrder?lastOrder.products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0):0;
     stats.innerHTML=`
-      <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${myOrders.length||'—'}</div></div>
+      <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${myOrders.length||' - '}</div></div>
       <div class="stat-card"><div class="si">💰</div><div class="sl">Lifetime Value</div><div class="sv">${fmtCur(total)}</div></div>
       ${thisMonthRev>0?`<div class="stat-card"><div class="si">📅</div><div class="sl">This Month</div><div class="sv">${fmtCur(thisMonthRev)}</div></div>`
         :lastOrder?`<div class="stat-card"><div class="si">🕐</div><div class="sl">Last Order</div><div class="sv">${fmtDate(lastOrder.date)}</div></div>`:''}
@@ -2769,7 +2771,7 @@ function renderRetailerHome() {
     if(bigRecent.length>0){
       const bigUnits=bigRecent[0].products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0);
       const alertEl=document.getElementById('r-big-order-alert');
-      if(alertEl) alertEl.innerHTML=`<div style="background:var(--brown-dk);color:var(--cream);border-radius:4px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><span style="font-size:1.5rem;">🎉</span><div><strong>Your latest order of ${bigUnits} units has been received!</strong><br><span style="font-size:.83rem;opacity:.85;">Thank you — we're on it. You'll hear from us within 24 hours.</span></div></div>`;
+      if(alertEl) alertEl.innerHTML=`<div style="background:var(--brown-dk);color:var(--cream);border-radius:4px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><span style="font-size:1.5rem;">🎉</span><div><strong>Your latest order of ${bigUnits} units has been received!</strong><br><span style="font-size:.83rem;opacity:.85;">Thank you - we're on it. You'll hear from us within 24 hours.</span></div></div>`;
     }
   }
   // Social proof section
@@ -2811,7 +2813,7 @@ function renderRetailerHome() {
     rro.innerHTML=recent.length?recent.map(o=>`<tr>
       <td><strong>${invNum(o.invoiceNum)}</strong></td>
       <td>${fmtDate(o.date)}</td>
-      <td>${o.delivery?fmtDate(o.delivery):'—'}</td>
+      <td>${o.delivery?fmtDate(o.delivery):' - '}</td>
       <td><strong>${fmtCur(o.total)}</strong></td>
       <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
       <td><button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})"> Invoice</button></td>
@@ -2828,7 +2830,7 @@ function renderRetailerOrders() {
   tbody.innerHTML=orders.length?orders.map(o=>`<tr>
     <td><strong>${invNum(o.invoiceNum)}</strong></td>
     <td>${fmtDate(o.date)}</td>
-    <td>${o.delivery?fmtDate(o.delivery):'—'}</td>
+    <td>${o.delivery?fmtDate(o.delivery):' - '}</td>
     <td>${o.products.filter(p=>p.product!=='Delivery').length} item${o.products.filter(p=>p.product!=='Delivery').length!==1?'s':''}</td>
     <td><strong>${fmtCur(o.total)}</strong></td>
     <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
@@ -3018,7 +3020,7 @@ function generateBakeList() {
     const items=o.products.filter(p=>p.product&&p.product!=='Delivery'&&p.qty>0);
     return `<div style="font-size:.78rem;color:var(--muted);padding:3px 0 3px 12px;border-left:2px solid var(--tan);">
       <strong style="color:var(--brown-dk);">${invNum(o.invoiceNum)}</strong> · ${esc(o.retailerName)} · <span class="badge ${sBadge(o.status)}">${o.status}</span>
-      — ${items.map(p=>`${p.qty}× ${esc(getProductDisplayName(p.product))}`).join(', ')}
+     - ${items.map(p=>`${p.qty}× ${esc(getProductDisplayName(p.product))}`).join(', ')}
     </div>`;
   }).join('');
 
@@ -3094,7 +3096,7 @@ function refreshAnalytics() {
   // KPI cards
   const kpi=document.getElementById('anal-kpi'); if(!kpi) return;
   const rev=db.orders.reduce((s,o)=>s+(o.total||0),0); // Brick & Mortar (wholesale)
-  // Online (Goldbelly) — confirmed statement payouts, or projected at known rates
+  // Online (Goldbelly) - confirmed statement payouts, or projected at known rates
   const gbEvents=(db.calEvents||[]).filter(e=>e.type==='gb_ship');
   const gbVal=e=>Number(e.amount)>0?Number(e.amount):((GB_PACKAGES[e.package_key]&&GB_PACKAGES[e.package_key].payout)?(e.qty||1)*GB_PACKAGES[e.package_key].payout:0);
   const gbTotal=gbEvents.reduce((s,e)=>s+gbVal(e),0);
@@ -3152,12 +3154,12 @@ function refreshAnalytics() {
           <span style="font-weight:600;font-size:.85rem;padding:8px 0;border-bottom:1px solid var(--cream-dk);">Last ${r.w} weeks</span>
           <span style="font-size:.85rem;padding:8px 0;border-bottom:1px solid var(--cream-dk);text-align:right;font-weight:700;color:var(--brown-dk);">${fmtCur(r.cur)}</span>
           <span style="font-size:.85rem;padding:8px 0;border-bottom:1px solid var(--cream-dk);text-align:right;color:var(--muted);">${fmtCur(r.pri)}</span>
-          <span style="font-size:.85rem;padding:8px 0;border-bottom:1px solid var(--cream-dk);text-align:right;font-weight:700;color:${r.pct===null?'var(--muted)':(r.pct>=0?'#2e7d4f':'var(--danger)')};">${r.pct===null?'—':(r.pct>=0?'▲ ':'▼ ')+Math.abs(r.pct)+'%'}</span>`).join('')}
+          <span style="font-size:.85rem;padding:8px 0;border-bottom:1px solid var(--cream-dk);text-align:right;font-weight:700;color:${r.pct===null?'var(--muted)':(r.pct>=0?'#2e7d4f':'var(--danger)')};">${r.pct===null?' - ':(r.pct>=0?'▲ ':'▼ ')+Math.abs(r.pct)+'%'}</span>`).join('')}
       </div>
       <p style="font-size:.72rem;color:var(--muted);margin:8px 0 0;">Both channels combined. Windows end today and compare against the same weeks one year earlier (364-day shift keeps weekdays aligned).</p>`;
   }
 
-  // 📈 Year-over-year monthly trend — one line per year, back to the first order
+  // 📈 Year-over-year monthly trend - one line per year, back to the first order
   const yoyEl=document.getElementById('anal-yoy-line'); if(yoyEl){
     const monthRev=(y,m)=>{
       const from=new Date(y,m,1), to=new Date(y,m+1,0,23,59);
@@ -3197,7 +3199,7 @@ function refreshAnalytics() {
       <p style="font-size:.72rem;color:var(--muted);margin:6px 0 0;">Both channels combined, by calendar month, back to your first order.</p>`;
   }
 
-  // All-time totals — the bottom-of-page reference
+  // All-time totals - the bottom-of-page reference
   const atEl=document.getElementById('anal-alltime'); if(atEl){
     atEl.innerHTML=`
       <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">💰 All-Time Revenue</div><div class="av">${fmtCur(rev+gbTotal)}</div><div class="ac">Since the beginning</div></div>
@@ -3205,7 +3207,7 @@ function refreshAnalytics() {
       <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 All-Time Online</div><div class="av">${fmtCur(gbTotal)}</div><div class="ac">${gbEvents.length} Goldbelly shipments</div></div>`;
   }
 
-  // Monthly bar chart — last 12 months (use noon UTC to avoid timezone off-by-one)
+  // Monthly bar chart - last 12 months (use noon UTC to avoid timezone off-by-one)
   const months=[]; const today=new Date();
   for(let i=11;i>=0;i--){const d=new Date(today.getFullYear(),today.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth(),label:d.toLocaleString('default',{month:'short'})});}
   const monthBM=months.map(mo=>db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===mo.y&&d.getMonth()===mo.m;}).reduce((s,o)=>s+(o.total||0),0));
@@ -3218,7 +3220,7 @@ function refreshAnalytics() {
       const hBM=monthBM[i]>0?Math.max(3,Math.round((monthBM[i]/maxM)*130)):0;
       const hGB=monthGB[i]>0?Math.max(3,Math.round((monthGB[i]/maxM)*130)):0;
       return `
-      <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])} — Brick & Mortar ${fmtCur(monthBM[i])} · Online ${fmtCur(monthGB[i])}">
+      <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])} - Brick & Mortar ${fmtCur(monthBM[i])} · Online ${fmtCur(monthGB[i])}">
         <div class="bar-val" style="font-size:.62rem;font-weight:700;height:16px;line-height:16px;">${monthTotals[i]>0?fmtK(monthTotals[i]):''}</div>
         <div style="flex:1;min-height:0;"></div>
         ${hGB?`<div style="height:${hGB}px;width:100%;background:#b8860b;border-radius:3px 3px 0 0;"></div>`:''}
@@ -3231,7 +3233,7 @@ function refreshAnalytics() {
       </div>`;
   }
 
-  // Top retailers — Goldbelly ranks as a partner alongside brick & mortar
+  // Top retailers - Goldbelly ranks as a partner alongside brick & mortar
   const byRet={};
   db.orders.forEach(o=>{byRet[o.retailerName]=(byRet[o.retailerName]||0)+(o.total||0);});
   if(gbTotal>0) byRet['🚚 Goldbelly (Online)']=gbTotal;
@@ -3247,7 +3249,7 @@ function refreshAnalytics() {
       </div>`).join(''):'<p style="color:var(--muted);font-style:italic;">No data yet.</p>';
   }
 
-  // Products sold — with distinct colors per product
+  // Products sold - with distinct colors per product
   const PROD_COLORS=['#9B4F1E','#C8A870','#6B3A1F','#A0623A','#e03318','#3D6B3A','#3A5A6B','#6B3A5A','#5A6B3A'];
   const byProd={};
   db.orders.forEach(o=>o.products.forEach(p=>{if(p.qty>0&&p.product!=='Delivery')byProd[p.product]=(byProd[p.product]||0)+p.qty;}));
@@ -3255,7 +3257,7 @@ function refreshAnalytics() {
   const GB_COMPONENTS={
     'grandma-jeanne-sampler':{'CC Mandelbites':1,'Almond':1,'Funfetti Mandelbites':1,'Gluten-Free Chocolate-Chip':1,'Two Pack Chocolate Chip':2},
     'the-shabbat-mandelbites-box':{'CC Mandelbites':2,'Almond':1,'Gluten-Free Chocolate-Chip':1},
-    'mandelbites-pick-your-mix-6-pack':{'MandelBites — Customer Mix (GB)':6},
+    'mandelbites-pick-your-mix-6-pack':{'MandelBites - Customer Mix (GB)':6},
     'treat-the-office':{'Two Pack Chocolate Chip':24},
     'bakehouse-tour':{'CC Mandelbites':2,'Almond':2,'Funfetti Mandelbites':2,'Gluten-Free Chocolate-Chip':2}
   };
@@ -3272,7 +3274,7 @@ function refreshAnalytics() {
       </div>`).join(''):'<p style="color:var(--muted);font-style:italic;">No data yet.</p>';
   }
 
-  // Order frequency + avg reorder time — ALL partners who have ever ordered
+  // Order frequency + avg reorder time - ALL partners who have ever ordered
   const freqEl=document.getElementById('anal-freq'); if(freqEl){
     const retStats=db.retailers.map(r=>{
       const orders=db.orders.filter(o=>o.retailerId===r.id&&o.date).sort((a,b)=>new Date(a.date+'T12:00:00')-new Date(b.date+'T12:00:00'));
@@ -3288,7 +3290,7 @@ function refreshAnalytics() {
         let maxTs=0;
         orders.forEach(o=>{const t=new Date(o.date+'T12:00:00').getTime(); if(!isNaN(t)&&t>maxTs){maxTs=t;lastOrder=o.date;}});
       }
-      // Days since last order — useful for spotting stale accounts
+      // Days since last order - useful for spotting stale accounts
       const daysSince=lastOrder?Math.floor((now-new Date(lastOrder+'T12:00:00'))/(1000*60*60*24)):null;
       return {name:r.name,count:orders.length,avgDays,lastOrder,daysSince};
     }).filter(r=>r.count>0).sort((a,b)=>{
@@ -3307,8 +3309,8 @@ function refreshAnalytics() {
         ${retStats.map(r=>`
           <span style="font-weight:600;font-size:.83rem;padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${esc(r.name)}</span>
           <span style="text-align:right;font-size:.83rem;font-weight:700;color:var(--brown-dk);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.count}</span>
-          <span style="text-align:right;font-size:.78rem;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.avgDays!==null?r.avgDays+' days':'—'}</span>
-          <span style="text-align:right;font-size:.78rem;color:${r.daysSince!==null&&r.daysSince>60?'#b24a2a':'var(--muted)'};padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;" title="${r.daysSince!==null?r.daysSince+' days ago':''}">${r.lastOrder?fmtDate(r.lastOrder):'—'}</span>
+          <span style="text-align:right;font-size:.78rem;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;">${r.avgDays!==null?r.avgDays+' days':' - '}</span>
+          <span style="text-align:right;font-size:.78rem;color:${r.daysSince!==null&&r.daysSince>60?'#b24a2a':'var(--muted)'};padding:6px 0;border-bottom:1px solid var(--cream-dk);align-self:center;" title="${r.daysSince!==null?r.daysSince+' days ago':''}">${r.lastOrder?fmtDate(r.lastOrder):' - '}</span>
         `).join('')}
       </div>
     `:'<p style="color:var(--muted);font-style:italic;">No partner orders yet.</p>';
@@ -3395,7 +3397,7 @@ function refreshAnalytics() {
         return {year:y,rev,orders:yOrds.length,units,partners};
       });
       const maxRev=Math.max(...yData.map(d=>d.rev),1);
-      yearlyEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">${yData.map((d,i)=>`<div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:14px 16px;"><div style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--brown-dk);">${d.year}</div><div style="font-size:1.25rem;font-weight:700;color:var(--sage);margin:4px 0;">${fmtCur(d.rev)}</div><div style="height:5px;background:var(--tan);border-radius:3px;margin:6px 0;"><div style="height:100%;width:${Math.round((d.rev/maxRev)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};border-radius:3px;"></div></div><div style="font-size:.75rem;color:var(--muted);margin-top:4px;">${d.orders} orders &middot; ${d.units} units &middot; ${d.partners} partner${d.partners!==1?'s':''}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="border-bottom:2px solid var(--tan);"><th style="text-align:left;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Year</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Revenue</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Orders</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Units</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Partners</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">YoY</th></tr></thead><tbody>${yData.map((d,i)=>{const prev=yData[i-1];const yoy=prev&&prev.rev>0?Math.round(((d.rev-prev.rev)/prev.rev)*100):null;return `<tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:9px 10px;font-weight:700;color:var(--brown-dk);">${d.year}</td><td style="padding:9px 10px;text-align:right;font-weight:700;color:var(--sage);">${fmtCur(d.rev)}</td><td style="padding:9px 10px;text-align:right;">${d.orders}</td><td style="padding:9px 10px;text-align:right;">${d.units}</td><td style="padding:9px 10px;text-align:right;">${d.partners}</td><td style="padding:9px 10px;text-align:right;">${yoy!==null?`<span style="color:${yoy>=0?'#2e7d4f':'var(--danger)'};">${yoy>=0?'▲':'▼'}${Math.abs(yoy)}%</span>`:'—'}</td></tr>`;}).join('')}</tbody></table>`;
+      yearlyEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">${yData.map((d,i)=>`<div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:14px 16px;"><div style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--brown-dk);">${d.year}</div><div style="font-size:1.25rem;font-weight:700;color:var(--sage);margin:4px 0;">${fmtCur(d.rev)}</div><div style="height:5px;background:var(--tan);border-radius:3px;margin:6px 0;"><div style="height:100%;width:${Math.round((d.rev/maxRev)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};border-radius:3px;"></div></div><div style="font-size:.75rem;color:var(--muted);margin-top:4px;">${d.orders} orders &middot; ${d.units} units &middot; ${d.partners} partner${d.partners!==1?'s':''}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="border-bottom:2px solid var(--tan);"><th style="text-align:left;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Year</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Revenue</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Orders</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Units</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Partners</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">YoY</th></tr></thead><tbody>${yData.map((d,i)=>{const prev=yData[i-1];const yoy=prev&&prev.rev>0?Math.round(((d.rev-prev.rev)/prev.rev)*100):null;return `<tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:9px 10px;font-weight:700;color:var(--brown-dk);">${d.year}</td><td style="padding:9px 10px;text-align:right;font-weight:700;color:var(--sage);">${fmtCur(d.rev)}</td><td style="padding:9px 10px;text-align:right;">${d.orders}</td><td style="padding:9px 10px;text-align:right;">${d.units}</td><td style="padding:9px 10px;text-align:right;">${d.partners}</td><td style="padding:9px 10px;text-align:right;">${yoy!==null?`<span style="color:${yoy>=0?'#2e7d4f':'var(--danger)'};">${yoy>=0?'▲':'▼'}${Math.abs(yoy)}%</span>`:' - '}</td></tr>`;}).join('')}</tbody></table>`;
     }
   }}
 
@@ -3418,7 +3420,7 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
   const deliveryFee = 0;
   const deliveryDisplay = deliveryDate || 'Not specified';
   const notesDisplay = notes || 'None';
-  // Admin notification — tells YOU a new order needs review
+  // Admin notification - tells YOU a new order needs review
   emailjs.send(EMAILJS_SERVICE, EMAILJS_NOTIFY_TPL, {
     retailer_name: retailerName,
     order_id: orderId || 'TBD',
@@ -3530,8 +3532,8 @@ async function retailerPlaceCatalogOrder() {
   if(delivery && delivery < minDelivStr){toast('⚠️ Delivery date must be at least 7 days from today.');return;}
   const notes=v('ro-notes');
   const allItems=[...products];
-  // Invoice numbers are assigned by admin only — retailer orders start at 0 (TBD)
-  // Sanitize all items — unit_price must never be null
+  // Invoice numbers are assigned by admin only - retailer orders start at 0 (TBD)
+  // Sanitize all items - unit_price must never be null
   const safeItems=allItems.map(p=>({product:String(p.product),qty:Number(p.qty)||1,price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)}));
   const {data,error}=await sbClient.rpc('submit_retailer_order',{
     p_retailer_id:r.id,p_pin:session.pin,p_invoice_num:0,
@@ -3568,7 +3570,7 @@ async function retailerRequestAutoOrder() {
   // Auto-fill prices from catalog
   products.forEach(p=>{if(!p.price&&PRODUCT_PRICES[p.product])p.price=PRODUCT_PRICES[p.product];});
   // Save to the database via PIN-checked RPC (used to be localStorage-only,
-  // which silently lost partner auto-orders — the Selvasr bug)
+  // which silently lost partner auto-orders - the Selvasr bug)
   const {data:newId,error}=await sbClient.rpc('retailer_save_auto_order',{
     p_retailer_id:r.id,p_pin:session.pin,p_freq:freq,p_day:day,
     p_start:start||null,p_notes:notes,p_products:products
@@ -3592,31 +3594,31 @@ const GB_PACKAGES = {
     summary:'Each box: 1 bag Chocolate-Chip, 1 Almond, 1 Funfetti, 1 Gluten-Free CC + 2 Mandel Bread two-packs + thank-you card, red wrap',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/grandma-jeanne-sampler',
     contents:[
-      {item:'Chocolate-Chip MandelBites — 8 oz bag', qty:1, img:'images/cc-mandelbites.jpg'},
-      {item:'Almond MandelBites — 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg'},
-      {item:'Funfetti MandelBites — 8 oz bag', qty:1, img:'images/funfetti-mandelbites.jpg'},
-      {item:'GF Chocolate-Chip MandelBites — 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
-      {item:'Choc-Chip Mandel Bread Two-Pack — 2 oz', qty:2, img:'images/two-pack-choc-chip.jpg'},
+      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/cc-mandelbites.jpg'},
+      {item:'Almond MandelBites - 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg'},
+      {item:'Funfetti MandelBites - 8 oz bag', qty:1, img:'images/funfetti-mandelbites.jpg'},
+      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
+      {item:'Choc-Chip Mandel Bread Two-Pack - 2 oz', qty:2, img:'images/two-pack-choc-chip.jpg'},
       {item:'Thank You card + red wrap & Grandma sticker', qty:1}
     ]},
   'the-shabbat-mandelbites-box': {name:'The Shabbat MandelBites Box', price:74.95, payout:46.80, serves:8,
     summary:'Each box: 2 bags Chocolate-Chip, 1 Almond, 1 Gluten-Free CC + thank-you card, navy & white wrap',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/the-shabbat-mandelbites-box',
     contents:[
-      {item:'Chocolate-Chip MandelBites — 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg'},
-      {item:'Almond MandelBites — 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg'},
-      {item:'GF Chocolate-Chip MandelBites — 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
+      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg'},
+      {item:'Almond MandelBites - 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg'},
+      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
       {item:'Thank You card + navy & white wrap', qty:1}
     ]},
   'mandelbites-pick-your-mix-6-pack': {name:'"Pick Your Mix" 6-Pack', price:89.95, payout:61.00, serves:12,
     summary:'Each box: 6 bags of MandelBites in the MIX THE CUSTOMER CHOSE (check the Goldbelly order slip!) + thank-you card',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/mandelbites-pick-your-mix-6-pack',
-    note:"Customer picks the mix — check the Goldbelly order for which 6 bags. Combos: 6 CC · 6 GF · 3 CC+3 Funfetti · 3 CC+3 Almond · 3 CC+3 GF · 3 Funfetti+3 Almond · 2 CC+2 Almond+2 Funfetti.",
+    note:"Customer picks the mix - check the Goldbelly order for which 6 bags. Combos: 6 CC · 6 GF · 3 CC+3 Funfetti · 3 CC+3 Almond · 3 CC+3 GF · 3 Funfetti+3 Almond · 2 CC+2 Almond+2 Funfetti.",
     contents:[
-      {item:'MandelBites 8 oz bags — customer\'s choice of mix', qty:6, img:'images/cc-mandelbites.jpg'},
+      {item:'MandelBites 8 oz bags - customer\'s choice of mix', qty:6, img:'images/cc-mandelbites.jpg'},
       {item:'Thank You card + gift wrap', qty:1}
     ]},
-  'treat-the-office': {name:'"Treat the Office" — 24 Pack', price:124.95, payout:85.00, serves:24,
+  'treat-the-office': {name:'"Treat the Office" - 24 Pack', price:124.95, payout:85.00, serves:24,
     summary:'Each box: 24 little pouches of Chocolate-Chip Mandel Bread (2 pieces each) + thank-you card with gift message',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/treat-the-office',
     contents:[
@@ -3624,13 +3626,13 @@ const GB_PACKAGES = {
       {item:'Thank You card (custom gift message) + red wrap', qty:1}
     ]},
   'bakehouse-tour': {name:'Bakehouse MandelBites Tour', price:114.95, serves:16,
-    summary:'Each box: 2 bags of EVERY flavor — 2 Chocolate-Chip, 2 Almond, 2 Funfetti, 2 Gluten-Free CC (8 bags) + thank-you card',
+    summary:'Each box: 2 bags of EVERY flavor - 2 Chocolate-Chip, 2 Almond, 2 Funfetti, 2 Gluten-Free CC (8 bags) + thank-you card',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/bakehouse-tour',
     contents:[
-      {item:'Chocolate-Chip MandelBites — 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg'},
-      {item:'Almond MandelBites — 8 oz bag', qty:2, img:'images/almond-mandelbites.jpg'},
-      {item:'Funfetti MandelBites — 8 oz bag', qty:2, img:'images/funfetti-mandelbites.jpg'},
-      {item:'GF Chocolate-Chip MandelBites — 8 oz bag', qty:2, img:'images/gf-choc-chip-mandelbites.jpg'},
+      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg'},
+      {item:'Almond MandelBites - 8 oz bag', qty:2, img:'images/almond-mandelbites.jpg'},
+      {item:'Funfetti MandelBites - 8 oz bag', qty:2, img:'images/funfetti-mandelbites.jpg'},
+      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/gf-choc-chip-mandelbites.jpg'},
       {item:'Thank You card + red wrap & Grandma sticker', qty:1}
     ]}
 };
@@ -3750,7 +3752,7 @@ function openCalDayModal(ds){
   db.orders.filter(o=>o.delivery===ds&&o.status!=='Pending').forEach(o=>{
     const what=o.products.filter(p=>p.product!=='Delivery').map(p=>`${p.qty}× ${getProductDisplayName(p.product)}`).join(', ');
     items.push(`<div style="margin:3px 0 8px;">
-      <div class="cal-chip c-order" style="cursor:pointer;white-space:normal;" onclick="closeModal('cal-day-modal');viewOrderDetail(${o.id})">📦 ${esc(o.retailerName)} — ${invNum(o.invoiceNum)} · ${fmtCur(o.total)} (${o.status})</div>
+      <div class="cal-chip c-order" style="cursor:pointer;white-space:normal;" onclick="closeModal('cal-day-modal');viewOrderDetail(${o.id})">📦 ${esc(o.retailerName)} - ${invNum(o.invoiceNum)} · ${fmtCur(o.total)} (${o.status})</div>
       ${what?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">What's in it: ${esc(what)}</div>`:''}
     </div>`);
   });
@@ -3765,16 +3767,16 @@ function openCalDayModal(ds){
     items.push(`<div style="margin:3px 0 8px;">
       <div style="display:flex;align-items:center;gap:6px;">
         <div class="cal-chip ${cls}" style="flex:1;cursor:pointer;white-space:normal;" onclick="closeModal('cal-day-modal');openCalEventModal(${e.id})">${e.done?'✓ ':''}${icon} ${esc(lbl)}</div>
-        <button class="btn-icon" style="color:${e.done?'var(--muted)':'#2e7d4f'};" title="${e.done?'Mark as not done':'Mark as done — stops the day-before reminder'}" onclick="toggleCalDone(${e.id})">${e.done?'↩':'✓'}</button>
+        <button class="btn-icon" style="color:${e.done?'var(--muted)':'#2e7d4f'};" title="${e.done?'Mark as not done':'Mark as done - stops the day-before reminder'}" onclick="toggleCalDone(${e.id})">${e.done?'↩':'✓'}</button>
         <button class="btn-icon" style="color:var(--gold);" title="Push out one week" onclick="pushCalEvent(${e.id})">⏭</button>
         <button class="btn-icon" title="Remove" onclick="deleteCalEvent(${e.id})">🗑</button>
       </div>
-      ${p&&p.summary&&!e.done?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">${esc(p.summary)}${(e.qty||1)>1?` — and you're shipping ${e.qty} of these boxes`:''} <span style="color:var(--gold);">(click for photos)</span></div>`:''}
+      ${p&&p.summary&&!e.done?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">${esc(p.summary)}${(e.qty||1)>1?` - and you're shipping ${e.qty} of these boxes`:''} <span style="color:var(--gold);">(click for photos)</span></div>`:''}
     </div>`);
   });
   document.getElementById('cal-day-events').innerHTML=items.join('')||'<p style="color:var(--muted);font-style:italic;font-size:.85rem;">Nothing scheduled yet.</p>';
   const sel=document.getElementById('cal-ev-pkg');
-  sel.innerHTML=Object.entries(GB_PACKAGES).map(([k,p])=>`<option value="${k}">${esc(p.name)} — ${fmtCur(p.price)}</option>`).join('');
+  sel.innerHTML=Object.entries(GB_PACKAGES).map(([k,p])=>`<option value="${k}">${esc(p.name)} - ${fmtCur(p.price)}</option>`).join('');
   calEvTypeChanged();
   openModal('cal-day-modal');
 }
@@ -3811,10 +3813,10 @@ async function deleteCalEvent(id){
 async function toggleCalDone(id){
   const e=db.calEvents.find(x=>x.id===id);if(!e)return;
   const {error}=await sbClient.from('calendar_events').update({done:!e.done}).eq('id',id);
-  if(error){toast('⚠️ Could not update — did you run the new SQL? '+error.message);return;}
+  if(error){toast('⚠️ Could not update - did you run the new SQL? '+error.message);return;}
   e.done=!e.done;
   renderCalendar(); if(_calSelectedDate) openCalDayModal(_calSelectedDate);
-  toast(e.done?'✓ Done — no reminder will be sent for this.':'↩ Back on the reminder list.');
+  toast(e.done?'✓ Done - no reminder will be sent for this.':'↩ Back on the reminder list.');
 }
 async function pushCalEvent(id){
   const e=db.calEvents.find(x=>x.id===id);if(!e)return;
@@ -3849,7 +3851,7 @@ function openCalEventModal(id){
     const icons={bake:'🍞',media:'📸',prospect:'🤝',note:'📝'};
     const names={bake:'Bake Day',media:'Media / Content',prospect:'Potential Partner Drop/Ship',note:'Note'};
     document.getElementById('gb-pkg-title').textContent=(icons[ev.type]||'📝')+' '+(ev.title||names[ev.type]||'Note');
-    body.innerHTML=`<p style="font-size:.9rem;color:var(--brown-dk);">${fmtDate(ev.event_date)}${ev.done?' · <span style="color:#2e7d4f;">✓ Done</span>':''}</p>${ev.notes?`<p style="font-size:.85rem;color:var(--muted);">${esc(ev.notes)}</p>`:''}${ev.type==='prospect'?'<p style="font-size:.78rem;color:var(--muted);">Tentative — use ⏭ below to slide it a week if plans move.</p>':''}`;
+    body.innerHTML=`<p style="font-size:.9rem;color:var(--brown-dk);">${fmtDate(ev.event_date)}${ev.done?' · <span style="color:#2e7d4f;">✓ Done</span>':''}</p>${ev.notes?`<p style="font-size:.85rem;color:var(--muted);">${esc(ev.notes)}</p>`:''}${ev.type==='prospect'?'<p style="font-size:.78rem;color:var(--muted);">Tentative - use ⏭ below to slide it a week if plans move.</p>':''}`;
   }
   openModal('gb-pkg-modal');
 }
@@ -3884,7 +3886,7 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 function v(id){return document.getElementById(id).value.trim();}
 function todayStr(){return new Date().toISOString().split('T')[0];}
-function fmtDate(d){if(!d)return'—';const[y,m,day]=d.split('-');return new Date(y,m-1,day).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
+function fmtDate(d){if(!d)return' - ';const[y,m,day]=d.split('-');return new Date(y,m-1,day).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fmtCur(n){return'$'+(Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
 function sBadge(s){return{Pending:'b-pending',Confirmed:'b-confirmed',Delivered:'b-delivered'}[s]||'b-inactive';}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -3917,7 +3919,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     return;
   }
 
-  // Load retailer list for login dropdown (anon access — no PINs exposed)
+  // Load retailer list for login dropdown (anon access - no PINs exposed)
   const {data:retList, error:retListErr}=await sbClient.from('retailers').select('id,name,status').eq('status','Active');
   if(retListErr) {
     console.error('[LFB] retailer list error:', retListErr);
@@ -3939,7 +3941,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 //  ⚠️  Always wrap unit_price in Number()||0 before Supabase insert.
 //  [24] EDIT ORDER MODAL
 //  openEditOrder(), updateEOTotal(), saveEditOrder().
-//  saveEditOrder() deletes + re-inserts order_items — always use Number()||0.
+//  saveEditOrder() deletes + re-inserts order_items - always use Number()||0.
 // =====================================================================
 function openEditOrder(id) {
   const o=db.orders.find(x=>x.id===id);if(!o)return;
