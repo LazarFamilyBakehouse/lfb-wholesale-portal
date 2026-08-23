@@ -104,7 +104,7 @@ main { padding:26px 30px;max-width:1200px;margin:0 auto;flex:1; }
 .stats-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px; }
 .stat-card { background:var(--white);border:1px solid var(--tan);border-radius:4px;padding:18px;box-shadow:none;border-top:3px solid var(--red); }
 .stat-card .sl { font-size:.73rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted); }
-.stat-card .sv { font-family:'Playfair Display',serif;font-size:clamp(1.25rem,1.1vw + .85rem,1.9rem);font-weight:700;color:var(--brown-dk);margin-top:4px;overflow-wrap:anywhere;line-height:1.15; }
+.stat-card .sv { font-family:'Playfair Display',serif;font-size:clamp(1.1rem,1.1vw + .8rem,1.9rem);font-weight:700;color:var(--brown-dk);margin-top:4px;white-space:nowrap;line-height:1.15; }
 .stat-card .si { font-size:1.4rem;float:right;margin-top:-2px; }
 
 /* ===================== BUTTONS ===================== */
@@ -2482,7 +2482,7 @@ function refreshDashboard() {
     <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${db.orders.length}</div></div>
     <div class="stat-card"><div class="si">🍪</div><div class="sl">Avg Items / Week</div><div class="sv">${avgPerWeek}</div></div>
     <div class="stat-card"><div class="si">🔄</div><div class="sl">Auto-Orders</div><div class="sv">${db.autoOrders.filter(a=>a.active).length}</div></div>
-    <div class="stat-card"><div class="si">💰</div><div class="sl">Revenue ${curYear}</div><div class="sv">${fmtCur(revCurYear+gbYearDash)}</div>${yoyChange!==null?`<div style="font-size:.72rem;margin-top:3px;color:${yoyChange>=0?'#2e7d4f':'var(--danger)'};">${yoyChange>=0?'▲':'▼'} ${Math.abs(yoyChange)}% ${curYear} vs ${prvYear}</div>`:''}</div>`;
+    <div class="stat-card"><div class="si">💰</div><div class="sl">Revenue ${curYear}</div><div class="sv">$${Math.round(revCurYear+gbYearDash).toLocaleString()}</div>${yoyChange!==null?`<div style="font-size:.72rem;margin-top:3px;color:${yoyChange>=0?'#2e7d4f':'var(--danger)'};">${yoyChange>=0?'▲':'▼'} ${Math.abs(yoyChange)}% ${curYear} vs ${prvYear}</div>`:''}</div>`;
   const recent=[...db.orders].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
   const dob=document.getElementById('dash-orders');
   dob.innerHTML=recent.length?recent.map(o=>`<tr><td><strong>${invNum(o.invoiceNum)}</strong></td><td>${esc(o.retailerName)}</td><td>${fmtDate(o.date)}</td><td><strong>${fmtCur(o.total)}</strong></td><td><span class="badge ${sBadge(o.status)}">${o.status}</span></td></tr>`).join(''):
@@ -3122,10 +3122,24 @@ function refreshAnalytics() {
   const curYear=now.getFullYear();
   const yStart=new Date(curYear,0,1), yEnd=new Date(curYear,11,31,23,59);
   const bmYear=bmRange(yStart,yEnd), gbYear=gbRange(yStart,yEnd);
+  // Online share of revenue: this-year level, with a 4-week-on-4-week trend
+  const shDay=864e5;
+  const shTo=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59);
+  const shFrom=new Date(shTo.getTime()-27*shDay);
+  const shPTo=new Date(shFrom.getTime()-shDay), shPFrom=new Date(shPTo.getTime()-27*shDay);
+  const c4bm=bmRange(shFrom,shTo), c4gb=gbRange(shFrom,shTo);
+  const p4bm=bmRange(shPFrom,shPTo), p4gb=gbRange(shPFrom,shPTo);
+  const yrShare=(bmYear+gbYear)>0?gbYear/(bmYear+gbYear)*100:0;
+  const c4Share=(c4bm+c4gb)>0?c4gb/(c4bm+c4gb)*100:null;
+  const p4Share=(p4bm+p4gb)>0?p4gb/(p4bm+p4gb)*100:null;
+  let shCap='Share of revenue this year';
+  if(c4Share!==null&&p4Share!==null){const shD=c4Share-p4Share;shCap=(shD>=0?'▲ +':'▼ ')+shD.toFixed(1)+' pts vs prior 4 weeks';}
+  else if(c4Share!==null){shCap='Last 4 weeks: '+c4Share.toFixed(0)+'% online';}
   kpi.innerHTML=`
     <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">Revenue ${curYear}</div><div class="av">${fmtCur(bmYear+gbYear)}</div><div class="ac">Brick & Mortar + Online, this year</div></div>
     <div class="anal-card"><div class="al">🏪 Brick & Mortar ${curYear}</div><div class="av">${fmtCur(bmYear)}</div><div class="ac">Wholesale partners</div></div>
     <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 Online (Goldbelly) ${curYear}</div><div class="av">${fmtCur(gbYear)}</div><div class="ac">${fmtCur(gbConf)} confirmed${gbProj>0?' · '+fmtCur(gbProj)+' projected':''}</div></div>
+    <div class="anal-card" style="border-top-color:#b8860b;"><div class="al">🧮 Online Share</div><div class="av">${yrShare.toFixed(0)}%</div><div class="ac">${shCap}</div></div>
     <div class="anal-card"><div class="al">This Month</div><div class="av">${fmtCur(thisMonthRev+thisMonthGb)}</div><div class="ac">${thisMonthOrders.length} wholesale order${thisMonthOrders.length!==1?'s':''}${thisMonthGb>0?' + '+fmtCur(thisMonthGb)+' online':''}</div></div>
     <div class="anal-card"><div class="al">Avg Order Value</div><div class="av">${fmtCur(avgOrder)}</div><div class="ac">Per wholesale invoice</div></div>
     <div class="anal-card"><div class="al">Active Partners</div><div class="av">${activeCount}</div><div class="ac">Ordered in last 2 mo.</div></div>
@@ -3203,7 +3217,7 @@ function refreshAnalytics() {
   const atEl=document.getElementById('anal-alltime'); if(atEl){
     atEl.innerHTML=`
       <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">💰 All-Time Revenue</div><div class="av">${fmtCur(rev+gbTotal)}</div><div class="ac">Since the beginning</div></div>
-      <div class="anal-card"><div class="al">🏪 All-Time Wholesale Revenue</div><div class="av">${fmtCur(rev)}</div><div class="ac">${db.orders.length} wholesale orders</div></div>
+      <div class="anal-card"><div class="al">🏪 All-Time Brick & Mortar Revenue</div><div class="av">${fmtCur(rev)}</div><div class="ac">${db.orders.length} partner orders</div></div>
       <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 All-Time Online</div><div class="av">${fmtCur(gbTotal)}</div><div class="ac">${gbEvents.length} Goldbelly shipments</div></div>`;
   }
 
@@ -3226,10 +3240,12 @@ function refreshAnalytics() {
         ${hGB?`<div style="height:${hGB}px;width:100%;background:#b8860b;border-radius:3px 3px 0 0;"></div>`:''}
         ${hBM?`<div class="bar" style="height:${hBM}px;width:100%;${hGB?'border-radius:0 0 3px 3px;':''}"></div>`:(hGB?'':`<div class="bar" style="height:4px;width:100%;"></div>`)}
         <div class="bar-label" style="height:18px;line-height:18px;margin-top:3px;">${mo.label}</div>
+        <div style="height:14px;line-height:14px;font-size:.58rem;color:#b8860b;font-weight:700;">${monthTotals[i]>0&&monthGB[i]>0?Math.round(monthGB[i]/monthTotals[i]*100)+'%':''}</div>
       </div>`;}).join('')+
       `<div style="flex-basis:100%;display:flex;gap:16px;justify-content:center;font-size:.7rem;color:var(--muted);padding-top:8px;">
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--red);margin-right:4px;"></span>Brick & Mortar</span>
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#b8860b;margin-right:4px;"></span>Online (Goldbelly)</span>
+        <span><span style="color:#b8860b;font-weight:700;">%</span> = online share of that month</span>
       </div>`;
   }
 
