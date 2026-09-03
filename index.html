@@ -2771,7 +2771,7 @@ function renderRetailerHome() {
       <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${myOrders.length||' - '}</div></div>
       <div class="stat-card"><div class="si">💰</div><div class="sl">Lifetime Value</div><div class="sv">${fmtCur(total)}</div></div>
       ${thisMonthRev>0?`<div class="stat-card"><div class="si">📅</div><div class="sl">This Month</div><div class="sv">${fmtCur(thisMonthRev)}</div></div>`
-        :lastOrder?`<div class="stat-card"><div class="si">🕐</div><div class="sl">Last Order</div><div class="sv">${fmtDate(lastOrder.date)}</div></div>`:''}
+        :lastOrder?`<div class="stat-card"><div class="si">🕐</div><div class="sl">Last Order</div><div class="sv" style="font-size:clamp(.95rem,.9vw + .7rem,1.35rem);">${fmtDate(lastOrder.date)}</div></div>`:''}
       <div class="stat-card"><div class="si"></div><div class="sl">Avg Order Value</div><div class="sv">${fmtCur(avgOrder)}</div></div>
       ${lastOrderUnits>0?`<div class="stat-card"><div class="si">🍪</div><div class="sl">Last Order Units</div><div class="sv">${lastOrderUnits}</div></div>`:''}`;
     // Big order alert banner
@@ -3713,13 +3713,13 @@ function calEventsByDate(y,m){
       const p=GB_PACKAGES[ev.package_key];
       push(ev.event_date,{label:`🚚 ${ev.qty||1}× ${esc(p?p.name:(ev.title||'GB package'))}`,cls:'c-gb',click:`openCalEventModal(${ev.id})`,desc:p&&p.summary?p.summary:'',who:ev.assignee||'both'});
     } else if(ev.type==='bake')
-      push(ev.event_date,{label:'🍞 '+esc(ev.title||'Bake day')+whoTag(ev),cls:'c-bake',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both'});
+      push(ev.event_date,{label:'🍞 '+esc(ev.title||'Bake day')+whoTag(ev)+(ev.notes?' ✎':''),cls:'c-bake',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both',desc:ev.notes||''});
     else if(ev.type==='media')
-      push(ev.event_date,{label:'📸 '+esc(ev.title||'Media')+whoTag(ev),cls:'c-media',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both'});
+      push(ev.event_date,{label:'📸 '+esc(ev.title||'Media')+whoTag(ev)+(ev.notes?' ✎':''),cls:'c-media',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both',desc:ev.notes||''});
     else if(ev.type==='prospect')
-      push(ev.event_date,{label:'🤝 '+esc(ev.title||'Potential partner')+whoTag(ev),cls:'c-prospect',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both'});
+      push(ev.event_date,{label:'🤝 '+esc(ev.title||'Potential partner')+whoTag(ev)+(ev.notes?' ✎':''),cls:'c-prospect',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both',desc:ev.notes||''});
     else
-      push(ev.event_date,{label:'📝 '+esc(ev.title||'Note')+whoTag(ev),cls:'c-note',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both'});
+      push(ev.event_date,{label:'📝 '+esc(ev.title||'Note')+whoTag(ev)+(ev.notes?' ✎':''),cls:'c-note',click:`openCalEventModal(${ev.id})`,who:ev.assignee||'both',desc:ev.notes||''});
     if(ev.done){const arr=map[ev.event_date];const last=arr[arr.length-1];last.label='✓ '+last.label;last.cls+=' cal-done';}
   });
   db.autoOrders.filter(a=>a.active).forEach(ao=>{
@@ -3806,6 +3806,7 @@ function openCalDayModal(ds){
         <button class="btn-icon" title="Remove" onclick="deleteCalEvent(${e.id})">🗑</button>
       </div>
       ${p&&p.summary&&!e.done?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">${esc(p.summary)}${(e.qty||1)>1?` - and you're shipping ${e.qty} of these boxes`:''} <span style="color:var(--gold);">(click for photos)</span></div>`:''}
+      ${e.notes&&e.type!=='gb_ship'?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">✎ ${esc(e.notes)}</div>`:''}
     </div>`);
   });
   document.getElementById('cal-day-events').innerHTML=items.join('')||'<p style="color:var(--muted);font-style:italic;font-size:.85rem;">Nothing scheduled yet.</p>';
@@ -4032,7 +4033,13 @@ function updateEOTotal() {
   if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;total+=delPrice;}
   document.getElementById('eo-total-display').textContent=fmtCur(total);
 }
+let _eoSaving=false; // guard: a double-click on Save must never run this twice
 async function saveEditOrder() {
+  if(_eoSaving) return;
+  _eoSaving=true;
+  try { await _saveEditOrderInner(); } finally { _eoSaving=false; }
+}
+async function _saveEditOrderInner() {
   const id=Number(document.getElementById('eo-id').value);
   const o=db.orders.find(x=>x.id===id);if(!o){toast('⚠️ Order not found.');return;}
   const products=getProdRows('eo-prod-list');
@@ -4050,8 +4057,12 @@ async function saveEditOrder() {
   try {
     const {error:oErr}=await sbClient.from('orders').update({invoice_num:invNew,order_date:date,delivery_date:delivery||null,status,notes,total}).eq('id',id);
     if(oErr){toast('⚠️ Error updating order: '+oErr.message);return;}
-    await sbClient.from('order_items').delete().eq('order_id',id);
-    await sbClient.from('order_items').insert(products.map(p=>({order_id:id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
+    // Replace line items: the delete MUST succeed before we insert, or the
+    // order ends up with duplicated items (this happened to INV-0108 and 0147)
+    const {error:dErr}=await sbClient.from('order_items').delete().eq('order_id',id);
+    if(dErr){toast('⚠️ Could not update line items ('+dErr.message+'). Order info saved; items left unchanged.');return;}
+    const {error:iErr}=await sbClient.from('order_items').insert(products.map(p=>({order_id:id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
+    if(iErr){toast('⚠️ Items failed to save: '+iErr.message+'. Please re-open the order and check its products.');return;}
     // Update nextInvoice if we used a higher number
     if(invNew >= db.nextInvoice) db.nextInvoice = invNew + 1;
     await loadFromSupabase();
