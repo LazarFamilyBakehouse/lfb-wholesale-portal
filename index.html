@@ -695,6 +695,8 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 const EMAILJS_SERVICE     = 'service_j5qotyn';
 const EMAILJS_NOTIFY_TPL  = 'template_wbhl7fm';    // admin notification (existing)
 const EMAILJS_CONFIRM_TPL = 'template_5m4rusk'; // retailer confirmation email
+// Everyone who gets the "new order" notification (comma-separated = one EmailJS send)
+const ADMIN_NOTIFY_EMAILS = 'info@lazarfamilybakehouse.com, victoria@lazarfamilybakehouse.com';
 
 const SUPABASE_URL  = 'https://ylvoswzsijigyezqvaat.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlsdm9zd3pzaWppZ3llenF2YWF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2Mjk5MTAsImV4cCI6MjA4OTIwNTkxMH0.iA4QMZkxTsqArV3CgHb-YluiBeiIq5RppGV6kBe8G8g';
@@ -766,25 +768,25 @@ const SEED_DATA = {
     {id:1002,invoiceNum:13,retailerId:1,retailerName:"Spinelli's Market",date:"2025-07-07",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50}],total:88.00,created:"2025-07-07T00:00:00Z"},
     {id:1003,invoiceNum:18,retailerId:1,retailerName:"Spinelli's Market",date:"2025-07-28",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50}],total:88.00,created:"2025-07-28T00:00:00Z"},
     {id:1004,invoiceNum:26,retailerId:1,retailerName:"Spinelli's Market",date:"2025-09-09",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50}],total:88.00,created:"2025-09-09T00:00:00Z"},
-    {id:1005,invoiceNum:48,retailerId:1,retailerName:"Spinelli's Market",date:"2025-10-14",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50},{product:"Funfetti",qty:8,price:5.50},{product:"Almond",qty:8,price:6.40}],total:183.20,created:"2025-10-14T00:00:00Z"},
-    {id:1006,invoiceNum:61,retailerId:1,retailerName:"Spinelli's Market",date:"2025-11-18",delivery:"",status:"Delivered",notes:"",products:[{product:"Funfetti",qty:8,price:6.00}],total:48.00,created:"2025-11-18T00:00:00Z"},
+    {id:1005,invoiceNum:48,retailerId:1,retailerName:"Spinelli's Market",date:"2025-10-14",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50},{product:"Confetti",qty:8,price:5.50},{product:"Almond",qty:8,price:6.40}],total:183.20,created:"2025-10-14T00:00:00Z"},
+    {id:1006,invoiceNum:61,retailerId:1,retailerName:"Spinelli's Market",date:"2025-11-18",delivery:"",status:"Delivered",notes:"",products:[{product:"Confetti",qty:8,price:6.00}],total:48.00,created:"2025-11-18T00:00:00Z"},
     {id:1007,invoiceNum:67,retailerId:1,retailerName:"Spinelli's Market",date:"2025-12-08",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00}],total:96.00,created:"2025-12-08T00:00:00Z"},
     {id:1008,invoiceNum:78,retailerId:1,retailerName:"Spinelli's Market",date:"2025-12-29",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00}],total:96.00,created:"2025-12-29T00:00:00Z"},
-    {id:1009,invoiceNum:91,retailerId:1,retailerName:"Spinelli's Market",date:"2026-02-12",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:8,price:6.00},{product:"Gluten-Free Chocolate-Chip",qty:8,price:6.20},{product:"Funfetti",qty:8,price:6.00}],total:145.60,created:"2026-02-12T00:00:00Z"},
+    {id:1009,invoiceNum:91,retailerId:1,retailerName:"Spinelli's Market",date:"2026-02-12",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:8,price:6.00},{product:"Gluten-Free Chocolate-Chip",qty:8,price:6.20},{product:"Confetti",qty:8,price:6.00}],total:145.60,created:"2026-02-12T00:00:00Z"},
     {id:1010,invoiceNum:93,retailerId:1,retailerName:"Spinelli's Market",date:"2026-02-15",delivery:"",status:"Delivered",notes:"",products:[{product:"Almond",qty:8,price:6.40}],total:51.20,created:"2026-02-15T00:00:00Z"},
     // ── Leevers Locavore ── (verified $2,659.20)
     {id:2001,invoiceNum:8, retailerId:2,retailerName:"Leevers Locavore",date:"2025-07-26",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:48,price:5.50}],total:264.00,created:"2025-07-26T00:00:00Z"},
     {id:2002,invoiceNum:23,retailerId:2,retailerName:"Leevers Locavore",date:"2025-08-17",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:48,price:5.50}],total:264.00,created:"2025-08-17T00:00:00Z"},
     {id:2003,invoiceNum:30,retailerId:2,retailerName:"Leevers Locavore",date:"2025-09-16",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50}],total:88.00,created:"2025-09-16T00:00:00Z"},
     {id:2004,invoiceNum:41,retailerId:2,retailerName:"Leevers Locavore",date:"2025-09-23",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:48,price:5.50}],total:264.00,created:"2025-09-23T00:00:00Z"},
-    {id:2005,invoiceNum:43,retailerId:2,retailerName:"Leevers Locavore",date:"2025-09-30",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:48,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20},{product:"Funfetti",qty:16,price:5.50}],total:451.20,created:"2025-09-30T00:00:00Z"},
+    {id:2005,invoiceNum:43,retailerId:2,retailerName:"Leevers Locavore",date:"2025-09-30",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:48,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20},{product:"Confetti",qty:16,price:5.50}],total:451.20,created:"2025-09-30T00:00:00Z"},
     {id:2006,invoiceNum:47,retailerId:2,retailerName:"Leevers Locavore",date:"2025-10-06",delivery:"",status:"Delivered",notes:"",products:[{product:"Almond",qty:16,price:6.40},{product:"CC Mandel Bread",qty:5,price:16.00}],total:182.40,created:"2025-10-06T00:00:00Z"},
-    {id:2007,invoiceNum:51,retailerId:2,retailerName:"Leevers Locavore",date:"2025-10-21",delivery:"",status:"Delivered",notes:"",products:[{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20},{product:"Funfetti",qty:16,price:5.50}],total:187.20,created:"2025-10-21T00:00:00Z"},
-    {id:2008,invoiceNum:54,retailerId:2,retailerName:"Leevers Locavore",date:"2025-10-27",delivery:"",status:"Delivered",notes:"",products:[{product:"Funfetti",qty:16,price:5.50}],total:88.00,created:"2025-10-27T00:00:00Z"},
+    {id:2007,invoiceNum:51,retailerId:2,retailerName:"Leevers Locavore",date:"2025-10-21",delivery:"",status:"Delivered",notes:"",products:[{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20},{product:"Confetti",qty:16,price:5.50}],total:187.20,created:"2025-10-21T00:00:00Z"},
+    {id:2008,invoiceNum:54,retailerId:2,retailerName:"Leevers Locavore",date:"2025-10-27",delivery:"",status:"Delivered",notes:"",products:[{product:"Confetti",qty:16,price:5.50}],total:88.00,created:"2025-10-27T00:00:00Z"},
     {id:2009,invoiceNum:64,retailerId:2,retailerName:"Leevers Locavore",date:"2025-11-26",delivery:"",status:"Delivered",notes:"",products:[{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20}],total:99.20,created:"2025-11-26T00:00:00Z"},
-    {id:2010,invoiceNum:81,retailerId:2,retailerName:"Leevers Locavore",date:"2025-12-29",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:32,price:6.00},{product:"Funfetti",qty:16,price:6.00}],total:288.00,created:"2025-12-29T00:00:00Z"},
-    {id:2011,invoiceNum:90,retailerId:2,retailerName:"Leevers Locavore",date:"2026-02-12",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20},{product:"Funfetti",qty:16,price:6.00}],total:291.20,created:"2026-02-12T00:00:00Z"},
-    {id:2012,invoiceNum:97,retailerId:2,retailerName:"Leevers Locavore",date:"2026-02-18",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Funfetti",qty:16,price:6.00}],total:192.00,created:"2026-02-18T00:00:00Z"},
+    {id:2010,invoiceNum:81,retailerId:2,retailerName:"Leevers Locavore",date:"2025-12-29",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:32,price:6.00},{product:"Confetti",qty:16,price:6.00}],total:288.00,created:"2025-12-29T00:00:00Z"},
+    {id:2011,invoiceNum:90,retailerId:2,retailerName:"Leevers Locavore",date:"2026-02-12",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20},{product:"Confetti",qty:16,price:6.00}],total:291.20,created:"2026-02-12T00:00:00Z"},
+    {id:2012,invoiceNum:97,retailerId:2,retailerName:"Leevers Locavore",date:"2026-02-18",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Confetti",qty:16,price:6.00}],total:192.00,created:"2026-02-18T00:00:00Z"},
     // ── Congress Park Market ── (verified $1,036.10)
     {id:3001,invoiceNum:14,retailerId:3,retailerName:"Congress Park Market",date:"2025-07-14",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50}],total:88.00,created:"2025-07-14T00:00:00Z"},
     {id:3002,invoiceNum:17,retailerId:3,retailerName:"Congress Park Market",date:"2025-07-25",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50}],total:88.00,created:"2025-07-25T00:00:00Z"},
@@ -799,9 +801,9 @@ const SEED_DATA = {
         // ── Sky Market ──
     {id:4001,invoiceNum:16, retailerId:4,retailerName:"Sky Market",date:"2025-07-24",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:128,price:5.50}],total:704.00,created:"2025-07-24T00:00:00Z"},
     {id:4002,invoiceNum:46, retailerId:4,retailerName:"Sky Market",date:"2025-10-06",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:32,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:32,price:6.20},{product:"Almond",qty:32,price:6.40}],total:579.20,created:"2025-10-06T00:00:00Z"},
-    {id:4003,invoiceNum:52, retailerId:4,retailerName:"Sky Market",date:"2025-10-28",delivery:"",status:"Delivered",notes:"",products:[{product:"Gluten-Free Chocolate-Chip",qty:64,price:6.20},{product:"Funfetti",qty:64,price:5.50},{product:"Almond",qty:64,price:6.40}],total:1158.40,created:"2025-10-28T00:00:00Z"},
-    {id:4004,invoiceNum:83, retailerId:4,retailerName:"Sky Market",date:"2026-01-14",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:64,price:6.00},{product:"Funfetti",qty:48,price:6.00},{product:"Almond",qty:48,price:6.40}],total:979.20,created:"2026-01-14T00:00:00Z"},
-    {id:4005,invoiceNum:100,retailerId:4,retailerName:"Sky Market",date:"2026-03-10",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:48,price:6.00},{product:"Funfetti",qty:16,price:6.00}],total:384.00,created:"2026-03-10T00:00:00Z"},
+    {id:4003,invoiceNum:52, retailerId:4,retailerName:"Sky Market",date:"2025-10-28",delivery:"",status:"Delivered",notes:"",products:[{product:"Gluten-Free Chocolate-Chip",qty:64,price:6.20},{product:"Confetti",qty:64,price:5.50},{product:"Almond",qty:64,price:6.40}],total:1158.40,created:"2025-10-28T00:00:00Z"},
+    {id:4004,invoiceNum:83, retailerId:4,retailerName:"Sky Market",date:"2026-01-14",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:64,price:6.00},{product:"Confetti",qty:48,price:6.00},{product:"Almond",qty:48,price:6.40}],total:979.20,created:"2026-01-14T00:00:00Z"},
+    {id:4005,invoiceNum:100,retailerId:4,retailerName:"Sky Market",date:"2026-03-10",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:48,price:6.00},{product:"Confetti",qty:16,price:6.00}],total:384.00,created:"2026-03-10T00:00:00Z"},
     // ── Rockin R Ranch ──
     {id:5001,invoiceNum:62,retailerId:5,retailerName:"Rockin R Ranch",date:"2025-10-31",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00},{product:"Gluten-Free Chocolate-Chip",qty:16,price:6.20}],total:195.20,created:"2025-10-31T00:00:00Z"},
     {id:5002,invoiceNum:80,retailerId:5,retailerName:"Rockin R Ranch",date:"2026-01-01",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:6.00}],total:96.00,created:"2026-01-01T00:00:00Z"},
@@ -818,7 +820,7 @@ const SEED_DATA = {
     // ── Ruby's Market ──
     {id:9001,invoiceNum:9,  retailerId:9,retailerName:"Ruby's Market",date:"2025-05-28",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:18,price:5.50}],total:99.00,created:"2025-05-28T00:00:00Z"},
     {id:9002,invoiceNum:15, retailerId:9,retailerName:"Ruby's Market",date:"2025-07-18",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:6,price:5.50}],total:33.00,created:"2025-07-18T00:00:00Z"},
-    {id:9003,invoiceNum:49, retailerId:9,retailerName:"Ruby's Market",date:"2025-10-21",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:4,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:4,price:6.20},{product:"Funfetti",qty:4,price:5.50},{product:"Almond",qty:4,price:6.40}],total:94.40,created:"2025-10-21T00:00:00Z"},
+    {id:9003,invoiceNum:49, retailerId:9,retailerName:"Ruby's Market",date:"2025-10-21",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:4,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:4,price:6.20},{product:"Confetti",qty:4,price:5.50},{product:"Almond",qty:4,price:6.40}],total:94.40,created:"2025-10-21T00:00:00Z"},
     // ── Lucky's Market Boulder ──
     {id:10001,invoiceNum:12,retailerId:10,retailerName:"Lucky's Market Boulder",date:"2025-06-25",delivery:"",status:"Delivered",notes:"Intro price $4.00/unit",products:[{product:"CC Mandelbites",qty:16,price:4.00}],total:64.00,created:"2025-06-25T00:00:00Z"},
     {id:10002,invoiceNum:23,retailerId:10,retailerName:"Lucky's Market Boulder",date:"2025-09-03",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:8,price:5.50}],total:44.00,created:"2025-09-03T00:00:00Z"},
@@ -842,11 +844,11 @@ const SEED_DATA = {
     // ── Mountain Avenue Market ──
     {id:15001,invoiceNum:32,retailerId:15,retailerName:"Mountain Avenue Market",date:"2025-07-24",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:8,price:5.50}],total:44.00,created:"2025-07-24T00:00:00Z"},
     // ── Urban Provisions ──
-    {id:16001,invoiceNum:53,retailerId:16,retailerName:"Urban Provisions",date:"2025-10-27",delivery:"",status:"Delivered",notes:"Backtracked",products:[{product:"CC Mandelbites",qty:6,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:4,price:6.20},{product:"Funfetti",qty:6,price:5.50}],total:90.80,created:"2025-10-27T00:00:00Z"},
+    {id:16001,invoiceNum:53,retailerId:16,retailerName:"Urban Provisions",date:"2025-10-27",delivery:"",status:"Delivered",notes:"Backtracked",products:[{product:"CC Mandelbites",qty:6,price:5.50},{product:"Gluten-Free Chocolate-Chip",qty:4,price:6.20},{product:"Confetti",qty:6,price:5.50}],total:90.80,created:"2025-10-27T00:00:00Z"},
     // ── Royals ──
     {id:17001,invoiceNum:57,retailerId:17,retailerName:"Royals",date:"2025-10-31",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:10,price:6.00}],total:60.00,created:"2025-10-31T00:00:00Z"},
     // ── Temple Emanuel ──
-    {id:18001,invoiceNum:63,retailerId:18,retailerName:"Temple Emanuel",          date:"2025-11-26",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50},{product:"Funfetti",qty:16,price:5.50}],total:176.00,created:"2025-11-26T00:00:00Z"},
+    {id:18001,invoiceNum:63,retailerId:18,retailerName:"Temple Emanuel",          date:"2025-11-26",delivery:"",status:"Delivered",notes:"",products:[{product:"CC Mandelbites",qty:16,price:5.50},{product:"Confetti",qty:16,price:5.50}],total:176.00,created:"2025-11-26T00:00:00Z"},
   ]
 };
 
@@ -946,7 +948,7 @@ async function loadFromSupabase() {
     total:parseFloat(o.total)||0, created:o.created_at||''
   }));
   // Normalize legacy SKU names so everything consolidates under current product names
-  const SKU_NORMALIZE = {'Two Packs':'Two Pack Chocolate Chip','Individual Mandel Bread':'Indiv. Mandel - Chocolate Chip'};
+  const SKU_NORMALIZE = {'Two Packs':'Two Pack Chocolate Chip','Individual Mandel Bread':'Indiv. Mandel - Chocolate Chip','Funfetti':'Confetti Mandelbites','Funfetti Mandelbites':'Confetti Mandelbites','Indiv. Mandel - Funfetti':'Indiv. Mandel - Confetti'};
   db.orders.forEach(o=>o.products.forEach(p=>{if(SKU_NORMALIZE[p.product])p.product=SKU_NORMALIZE[p.product];}));
   // Sort client-side: retailers by name, orders newest-first (by date or id)
   db.retailers.sort((a,b)=>a.name.localeCompare(b.name));
@@ -968,6 +970,11 @@ async function loadFromSupabase() {
   const { data:cevRows, error:cevErr } = await sbClient.from('calendar_events').select('*');
   if (cevErr) { lfbDiag('calendar_events load failed (table missing? run CALENDAR_SETUP.sql): '+cevErr.message); db.calEvents=[]; }
   else db.calEvents = cevRows||[];
+
+  // Website (Shopify) daily sales - synced by the shopify-sync edge function
+  const { data:wsRows, error:wsErr } = await sbClient.from('web_sales').select('sale_date,orders,net_sales');
+  if (wsErr) { lfbDiag('web_sales load failed: '+wsErr.message); db.webSales=[]; }
+  else db.webSales = (wsRows||[]).map(r=>({date:r.sale_date, orders:Number(r.orders)||0, net:Number(r.net_sales)||0}));
 
   lfbDiag(`loaded ${db.retailers.length} retailers, ${db.orders.length} orders, ${db.autoOrders.length} auto-orders, ${db.calEvents.length} calendar events`);
   console.log(`[LFB] Loaded ${db.retailers.length} retailers, ${db.orders.length} orders`);
@@ -1058,12 +1065,12 @@ function setupRetailerRealtime(rid,pin) {
     .subscribe();
 }
 
-const PRODUCTS = ['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond',
+const PRODUCTS = ['CC Mandelbites','Confetti Mandelbites','Gluten-Free Chocolate-Chip','Almond',
   'Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip',
   'Two Pack Chocolate Chip','Mandel Bread Rounds'];
 const PRODUCT_PRICES = {
-  'CC Mandelbites':6.00,'Funfetti Mandelbites':6.00,'Gluten-Free Chocolate-Chip':6.20,'Funfetti':6.00,'Almond':6.40,
-  'Indiv. Mandel - Chocolate Chip':1.50,'Indiv. Mandel - Almond':1.50,'Indiv. Mandel - Funfetti':1.50,'Indiv. Mandel - GF Choc Chip':1.50,
+  'CC Mandelbites':6.00,'Confetti Mandelbites':6.00,'Gluten-Free Chocolate-Chip':6.20,'Confetti':6.00,'Almond':6.40,
+  'Indiv. Mandel - Chocolate Chip':1.50,'Indiv. Mandel - Almond':1.50,'Indiv. Mandel - Confetti':1.50,'Indiv. Mandel - GF Choc Chip':1.50,
   'Two Pack Chocolate Chip':2.50,'CC Mandel Bread':16.00,
   'Mandel Bread Rounds':1.75,
   // Legacy SKUs (historical orders)
@@ -1071,13 +1078,13 @@ const PRODUCT_PRICES = {
 };
 const PRODUCT_DESC = {
   'CC Mandelbites':'Chocolate-Chip Mandel Bread in snackable bite-sized pieces. Our classic flavor and top seller.',
-  'Funfetti Mandelbites':'Mandel Bread bites packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
+  'Confetti Mandelbites':'Mandel Bread bites packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
   'Gluten-Free Chocolate-Chip':'Chocolate-Chip Mandel Bread bites, 100% gluten-free. All the flavor, none of the gluten. Our fastest-growing SKU.',
-  'Funfetti':'Mandel Bread packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
+  'Confetti':'Mandel Bread packed with rainbow sprinkles. Festive, colorful, and always a crowd favorite.',
   'Almond':'Lightly sweet Almond Mandel Bread bites. A refined, traditional take.',
   'Indiv. Mandel - Chocolate Chip':'Single-serve Chocolate-Chip Mandel Bread, delivered in a large pouch. Perfect for cafés, hotel service, and gift displays.',
   'Indiv. Mandel - Almond':'Single-serve Almond Mandel Bread, delivered in a large pouch. Elegant and lightly sweet.',
-  'Indiv. Mandel - Funfetti':'Single-serve Funfetti Mandel Bread, delivered in a large pouch. A pop of color for events and catering.',
+  'Indiv. Mandel - Confetti':'Single-serve Confetti Mandel Bread, delivered in a large pouch. A pop of color for events and catering.',
   'Indiv. Mandel - GF Choc Chip':'Single-serve Gluten-Free Chocolate-Chip Mandel Bread, delivered in a large pouch.',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate-Chip Mandel Bread. Built for coffee service, hotel catering, and premium display cases.',
   'Mandel Bread Rounds':'Our classic mandel bread reimagined in cookie form. Perfect for display cases or as ice cream sandwiches.',
@@ -1088,14 +1095,14 @@ const PRODUCT_DESC = {
 // Product image URLs - admin can update these via Settings → Product Photos
 // Full display names for analytics / reporting (maps short SKU names to full names)
 const PRODUCT_DISPLAY_NAMES = {
-  'Funfetti':'Funfetti MandelBites',
+  'Confetti':'Confetti MandelBites',
   'Almond':'Almond MandelBites',
   'CC Mandelbites':'Chocolate-Chip MandelBites',
-  'Funfetti Mandelbites':'Funfetti MandelBites',
+  'Confetti Mandelbites':'Confetti MandelBites',
   'Gluten-Free Chocolate-Chip':'Gluten-Free Chocolate-Chip MandelBites',
   'Indiv. Mandel - Chocolate Chip':'Individual Pieces of Mandel Bread - Chocolate Chip',
   'Indiv. Mandel - Almond':'Individual Pieces of Mandel Bread - Almond',
-  'Indiv. Mandel - Funfetti':'Individual Pieces of Mandel Bread - Funfetti',
+  'Indiv. Mandel - Confetti':'Individual Pieces of Mandel Bread - Confetti',
   'Indiv. Mandel - GF Choc Chip':'Individual Pieces of Mandel Bread - Gluten-Free Chocolate Chip',
   'Two Pack Chocolate Chip':'Two-Pack Chocolate Chip',
   'CC Mandel Bread':'Chocolate-Chip Mandel Bread (Red Bag)',
@@ -1105,7 +1112,7 @@ function getProductDisplayName(p){return PRODUCT_DISPLAY_NAMES[p]||p;}
 
 const PRODUCT_IMAGES = {
   'CC Mandelbites':'images/cc-mandelbites.jpg',
-  'Funfetti Mandelbites':'images/funfetti-mandelbites.jpg',
+  'Confetti Mandelbites':'images/confetti-mandelbites.jpg',
   'Gluten-Free Chocolate-Chip':'images/gf-choc-chip-mandelbites.jpg',
   'Almond':'images/almond-mandelbites.jpg',
   'Indiv. Mandel - Chocolate Chip':'images/indiv-choc-chip-mandel-bread.jpg',
@@ -1140,13 +1147,13 @@ function addDeliveryFeeRow(){
 }
 // Minimum order quantities and increment rules
 const PRODUCT_MOQ = {
-  'CC Mandelbites':8,'Funfetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
+  'CC Mandelbites':8,'Confetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
   'Indiv. Mandel - Chocolate Chip':40,'Indiv. Mandel - Almond':40,'Indiv. Mandel - GF Choc Chip':40,
   'Two Pack Chocolate Chip':25,
   'Mandel Bread Rounds':40
 };
 const PRODUCT_INCREMENT = {
-  'CC Mandelbites':8,'Funfetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
+  'CC Mandelbites':8,'Confetti Mandelbites':8,'Gluten-Free Chocolate-Chip':8,'Almond':8,
   'Indiv. Mandel - Chocolate Chip':40,'Indiv. Mandel - Almond':40,'Indiv. Mandel - GF Choc Chip':40,
   'Two Pack Chocolate Chip':25,
   'Mandel Bread Rounds':40
@@ -1157,7 +1164,7 @@ function setDeliveryFee(retailerId,fee){}
 
 // Catalog display groupings
 const PRODUCT_SECTIONS = [
-  {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Funfetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
+  {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Confetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
   {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
   {label:'Specialty Items',icon:'',products:['Two Pack Chocolate Chip','Mandel Bread Rounds']}
 ];
@@ -2483,6 +2490,20 @@ async function genOrderFromAO(id) {
 //  [15] DASHBOARD
 //  refreshDashboard() → KPI cards. 52-wk rolling window (364 days).
 // =====================================================================
+// ── Shared revenue helpers: one source of truth for all three channels ──
+//   Brick & Mortar = wholesale partner orders · Goldbelly = gb_ship calendar events
+//   Website = Shopify daily sales (web_sales table)
+function _inRange(iso,from,to){if(!iso)return false;const d=new Date(iso+'T12:00:00');return !isNaN(d)&&d>=from&&d<=to;}
+function gbEventVal(e){return Number(e.amount)>0?Number(e.amount):((GB_PACKAGES[e.package_key]&&GB_PACKAGES[e.package_key].payout)?(e.qty||1)*GB_PACKAGES[e.package_key].payout:0);}
+function revBM(from,to){return db.orders.filter(o=>_inRange(o.date,from,to)).reduce((s,o)=>s+(o.total||0),0);}
+function revGB(from,to){return (db.calEvents||[]).filter(e=>e.type==='gb_ship'&&_inRange(e.event_date,from,to)).reduce((s,e)=>s+gbEventVal(e),0);}
+function revWEB(from,to){return (db.webSales||[]).filter(w=>_inRange(w.date,from,to)).reduce((s,w)=>s+w.net,0);}
+function pctBadge(cur,pri,label){
+  if(!(pri>0)) return cur>0?`<div style="font-size:.72rem;margin-top:3px;color:#2e7d4f;">▲ New vs ${label}</div>`:'';
+  const p=Math.round((cur-pri)/pri*100);
+  return `<div style="font-size:.72rem;margin-top:3px;color:${p>=0?'#2e7d4f':'var(--danger)'};">${p>=0?'▲':'▼'} ${Math.abs(p)}% vs ${label}</div>`;
+}
+
 function refreshDashboard() {
   const sg=document.getElementById('stats-grid');if(!sg)return;
   // Calendar-year revenue comparison (matches Analytics → Yearly Revenue Breakdown)
@@ -2503,13 +2524,22 @@ function refreshDashboard() {
   // Online (Goldbelly) revenue for the current year - confirmed or projected at known rates
   const gbYearDash=(db.calEvents||[]).filter(e=>{if(e.type!=='gb_ship'||!e.event_date)return false;const d=new Date(e.event_date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===curYear;})
     .reduce((s,e)=>s+(Number(e.amount)>0?Number(e.amount):((GB_PACKAGES[e.package_key]&&GB_PACKAGES[e.package_key].payout)?(e.qty||1)*GB_PACKAGES[e.package_key].payout:0)),0);
+  // Year-to-date vs the same stretch last year (Jan 1 → today), every channel
+  const ytdFrom=new Date(curYear,0,1), ytdTo=new Date(curYear,nowDash.getMonth(),nowDash.getDate(),23,59);
+  const lyFrom=new Date(prvYear,0,1), lyTo=new Date(prvYear,nowDash.getMonth(),nowDash.getDate(),23,59);
+  const bmYTD=revBM(ytdFrom,ytdTo), gbYTD=revGB(ytdFrom,ytdTo), webYTD=revWEB(ytdFrom,ytdTo);
+  const bmLYTD=revBM(lyFrom,lyTo), gbLYTD=revGB(lyFrom,lyTo), webLYTD=revWEB(lyFrom,lyTo);
+  const totYTD=bmYTD+gbYTD+webYTD, totLYTD=bmLYTD+gbLYTD+webLYTD;
+  const onYTD=gbYTD+webYTD, onLYTD=gbLYTD+webLYTD;
+  const ytdLbl='same date '+prvYear;
   sg.innerHTML=`
     <div class="stat-card"><div class="si">🏪</div><div class="sl">Total Partners</div><div class="sv">${db.retailers.length}</div></div>
     <div class="stat-card"><div class="si"></div><div class="sl">Active Partners</div><div class="sv">${db.retailers.filter(r=>r.status==='Active').length} of ${db.retailers.length}</div></div>
     <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${db.orders.length}</div></div>
     <div class="stat-card"><div class="si">🍪</div><div class="sl">Avg Items / Week</div><div class="sv">${avgPerWeek}</div></div>
     <div class="stat-card"><div class="si">🔄</div><div class="sl">Auto-Orders</div><div class="sv">${db.autoOrders.filter(a=>a.active).length}</div></div>
-    <div class="stat-card"><div class="si">💰</div><div class="sl">Revenue ${curYear}</div><div class="sv">$${Math.round(revCurYear+gbYearDash).toLocaleString()}</div>${yoyChange!==null?`<div style="font-size:.72rem;margin-top:3px;color:${yoyChange>=0?'#2e7d4f':'var(--danger)'};">${yoyChange>=0?'▲':'▼'} ${Math.abs(yoyChange)}% ${curYear} vs ${prvYear}</div>`:''}</div>`;
+    <div class="stat-card"><div class="si">💰</div><div class="sl">Revenue ${curYear} YTD</div><div class="sv">$${Math.round(totYTD).toLocaleString()}</div>${pctBadge(totYTD,totLYTD,ytdLbl)}</div>
+    <div class="stat-card" title="Goldbelly $${Math.round(gbYTD).toLocaleString()} + Website $${Math.round(webYTD).toLocaleString()} · last year: Goldbelly $${Math.round(gbLYTD).toLocaleString()} + Website $${Math.round(webLYTD).toLocaleString()}"><div class="si">🛒</div><div class="sl">Online Sales ${curYear} YTD</div><div class="sv">$${Math.round(onYTD).toLocaleString()}</div>${pctBadge(onYTD,onLYTD,ytdLbl)}<div style="font-size:.68rem;margin-top:2px;color:var(--muted);">Goldbelly $${Math.round(gbYTD).toLocaleString()} · Website $${Math.round(webYTD).toLocaleString()}</div></div>`;
   const recent=[...db.orders].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,6);
   const dob=document.getElementById('dash-orders');
   dob.innerHTML=recent.length?recent.map(o=>`<tr><td><strong>${invNum(o.invoiceNum)}</strong></td><td>${esc(o.retailerName)}</td><td>${fmtDate(o.date)}</td><td><strong>${fmtCur(o.total)}</strong></td><td><span class="badge ${sBadge(o.status)}">${o.status}</span></td></tr>`).join(''):
@@ -3127,8 +3157,17 @@ function refreshAnalytics() {
   const gbEvents=(db.calEvents||[]).filter(e=>e.type==='gb_ship');
   const gbVal=e=>Number(e.amount)>0?Number(e.amount):((GB_PACKAGES[e.package_key]&&GB_PACKAGES[e.package_key].payout)?(e.qty||1)*GB_PACKAGES[e.package_key].payout:0);
   const gbTotal=gbEvents.reduce((s,e)=>s+gbVal(e),0);
-  const gbConf=gbEvents.reduce((s,e)=>s+(Number(e.amount)>0?Number(e.amount):0),0);
+  // Actual = a statement amount is recorded OR the ship date has passed; Projected = still upcoming
+  const todayISO=new Date().toISOString().slice(0,10);
+  const gbIsActual=e=>Number(e.amount)>0||(e.event_date&&e.event_date<=todayISO);
+  const gbConf=gbEvents.filter(gbIsActual).reduce((s,e)=>s+gbVal(e),0);
   const gbProj=gbTotal-gbConf;
+  // Website (Shopify) sales
+  const webRows=db.webSales||[];
+  const webTotal=webRows.reduce((s,w)=>s+w.net,0);
+  const webOrdersAll=webRows.reduce((s,w)=>s+w.orders,0);
+  const webRange=(from,to)=>webRows.filter(w=>{if(!w.date)return false;const d=new Date(w.date+'T12:00:00');return !isNaN(d)&&d>=from&&d<=to;}).reduce((s,w)=>s+w.net,0);
+  const webMonthVal=(y,m)=>webRange(new Date(y,m,1),new Date(y,m+1,0,23,59));
   const gbMonthVal=(y,m)=>gbEvents.filter(e=>{if(!e.event_date)return false;const d=new Date(e.event_date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===y&&d.getMonth()===m;}).reduce((s,e)=>s+gbVal(e),0);
   const now=new Date();
   const thisMonthOrders=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();});
@@ -3143,25 +3182,33 @@ function refreshAnalytics() {
   const six6counts=six6months.map(mo=>db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===mo.y&&d.getMonth()===mo.m;}).length);
   const avgOrdersPerMonth=(six6counts.reduce((a,b)=>a+b,0)/6);
   const thisMonthGb=gbMonthVal(now.getFullYear(),now.getMonth());
+  const thisMonthWeb=webMonthVal(now.getFullYear(),now.getMonth());
   // Range helpers: sum each channel between two dates (inclusive)
   const bmRange=(from,to)=>db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d>=from&&d<=to;}).reduce((s,o)=>s+(o.total||0),0);
   const gbRange=(from,to)=>gbEvents.filter(e=>{if(!e.event_date)return false;const d=new Date(e.event_date+'T12:00:00');return !isNaN(d)&&d>=from&&d<=to;}).reduce((s,e)=>s+gbVal(e),0);
   const curYear=now.getFullYear();
   const yStart=new Date(curYear,0,1), yEnd=new Date(curYear,11,31,23,59);
-  const bmYear=bmRange(yStart,yEnd), gbYear=gbRange(yStart,yEnd);
-  // Online share of revenue: this year vs last year
-  const yrShare=(bmYear+gbYear)>0?gbYear/(bmYear+gbYear)*100:0;
+  const bmYear=bmRange(yStart,yEnd), gbYear=gbRange(yStart,yEnd), webYear=webRange(yStart,yEnd);
+  // Online share of revenue (Goldbelly + website): this year vs last year
+  const yrShare=(bmYear+gbYear+webYear)>0?(gbYear+webYear)/(bmYear+gbYear+webYear)*100:0;
   const lyStart=new Date(curYear-1,0,1), lyEnd=new Date(curYear-1,11,31,23,59);
-  const bmLY=bmRange(lyStart,lyEnd), gbLY=gbRange(lyStart,lyEnd);
-  const lyShare=(bmLY+gbLY)>0?gbLY/(bmLY+gbLY)*100:0;
+  const bmLY=bmRange(lyStart,lyEnd), gbLY=gbRange(lyStart,lyEnd), webLY=webRange(lyStart,lyEnd);
+  const lyShare=(bmLY+gbLY+webLY)>0?(gbLY+webLY)/(bmLY+gbLY+webLY)*100:0;
+  // Same-period (YTD) comparisons for the channel cards
+  const ytdTo=new Date(curYear,now.getMonth(),now.getDate(),23,59), lyYtdTo=new Date(curYear-1,now.getMonth(),now.getDate(),23,59);
+  const gbYTDa=gbRange(yStart,ytdTo), gbLYTDa=gbRange(lyStart,lyYtdTo);
+  const webYTDa=webRange(yStart,ytdTo), webLYTDa=webRange(lyStart,lyYtdTo);
+  const bmYTDa=bmRange(yStart,ytdTo), bmLYTDa=bmRange(lyStart,lyYtdTo);
+  const ytdLblA='same date '+(curYear-1);
   let shCap='Share of '+curYear+' revenue';
   if(lyShare===0&&yrShare>0){shCap='▲ New in '+curYear+' - was 0% in '+(curYear-1);}
   else if(lyShare>0){const shD=yrShare-lyShare;shCap=(shD>=0?'▲ +':'▼ -')+Math.abs(shD).toFixed(1)+' pts vs '+(curYear-1)+' ('+lyShare.toFixed(0)+'%)';}
   kpi.innerHTML=`
-    <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">Revenue ${curYear}</div><div class="av">${fmtCur(bmYear+gbYear)}</div><div class="ac">Brick & Mortar + Online, this year</div></div>
-    <div class="anal-card"><div class="al">🏪 Brick & Mortar ${curYear}</div><div class="av">${fmtCur(bmYear)}</div><div class="ac">Wholesale partners</div></div>
-    <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 Online (Goldbelly) ${curYear}</div><div class="av">${fmtCur(gbYear)}</div><div class="ac">${fmtCur(gbConf)} confirmed${gbProj>0?' · '+fmtCur(gbProj)+' projected':''}</div></div>
-    <div class="anal-card"><div class="al">This Month</div><div class="av">${fmtCur(thisMonthRev+thisMonthGb)}</div><div class="ac">${thisMonthOrders.length} wholesale order${thisMonthOrders.length!==1?'s':''}${thisMonthGb>0?' + '+fmtCur(thisMonthGb)+' online':''}</div></div>
+    <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">Revenue ${curYear}</div><div class="av">${fmtCur(bmYear+gbYear+webYear)}</div><div class="ac">Brick & Mortar + Goldbelly + Website, this year</div></div>
+    <div class="anal-card"><div class="al">🏪 Brick & Mortar ${curYear}</div><div class="av">${fmtCur(bmYear)}</div><div class="ac">Wholesale partners</div>${pctBadge(bmYTDa,bmLYTDa,ytdLblA)}</div>
+    <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 Online (Goldbelly) ${curYear}</div><div class="av">${fmtCur(gbYear)}</div><div class="ac">${fmtCur(gbConf)} actual${gbProj>0?' · '+fmtCur(gbProj)+' projected':''}</div>${pctBadge(gbYTDa,gbLYTDa,ytdLblA)}</div>
+    <div class="anal-card" style="border-top-color:#3A5A6B;"><div class="al">🛒 Website ${curYear}</div><div class="av">${fmtCur(webYear)}</div><div class="ac">lazarfamilybakehouse.com (net sales)</div>${pctBadge(webYTDa,webLYTDa,ytdLblA)}</div>
+    <div class="anal-card"><div class="al">This Month</div><div class="av">${fmtCur(thisMonthRev+thisMonthGb+thisMonthWeb)}</div><div class="ac">${thisMonthOrders.length} wholesale order${thisMonthOrders.length!==1?'s':''}${thisMonthGb>0?' + '+fmtCur(thisMonthGb)+' Goldbelly':''}${thisMonthWeb>0?' + '+fmtCur(thisMonthWeb)+' website':''}</div></div>
     <div class="anal-card" style="border-top-color:#b8860b;"><div class="al">🧮 Online Share ${curYear}</div><div class="av">${yrShare.toFixed(0)}%</div><div class="ac">${shCap}</div></div>
     <div class="anal-card"><div class="al">Avg Order Value</div><div class="av">${fmtCur(avgOrder)}</div><div class="ac">Per wholesale invoice</div></div>
     <div class="anal-card"><div class="al">Active Partners</div><div class="av">${activeCount}</div><div class="ac">Ordered in last 2 mo.</div></div>
@@ -3175,8 +3222,8 @@ function refreshAnalytics() {
       const to=new Date(now.getFullYear(),now.getMonth(),now.getDate(),23,59);
       const from=new Date(to.getTime()-(w*7-1)*day);
       const pTo=new Date(to.getTime()-364*day), pFrom=new Date(from.getTime()-364*day);
-      const cur=bmRange(from,to)+gbRange(from,to);
-      const pri=bmRange(pFrom,pTo)+gbRange(pFrom,pTo);
+      const cur=bmRange(from,to)+gbRange(from,to)+webRange(from,to);
+      const pri=bmRange(pFrom,pTo)+gbRange(pFrom,pTo)+webRange(pFrom,pTo);
       const pct=pri>0?Math.round(((cur-pri)/pri)*100):null;
       return {w,cur,pri,pct};
     });
@@ -3192,18 +3239,19 @@ function refreshAnalytics() {
           <span style="font-size:.85rem;padding:8px 0;border-bottom:1px solid var(--cream-dk);text-align:right;color:var(--muted);">${fmtCur(r.pri)}</span>
           <span style="font-size:.85rem;padding:8px 0;border-bottom:1px solid var(--cream-dk);text-align:right;font-weight:700;color:${r.pct===null?'var(--muted)':(r.pct>=0?'#2e7d4f':'var(--danger)')};">${r.pct===null?' - ':(r.pct>=0?'▲ ':'▼ ')+Math.abs(r.pct)+'%'}</span>`).join('')}
       </div>
-      <p style="font-size:.72rem;color:var(--muted);margin:8px 0 0;">Both channels combined. Windows end today and compare against the same weeks one year earlier (364-day shift keeps weekdays aligned).</p>`;
+      <p style="font-size:.72rem;color:var(--muted);margin:8px 0 0;">All channels combined (Brick & Mortar, Goldbelly, Website). Windows end today and compare against the same weeks one year earlier (364-day shift keeps weekdays aligned).</p>`;
   }
 
   // 📈 Year-over-year monthly trend - one line per year, back to the first order
   const yoyEl=document.getElementById('anal-yoy-line'); if(yoyEl){
     const monthRev=(y,m)=>{
       const from=new Date(y,m,1), to=new Date(y,m+1,0,23,59);
-      return bmRange(from,to)+gbRange(from,to);
+      return bmRange(from,to)+gbRange(from,to)+webRange(from,to);
     };
     let firstYear=curYear;
     db.orders.forEach(o=>{if(o.date){const y=Number(o.date.slice(0,4));if(y&&y<firstYear)firstYear=y;}});
     gbEvents.forEach(e=>{if(e.event_date){const y=Number(e.event_date.slice(0,4));if(y&&y<firstYear)firstYear=y;}});
+    webRows.forEach(w=>{if(w.date&&w.net){const y=Number(w.date.slice(0,4));if(y&&y<firstYear)firstYear=y;}});
     const YR_COLORS=['#A0623A','#3A5A6B','#9B4F1E','#e03318','#2d1b0e'];
     const years=[]; for(let y=firstYear;y<=curYear;y++) years.push(y);
     const series=years.map(y=>({
@@ -3232,15 +3280,16 @@ function refreshAnalytics() {
       <div style="display:flex;gap:16px;justify-content:center;font-size:.72rem;color:var(--muted);padding-top:6px;">
         ${series.map((s,si)=>`<span><span style="display:inline-block;width:14px;height:3px;border-radius:2px;background:${YR_COLORS[si%YR_COLORS.length]};margin-right:5px;vertical-align:middle;"></span>${s.y}${s.y===curYear?' (to date)':''}</span>`).join('')}
       </div>
-      <p style="font-size:.72rem;color:var(--muted);margin:6px 0 0;">Both channels combined, by calendar month, back to your first order.</p>`;
+      <p style="font-size:.72rem;color:var(--muted);margin:6px 0 0;">All channels combined, by calendar month, back to your first sale.</p>`;
   }
 
   // All-time totals - the bottom-of-page reference
   const atEl=document.getElementById('anal-alltime'); if(atEl){
     atEl.innerHTML=`
-      <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">💰 All-Time Revenue</div><div class="av">${fmtCur(rev+gbTotal)}</div><div class="ac">Since the beginning</div></div>
+      <div class="anal-card" style="border-top-color:var(--gold);"><div class="al">💰 All-Time Revenue</div><div class="av">${fmtCur(rev+gbTotal+webTotal)}</div><div class="ac">Since the beginning</div></div>
       <div class="anal-card"><div class="al">🏪 All-Time Brick & Mortar Revenue</div><div class="av">${fmtCur(rev)}</div><div class="ac">${db.orders.length} partner orders</div></div>
-      <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 All-Time Online</div><div class="av">${fmtCur(gbTotal)}</div><div class="ac">${gbEvents.length} Goldbelly shipments</div></div>`;
+      <div class="anal-card" style="border-top-color:var(--danger);"><div class="al">🚚 All-Time Goldbelly</div><div class="av">${fmtCur(gbTotal)}</div><div class="ac">${gbEvents.length} Goldbelly shipments</div></div>
+      <div class="anal-card" style="border-top-color:#3A5A6B;"><div class="al">🛒 All-Time Website</div><div class="av">${fmtCur(webTotal)}</div><div class="ac">${webOrdersAll} website orders</div></div>`;
   }
 
   // Monthly bar chart - last 12 months (use noon UTC to avoid timezone off-by-one)
@@ -3248,27 +3297,32 @@ function refreshAnalytics() {
   for(let i=11;i>=0;i--){const d=new Date(today.getFullYear(),today.getMonth()-i,1);months.push({y:d.getFullYear(),m:d.getMonth(),label:d.toLocaleString('default',{month:'short'})});}
   const monthBM=months.map(mo=>db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===mo.y&&d.getMonth()===mo.m;}).reduce((s,o)=>s+(o.total||0),0));
   const monthGB=months.map(mo=>gbMonthVal(mo.y,mo.m));
-  const monthTotals=months.map((mo,i)=>monthBM[i]+monthGB[i]);
+  const monthWEB=months.map(mo=>webMonthVal(mo.y,mo.m));
+  const monthTotals=months.map((mo,i)=>monthBM[i]+monthGB[i]+monthWEB[i]);
   const maxM=Math.max(...monthTotals,1);
   const bars=document.getElementById('anal-monthly-bars'); if(bars){
     const fmtK=v=>v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v);
     bars.innerHTML=months.map((mo,i)=>{
       const hBM=monthBM[i]>0?Math.max(3,Math.round((monthBM[i]/maxM)*130)):0;
       const hGB=monthGB[i]>0?Math.max(3,Math.round((monthGB[i]/maxM)*130)):0;
+      const hWEB=monthWEB[i]>0?Math.max(3,Math.round((monthWEB[i]/maxM)*130)):0;
+      const pBM=monthTotals[i]>0?Math.round(monthBM[i]/monthTotals[i]*100):0, pGB=monthTotals[i]>0?Math.round(monthGB[i]/monthTotals[i]*100):0, pWEB=monthTotals[i]>0?Math.max(0,100-pBM-pGB):0;
       return `
-      <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])} - Brick & Mortar ${fmtCur(monthBM[i])} · Online ${fmtCur(monthGB[i])}">
+      <div class="bar-wrap" title="${mo.label} ${mo.y}: ${fmtCur(monthTotals[i])} - Brick & Mortar ${fmtCur(monthBM[i])} · Goldbelly ${fmtCur(monthGB[i])} · Website ${fmtCur(monthWEB[i])}">
         <div class="bar-val" style="font-size:.62rem;font-weight:700;height:16px;line-height:16px;">${monthTotals[i]>0?fmtK(monthTotals[i]):''}</div>
         <div style="flex:1;min-height:0;"></div>
-        ${hGB?`<div style="height:${hGB}px;width:100%;background:#b8860b;border-radius:3px 3px 0 0;"></div>`:''}
-        ${hBM?`<div class="bar" style="height:${hBM}px;width:100%;${hGB?'border-radius:0 0 3px 3px;':''}"></div>`:(hGB?'':`<div class="bar" style="height:4px;width:100%;"></div>`)}
+        ${hWEB?`<div style="height:${hWEB}px;width:100%;background:#3A5A6B;border-radius:3px 3px 0 0;"></div>`:''}
+        ${hGB?`<div style="height:${hGB}px;width:100%;background:#b8860b;${hWEB?'':'border-radius:3px 3px 0 0;'}"></div>`:''}
+        ${hBM?`<div class="bar" style="height:${hBM}px;width:100%;${(hGB||hWEB)?'border-radius:0 0 3px 3px;':''}"></div>`:((hGB||hWEB)?'':`<div class="bar" style="height:4px;width:100%;"></div>`)}
         <div class="bar-label" style="height:18px;line-height:18px;margin-top:3px;">${mo.label}</div>
-        <div style="width:100%;height:6px;border-radius:3px;overflow:hidden;display:flex;margin-top:2px;background:var(--cream-dk);" title="${monthTotals[i]>0?Math.round(monthBM[i]/monthTotals[i]*100)+'% Brick & Mortar / '+Math.round(monthGB[i]/monthTotals[i]*100)+'% Online':''}">
-          ${monthTotals[i]>0?`<div style="width:${Math.round(monthBM[i]/monthTotals[i]*100)}%;background:var(--red);"></div><div style="flex:1;background:#b8860b;"></div>`:''}
+        <div style="width:100%;height:6px;border-radius:3px;overflow:hidden;display:flex;margin-top:2px;background:var(--cream-dk);" title="${monthTotals[i]>0?pBM+'% Brick & Mortar / '+pGB+'% Goldbelly / '+pWEB+'% Website':''}">
+          ${monthTotals[i]>0?`<div style="width:${pBM}%;background:var(--red);"></div><div style="width:${pGB}%;background:#b8860b;"></div><div style="flex:1;background:#3A5A6B;"></div>`:''}
         </div>
       </div>`;}).join('')+
       `<div style="flex-basis:100%;display:flex;gap:16px;justify-content:center;font-size:.7rem;color:var(--muted);padding-top:8px;">
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--red);margin-right:4px;"></span>Brick & Mortar</span>
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#b8860b;margin-right:4px;"></span>Online (Goldbelly)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#3A5A6B;margin-right:4px;"></span>Website</span>
         <span>Small bar under each month = that month's split (hover for exact %)</span>
       </div>`;
   }
@@ -3277,6 +3331,7 @@ function refreshAnalytics() {
   const byRet={};
   db.orders.forEach(o=>{byRet[o.retailerName]=(byRet[o.retailerName]||0)+(o.total||0);});
   if(gbTotal>0) byRet['🚚 Goldbelly (Online)']=gbTotal;
+  if(webTotal>0) byRet['🛒 Website (lazarfamilybakehouse.com)']=webTotal;
   const topRets=Object.entries(byRet).sort((a,b)=>b[1]-a[1]).slice(0,6);
   const maxRev=topRets[0]?topRets[0][1]:1;
   const trEl=document.getElementById('anal-top-retailers'); if(trEl){
@@ -3295,11 +3350,11 @@ function refreshAnalytics() {
   db.orders.forEach(o=>o.products.forEach(p=>{if(p.qty>0&&p.product!=='Delivery')byProd[p.product]=(byProd[p.product]||0)+p.qty;}));
   // Goldbelly boxes bleed into product unit totals as their actual contents
   const GB_COMPONENTS={
-    'grandma-jeanne-sampler':{'CC Mandelbites':1,'Almond':1,'Funfetti Mandelbites':1,'Gluten-Free Chocolate-Chip':1,'Two Pack Chocolate Chip':2},
+    'grandma-jeanne-sampler':{'CC Mandelbites':1,'Almond':1,'Confetti Mandelbites':1,'Gluten-Free Chocolate-Chip':1,'Two Pack Chocolate Chip':2},
     'the-shabbat-mandelbites-box':{'CC Mandelbites':2,'Almond':1,'Gluten-Free Chocolate-Chip':1},
     'mandelbites-pick-your-mix-6-pack':{'MandelBites - Customer Mix (GB)':6},
     'treat-the-office':{'Two Pack Chocolate Chip':24},
-    'bakehouse-tour':{'CC Mandelbites':2,'Almond':2,'Funfetti Mandelbites':2,'Gluten-Free Chocolate-Chip':2}
+    'bakehouse-tour':{'CC Mandelbites':2,'Almond':2,'Confetti Mandelbites':2,'Gluten-Free Chocolate-Chip':2}
   };
   gbEvents.forEach(e=>{const comp=GB_COMPONENTS[e.package_key];if(comp)Object.entries(comp).forEach(([sku,n])=>{byProd[sku]=(byProd[sku]||0)+n*(e.qty||1);});});
   const prodSorted=Object.entries(byProd).sort((a,b)=>b[1]-a[1]);
@@ -3375,6 +3430,7 @@ function refreshAnalytics() {
         if(!e.event_date)return false;const d=new Date(e.event_date+'T12:00:00');
         return !isNaN(d)&&d.getFullYear()===q.year&&Math.floor(d.getMonth()/3)===q.q;
       }).reduce((s,e)=>s+gbVal(e),0)
+      + webRange(new Date(q.year,q.q*3,1),new Date(q.year,q.q*3+3,0,23,59))
     );
     const maxQR=Math.max(...qRevs,1);
     qoqEl.innerHTML=quarters.map((q,i)=>{
@@ -3434,7 +3490,9 @@ function refreshAnalytics() {
   const yearlyEl=document.getElementById('anal-yearly'); if(yearlyEl){
     const yearSet=new Set();
     db.orders.forEach(o=>{if(!o.date)return;const d=new Date(o.date+'T12:00:00');if(!isNaN(d))yearSet.add(d.getFullYear());});
-    const years=[...yearSet].sort((a,b)=>a-b);
+    gbEvents.forEach(e=>{if(e.event_date)yearSet.add(Number(e.event_date.slice(0,4)));});
+    webRows.forEach(w=>{if(w.date&&w.net)yearSet.add(Number(w.date.slice(0,4)));});
+    const years=[...yearSet].filter(Boolean).sort((a,b)=>a-b);
     if(!years.length){yearlyEl.innerHTML='<p style="color:var(--muted);font-style:italic;">No data yet.</p>';}
     else{
       const yData=years.map(y=>{
@@ -3442,10 +3500,12 @@ function refreshAnalytics() {
         const rev=yOrds.reduce((s,o)=>s+(o.total||0),0);
         const units=yOrds.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
         const partners=new Set(yOrds.map(o=>o.retailerId)).size;
-        return {year:y,rev,orders:yOrds.length,units,partners};
+        const yF=new Date(y,0,1), yT=new Date(y,11,31,23,59);
+        const gb=gbRange(yF,yT), web=webRange(yF,yT);
+        return {year:y,bm:rev,gb,web,rev:rev+gb+web,orders:yOrds.length,units,partners};
       });
       const maxRev=Math.max(...yData.map(d=>d.rev),1);
-      yearlyEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">${yData.map((d,i)=>`<div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:14px 16px;"><div style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--brown-dk);">${d.year}</div><div style="font-size:1.25rem;font-weight:700;color:var(--sage);margin:4px 0;">${fmtCur(d.rev)}</div><div style="height:5px;background:var(--tan);border-radius:3px;margin:6px 0;"><div style="height:100%;width:${Math.round((d.rev/maxRev)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};border-radius:3px;"></div></div><div style="font-size:.75rem;color:var(--muted);margin-top:4px;">${d.orders} orders &middot; ${d.units} units &middot; ${d.partners} partner${d.partners!==1?'s':''}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="border-bottom:2px solid var(--tan);"><th style="text-align:left;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Year</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Revenue</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Orders</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Units</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Partners</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">YoY</th></tr></thead><tbody>${yData.map((d,i)=>{const prev=yData[i-1];const yoy=prev&&prev.rev>0?Math.round(((d.rev-prev.rev)/prev.rev)*100):null;return `<tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:9px 10px;font-weight:700;color:var(--brown-dk);">${d.year}</td><td style="padding:9px 10px;text-align:right;font-weight:700;color:var(--sage);">${fmtCur(d.rev)}</td><td style="padding:9px 10px;text-align:right;">${d.orders}</td><td style="padding:9px 10px;text-align:right;">${d.units}</td><td style="padding:9px 10px;text-align:right;">${d.partners}</td><td style="padding:9px 10px;text-align:right;">${yoy!==null?`<span style="color:${yoy>=0?'#2e7d4f':'var(--danger)'};">${yoy>=0?'▲':'▼'}${Math.abs(yoy)}%</span>`:' - '}</td></tr>`;}).join('')}</tbody></table>`;
+      yearlyEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;">${yData.map((d,i)=>`<div style="background:var(--cream-dk);border:1px solid var(--tan);border-radius:10px;padding:14px 16px;"><div style="font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;color:var(--brown-dk);">${d.year}</div><div style="font-size:1.25rem;font-weight:700;color:var(--sage);margin:4px 0;">${fmtCur(d.rev)}</div><div style="height:5px;background:var(--tan);border-radius:3px;margin:6px 0;"><div style="height:100%;width:${Math.round((d.rev/maxRev)*100)}%;background:${PROD_COLORS[i%PROD_COLORS.length]};border-radius:3px;"></div></div><div style="font-size:.75rem;color:var(--muted);margin-top:4px;">B&amp;M ${fmtCur(d.bm)} &middot; Goldbelly ${fmtCur(d.gb)} &middot; Website ${fmtCur(d.web)}</div><div style="font-size:.75rem;color:var(--muted);margin-top:2px;">${d.orders} wholesale orders &middot; ${d.units} units &middot; ${d.partners} partner${d.partners!==1?'s':''}</div></div>`).join('')}</div><table style="width:100%;border-collapse:collapse;font-size:.82rem;"><thead><tr style="border-bottom:2px solid var(--tan);"><th style="text-align:left;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Year</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Brick &amp; Mortar</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Goldbelly</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Website</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Total</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Orders</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Units</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">Partners</th><th style="text-align:right;padding:8px 10px;color:var(--muted);font-weight:700;font-size:.72rem;text-transform:uppercase;">YoY</th></tr></thead><tbody>${yData.map((d,i)=>{const prev=yData[i-1];const yoy=prev&&prev.rev>0?Math.round(((d.rev-prev.rev)/prev.rev)*100):null;return `<tr style="border-bottom:1px solid var(--cream-dk);"><td style="padding:9px 10px;font-weight:700;color:var(--brown-dk);">${d.year}</td><td style="padding:9px 10px;text-align:right;">${fmtCur(d.bm)}</td><td style="padding:9px 10px;text-align:right;">${fmtCur(d.gb)}</td><td style="padding:9px 10px;text-align:right;">${fmtCur(d.web)}</td><td style="padding:9px 10px;text-align:right;font-weight:700;color:var(--sage);">${fmtCur(d.rev)}</td><td style="padding:9px 10px;text-align:right;">${d.orders}</td><td style="padding:9px 10px;text-align:right;">${d.units}</td><td style="padding:9px 10px;text-align:right;">${d.partners}</td><td style="padding:9px 10px;text-align:right;">${yoy!==null?`<span style="color:${yoy>=0?'#2e7d4f':'var(--danger)'};">${yoy>=0?'▲':'▼'}${Math.abs(yoy)}%</span>`:' - '}</td></tr>`;}).join('')}</tbody></table>`;
     }
   }}
 
@@ -3454,7 +3514,7 @@ function refreshAnalytics() {
 
 // =====================================================================
 //  EMAIL NOTIFICATION (EmailJS)
-//  Sends an order notification to info@lazarfamilybakehouse.com
+//  Sends an order notification to Jake + Victoria (ADMIN_NOTIFY_EMAILS)
 //  whenever a retailer places an order through the portal.
 // =====================================================================
 function sendOrderNotification(retailerName, items, total, orderId, deliveryDate, notes) {
@@ -3477,7 +3537,7 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
     order_date: todayStr(),
     orders: orderRows,
     cost: { shipping: '$0.00', tax: '$0.00', total: '$' + Number(total).toFixed(2) },
-    email: 'info@lazarfamilybakehouse.com'
+    email: ADMIN_NOTIFY_EMAILS
   }).catch(err => console.warn('EmailJS admin notification failed:', err));
 }
 //  Delivery fee from DELIVERY_FEES[retailerId] added as line item.
@@ -3639,12 +3699,12 @@ async function retailerRequestAutoOrder() {
 // =====================================================================
 const GB_PACKAGES = {
   'grandma-jeanne-sampler': {name:"Grandma Jeanne's Sampler", price:54.95, payout:45.00, serves:8,
-    summary:'Each box: 1 bag Chocolate-Chip, 1 Almond, 1 Funfetti, 1 Gluten-Free CC + 2 Mandel Bread two-packs + thank-you card, red wrap',
+    summary:'Each box: 1 bag Chocolate-Chip, 1 Almond, 1 Confetti, 1 Gluten-Free CC + 2 Mandel Bread two-packs + thank-you card, red wrap',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/grandma-jeanne-sampler',
     contents:[
       {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/cc-mandelbites.jpg'},
       {item:'Almond MandelBites - 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg'},
-      {item:'Funfetti MandelBites - 8 oz bag', qty:1, img:'images/funfetti-mandelbites.jpg'},
+      {item:'Confetti MandelBites - 8 oz bag', qty:1, img:'images/confetti-mandelbites.jpg'},
       {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg'},
       {item:'Choc-Chip Mandel Bread Two-Pack - 2 oz', qty:2, img:'images/two-pack-choc-chip.jpg'},
       {item:'Thank You card + red wrap & Grandma sticker', qty:1}
@@ -3661,7 +3721,7 @@ const GB_PACKAGES = {
   'mandelbites-pick-your-mix-6-pack': {name:'"Pick Your Mix" 6-Pack', price:89.95, payout:61.00, serves:12,
     summary:'Each box: 6 bags of MandelBites in the MIX THE CUSTOMER CHOSE (check the Goldbelly order slip!) + thank-you card',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/mandelbites-pick-your-mix-6-pack',
-    note:"Customer picks the mix - check the Goldbelly order for which 6 bags. Combos: 6 CC · 6 GF · 3 CC+3 Funfetti · 3 CC+3 Almond · 3 CC+3 GF · 3 Funfetti+3 Almond · 2 CC+2 Almond+2 Funfetti.",
+    note:"Customer picks the mix - check the Goldbelly order for which 6 bags. Combos: 6 CC · 6 GF · 3 CC+3 Confetti · 3 CC+3 Almond · 3 CC+3 GF · 3 Confetti+3 Almond · 2 CC+2 Almond+2 Confetti.",
     contents:[
       {item:'MandelBites 8 oz bags - customer\'s choice of mix', qty:6, img:'images/cc-mandelbites.jpg'},
       {item:'Thank You card + gift wrap', qty:1}
@@ -3674,12 +3734,12 @@ const GB_PACKAGES = {
       {item:'Thank You card (custom gift message) + red wrap', qty:1}
     ]},
   'bakehouse-tour': {name:'Bakehouse MandelBites Tour', price:114.95, serves:16,
-    summary:'Each box: 2 bags of EVERY flavor - 2 Chocolate-Chip, 2 Almond, 2 Funfetti, 2 Gluten-Free CC (8 bags) + thank-you card',
+    summary:'Each box: 2 bags of EVERY flavor - 2 Chocolate-Chip, 2 Almond, 2 Confetti, 2 Gluten-Free CC (8 bags) + thank-you card',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/bakehouse-tour',
     contents:[
       {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg'},
       {item:'Almond MandelBites - 8 oz bag', qty:2, img:'images/almond-mandelbites.jpg'},
-      {item:'Funfetti MandelBites - 8 oz bag', qty:2, img:'images/funfetti-mandelbites.jpg'},
+      {item:'Confetti MandelBites - 8 oz bag', qty:2, img:'images/confetti-mandelbites.jpg'},
       {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/gf-choc-chip-mandelbites.jpg'},
       {item:'Thank You card + red wrap & Grandma sticker', qty:1}
     ]}
