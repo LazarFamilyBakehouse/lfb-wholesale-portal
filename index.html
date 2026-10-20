@@ -513,6 +513,13 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
         <input type="date" id="confirm-delivery-date"/>
       </div>
     </div>
+    <div class="fg" style="margin-top:10px;padding:10px 12px;background:var(--cream-dk);border-radius:8px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;font-weight:700;color:var(--brown);">
+        <input type="checkbox" id="confirm-delivery-fee" style="width:18px;height:18px;margin:0;" onchange="updateConfirmTotal()"/>
+        <span>🚚 Add delivery fee (<span id="confirm-delivery-fee-amt">$10.00</span>)</span>
+      </label>
+      <div id="confirm-total-line" style="margin-top:6px;font-size:.84rem;color:var(--muted);"></div>
+    </div>
     <div class="fg" style="margin-top:10px;">
       <label>Partner Email <span style="color:var(--muted);font-weight:400;">(for confirmation email)</span></label>
       <input type="email" id="confirm-email" style="width:100%;padding:8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" placeholder="partner@example.com"/>
@@ -678,7 +685,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 // ║  PRODUCT_SECTIONS[] Catalog groupings shown to retailers            ║
 // ║  PRODUCT_MOQ{}     Min order qty enforced on retailer submit        ║
 // ║  PRODUCT_INCREMENT{} Snap-to increment per SKU                      ║
-// ║  (delivery fees removed)                                            ║
+// ║  DELIVERY_FEE_AMOUNT Flat $10 fee, toggled when confirming an order  ║
 // ║  PROD_COLORS[]     Chart bar colors - one per active SKU            ║
 // ╚══════════════════════════════════════════════════════════════════════╝
 
@@ -1158,9 +1165,20 @@ const PRODUCT_INCREMENT = {
   'Two Pack Chocolate Chip':25,
   'Mandel Bread Rounds':40
 };
-// Delivery fees removed - no longer applicable
-function getDeliveryFee(retailerId){return 0;}
+// Flat delivery fee, toggled per order when an admin confirms it (confirm modal)
+// or via the Add Delivery Fee row in the new/edit order forms. Stored as a
+// 'Delivery' line item (qty 1) on the order so it flows into the total + invoice.
+const DELIVERY_FEE_AMOUNT = 10;
+function getDeliveryFee(retailerId){return DELIVERY_FEE_AMOUNT;}
 function setDeliveryFee(retailerId,fee){}
+function orderDeliveryFee(o){return (o.products||[]).filter(p=>p.product==='Delivery').reduce((s,p)=>s+((Number(p.qty)||1)*(Number(p.price)||0)),0);}
+function orderProductSubtotal(o){return (o.products||[]).filter(p=>p.product!=='Delivery').reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);}
+// Delivery fee line shown on order detail + invoice tables (4 columns)
+function deliveryFeeRowHtml(o,cellStyle){
+  const fee=orderDeliveryFee(o); if(!(fee>0)) return '';
+  const cs=cellStyle||'';
+  return `<tr><td style="${cs}">🚚 Delivery fee</td><td style="${cs}text-align:center;">1</td><td style="${cs}text-align:right;">${fmtCur(fee)}</td><td style="${cs}text-align:right;"><strong>${fmtCur(fee)}</strong></td></tr>`;
+}
 
 // Catalog display groupings
 const PRODUCT_SECTIONS = [
@@ -2226,7 +2244,7 @@ function viewOrderDetail(id) {
     <strong style="display:block;margin-bottom:8px;color:var(--brown);">Products:</strong>
     <table style="width:100%;font-size:.87rem;border-collapse:collapse;">
       <thead style="background:var(--tan);"><tr><th style="padding:7px 10px;text-align:left;">Product</th><th style="padding:7px 10px;text-align:center;">Qty</th><th style="padding:7px 10px;text-align:right;">Unit Price</th><th style="padding:7px 10px;text-align:right;">Subtotal</th></tr></thead>
-      <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td style="padding:6px 10px;">${esc(getProductDisplayName(p.product))}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
+      <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td style="padding:6px 10px;">${esc(getProductDisplayName(p.product))}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}${deliveryFeeRowHtml(o,'padding:6px 10px;')}</tbody>
       <tfoot><tr><td colspan="3" style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">Order Total:</td><td style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">${fmtCur(o.total)}</td></tr></tfoot>
     </table>
     <p style="margin-top:14px;font-size:.8rem;color:var(--muted);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>`;
@@ -2247,6 +2265,12 @@ function openConfirmOrderModal() {
   if(dateInput) dateInput.value=o.delivery||'';
   const notesInput=document.getElementById('confirm-notes');
   if(notesInput) notesInput.value='';
+  // Delivery fee toggle: on if the order already carries one, otherwise off
+  const feeBox=document.getElementById('confirm-delivery-fee');
+  if(feeBox) feeBox.checked=orderDeliveryFee(o)>0;
+  const feeAmt=document.getElementById('confirm-delivery-fee-amt');
+  if(feeAmt) feeAmt.textContent=fmtCur(DELIVERY_FEE_AMOUNT);
+  updateConfirmTotal();
   // Pre-fill email from retailer profile
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
   const emailInput=document.getElementById('confirm-email');
@@ -2264,12 +2288,48 @@ function openConfirmOrderModal() {
   closeModal('order-detail-modal');
   openModal('confirm-order-modal');
 }
+function updateConfirmTotal() {
+  const o=db.orders.find(x=>x.id===modalOrderId);
+  const line=document.getElementById('confirm-total-line'); if(!o||!line) return;
+  const on=!!document.getElementById('confirm-delivery-fee')?.checked;
+  const sub=orderProductSubtotal(o);
+  line.innerHTML=on
+    ? `Products ${fmtCur(sub)} + delivery ${fmtCur(DELIVERY_FEE_AMOUNT)} = <strong style="color:var(--brown-dk);">${fmtCur(sub+DELIVERY_FEE_AMOUNT)}</strong> on the invoice`
+    : `Invoice total <strong style="color:var(--brown-dk);">${fmtCur(sub)}</strong> (no delivery fee)`;
+}
+// Add or remove the 'Delivery' line item on an order so the fee is part of the
+// stored total and shows on the invoice. Only touches the Delivery row; product
+// rows are left alone.
+async function applyDeliveryFee(o,wantFee) {
+  const hasFee=orderDeliveryFee(o)>0;
+  if(wantFee===hasFee) return null;
+  const products=o.products.filter(p=>p.product!=='Delivery');
+  if(wantFee) products.push({product:'Delivery',qty:1,price:DELIVERY_FEE_AMOUNT});
+  const total=products.reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);
+  _writeActive=true;
+  try {
+    const {error:dErr}=await sbClient.from('order_items').delete().eq('order_id',o.id).eq('product','Delivery');
+    if(dErr) return dErr.message;
+    if(wantFee) {
+      const {error:iErr}=await sbClient.from('order_items').insert({order_id:o.id,product:'Delivery',qty:1,unit_price:DELIVERY_FEE_AMOUNT,subtotal:DELIVERY_FEE_AMOUNT});
+      if(iErr) return iErr.message;
+    }
+    const {error:tErr}=await sbClient.from('orders').update({total}).eq('id',o.id);
+    if(tErr) return tErr.message;
+  } finally { _writeActive=false; }
+  o.products=products; o.total=total;
+  return null;
+}
 async function confirmOrder() {
   const o=db.orders.find(x=>x.id===modalOrderId);if(!o)return;
   const deliveryDate=document.getElementById('confirm-delivery-date').value;
   const notes=document.getElementById('confirm-notes').value.trim();
+  const wantFee=!!document.getElementById('confirm-delivery-fee')?.checked;
   const btn=document.querySelector('#confirm-order-modal .btn-primary');
   if(btn){btn.textContent='Sending…';btn.disabled=true;}
+  // Delivery fee on/off first, so the stored total and the email agree
+  const feeErr=await applyDeliveryFee(o,wantFee);
+  if(feeErr){if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}toast('Could not update the delivery fee: '+feeErr);return;}
   // Update status and delivery date in Supabase
   const updates={status:'Confirmed'};
   if(deliveryDate) updates.delivery_date=deliveryDate;
@@ -2300,8 +2360,10 @@ async function confirmOrder() {
       delivery_date: deliveryDate ? fmtDate(deliveryDate) : 'To be confirmed',
       order_notes: notes||'None',
       order_date: fmtDate(o.date),
-      orders: productItems.map(p=>({name:String(getProductDisplayName(p.product)),units:String(p.qty),price:'$'+(Number(p.price)||0).toFixed(2)})),
+      orders: productItems.map(p=>({name:String(getProductDisplayName(p.product)),units:String(p.qty),price:'$'+(Number(p.price)||0).toFixed(2)})).concat(orderDeliveryFee(o)>0?[{name:'Delivery fee',units:'1',price:'$'+orderDeliveryFee(o).toFixed(2)}]:[]),
       cost: {
+        shipping: '$'+orderDeliveryFee(o).toFixed(2),
+        subtotal: '$'+orderProductSubtotal(o).toFixed(2),
         total: '$'+Number(o.total).toFixed(2)
       },
       email: retailerEmail,
@@ -2345,7 +2407,7 @@ function showInvoice(id) {
       </div>
       <table class="inv-table">
         <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
-        <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td>${esc(getProductDisplayName(p.product))}</td><td style="text-align:center;">${p.qty}</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}</tbody>
+        <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td>${esc(getProductDisplayName(p.product))}</td><td style="text-align:center;">${p.qty}</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}${deliveryFeeRowHtml(o)}</tbody>
         <tfoot><tr><td colspan="3" style="text-align:right;">Total Due:</td><td style="text-align:right;">${fmtCur(o.total)}</td></tr></tfoot>
       </table>
       ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--muted);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
