@@ -313,17 +313,37 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   .modal table td,.modal table th{padding:6px 6px !important;}
   /* ── Data tables become stacked cards (labels stamped from the header by stampTableLabels) ── */
   .tbl-wrap{overflow:visible;}
-  .tbl-wrap table.stacked,.tbl-wrap table.stacked tbody{display:block;width:100%;}
-  .tbl-wrap table.stacked thead{display:none;}
-  .tbl-wrap table.stacked tr{display:block;background:var(--white);border:1px solid var(--tan);border-radius:8px;padding:8px 12px;margin-bottom:10px;}
-  .tbl-wrap table.stacked tr:hover{background:var(--white);}
-  .tbl-wrap table.stacked td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0 !important;border:none !important;text-align:left !important;font-size:.86rem;line-height:1.35;}
-  .tbl-wrap table.stacked td::before{content:attr(data-label);color:var(--muted);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
-  .tbl-wrap table.stacked td[data-label=""]::before{content:none;}
-  .tbl-wrap table.stacked td.td-actions{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:6px;padding-top:8px !important;border-top:1px dashed var(--tan) !important;margin-top:4px;}
-  .tbl-wrap table.stacked td.td-actions::before{content:none;}
-  .tbl-wrap table.stacked td.td-actions .btn{flex:1 1 auto;justify-content:center;}
-  .tbl-wrap table.stacked td.td-empty{display:none;}
+  table.stacked,table.stacked tbody{display:block;width:100%;}
+  table.stacked thead{display:none;}
+  table.stacked tr{display:block;background:var(--white);border:1px solid var(--tan);border-radius:8px;padding:8px 12px;margin-bottom:10px;}
+  table.stacked tr:hover{background:var(--white);}
+  table.stacked td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0 !important;border:none !important;text-align:left !important;font-size:.86rem;line-height:1.35;}
+  table.stacked td::before{content:attr(data-label);color:var(--muted);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
+  table.stacked td[data-label=""]::before{content:none;}
+  table.stacked td.td-actions{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:6px;padding-top:8px !important;border-top:1px dashed var(--tan) !important;margin-top:4px;}
+  table.stacked td.td-actions::before{content:none;}
+  table.stacked td.td-actions .btn{flex:1 1 auto;justify-content:center;}
+  table.stacked td.td-empty{display:none;}
+  table.stacked tfoot{display:block;}
+  table.stacked tfoot tr{background:var(--cream-dk);}
+
+  /* ── Analytics: one column, rows that wrap instead of clip ── */
+  #sec-analytics [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important;gap:14px !important;}
+  #sec-analytics [style*="grid-column:span 2"]{grid-column:auto !important;}
+  #sec-analytics .analytics-grid{grid-template-columns:repeat(2,1fr) !important;gap:10px;}
+  #anal-windows > div{grid-template-columns:minmax(0,1.2fr) auto auto auto !important;gap:0 8px !important;}
+  #anal-windows > div span{font-size:.76rem !important;padding:7px 0 !important;}
+  #anal-freq > div{grid-template-columns:minmax(0,1.3fr) auto auto auto !important;gap:0 8px !important;}
+  #anal-freq > div span{font-size:.74rem !important;padding:6px 0 !important;white-space:nowrap;}
+  #anal-freq > div span:nth-child(4n+1){white-space:normal;}
+  .top-ret-row{flex-wrap:wrap;row-gap:4px;margin-bottom:12px;}
+  .top-ret-name{flex:1 1 60%;min-width:0;font-size:.84rem;line-height:1.3;}
+  .top-ret-val{min-width:0;font-size:.8rem;}
+  .top-ret-bar-wrap{flex:1 1 100% !important;max-width:none !important;width:auto !important;order:3;margin-left:26px;}
+  #anal-qoq .top-ret-row{flex-wrap:nowrap;}
+  #anal-qoq .top-ret-bar-wrap{flex:1 1 auto !important;order:0;margin-left:0;min-width:40px;}
+  #anal-yearly [style*="grid-template-columns"]{grid-template-columns:1fr !important;}
+  .bar-chart{gap:3px;}
 
   /* ── Invoice ── */
   .invoice-box{padding:16px 14px;}
@@ -331,6 +351,10 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   /* ── Date pickers: iOS Safari ignores width on date inputs unless appearance is reset ── */
   input[type="date"],input[type="time"],input[type="datetime-local"]{-webkit-appearance:none !important;appearance:none !important;display:block;width:100% !important;min-width:0 !important;max-width:100% !important;box-sizing:border-box;min-height:44px;text-align:left;}
   input[type="date"]::-webkit-date-and-time-value,input[type="time"]::-webkit-date-and-time-value{text-align:left;}
+  input[type="date"]::-webkit-datetime-edit,input[type="time"]::-webkit-datetime-edit{min-width:0;overflow:hidden;}
+  input[type="date"]::-webkit-calendar-picker-indicator{flex-shrink:0;}
+  .fg,.lf{display:flex;flex-direction:column;}
+  .fg > *,.lf > *{max-width:100%;}
   .form-row,.fg,.lf{min-width:0;max-width:100%;}
   .modal .form-row{grid-template-columns:minmax(0,1fr) !important;}
 
@@ -4210,7 +4234,7 @@ function fillRetailerSelects() {
 // Phones show data tables as stacked cards; each cell carries its column header
 // in data-label so the CSS can print it. Runs after every render via the observer.
 function stampTableLabels(root){
-  (root||document).querySelectorAll('.tbl-wrap table').forEach(t=>{
+  (root||document).querySelectorAll('.tbl-wrap table, #anal-yearly table, #anal-freq table, #sec-settings table').forEach(t=>{
     const ths=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());
     if(!ths.length) return;
     t.classList.add('stacked');
@@ -4230,7 +4254,7 @@ function stampTableLabels(root){
   const run=()=>{pending=false;stampTableLabels();};
   new MutationObserver(muts=>{
     if(pending) return;
-    for(const m of muts){ const el=m.target.nodeType===1?m.target:m.target.parentElement; if(el&&el.closest&&el.closest('.tbl-wrap')){pending=true;setTimeout(run,0);break;} }
+    for(const m of muts){ const el=m.target.nodeType===1?m.target:m.target.parentElement; if(el&&el.closest&&el.closest('.tbl-wrap,#anal-yearly,#anal-freq,#sec-settings')){pending=true;setTimeout(run,0);break;} }
   }).observe(document.documentElement,{childList:true,subtree:true});
   document.addEventListener('DOMContentLoaded',()=>stampTableLabels());
 })();
