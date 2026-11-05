@@ -328,6 +328,12 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   /* ── Invoice ── */
   .invoice-box{padding:16px 14px;}
 
+  /* ── Date pickers: iOS Safari ignores width on date inputs unless appearance is reset ── */
+  input[type="date"],input[type="time"],input[type="datetime-local"]{-webkit-appearance:none !important;appearance:none !important;display:block;width:100% !important;min-width:0 !important;max-width:100% !important;box-sizing:border-box;min-height:44px;text-align:left;}
+  input[type="date"]::-webkit-date-and-time-value,input[type="time"]::-webkit-date-and-time-value{text-align:left;}
+  .form-row,.fg,.lf{min-width:0;max-width:100%;}
+  .modal .form-row{grid-template-columns:minmax(0,1fr) !important;}
+
   /* ── Sign-in screen ── */
   #login-screen{padding:28px 16px 32px;justify-content:flex-start;}
   .login-mark-svg{width:190px;margin-bottom:8px;}
