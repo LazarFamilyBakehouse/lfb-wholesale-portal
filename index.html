@@ -90,7 +90,13 @@ nav { background:var(--white);border-bottom:1px solid var(--tan);display:flex;ov
 nav button { background:none;border:none;color:var(--brown);font-family:'Nunito',sans-serif;font-size:.85rem;font-weight:400;letter-spacing:.02em;text-transform:none;padding:13px 20px;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap; }
 nav button:hover { color:var(--brown-dk);text-decoration:underline; }
 nav button.active { color:var(--red);border-bottom-color:var(--red);font-weight:700; }
-main { padding:26px 30px;max-width:1200px;margin:0 auto;flex:1; }
+nav button .ni { margin-right:6px; }
+nav button.nav-more { display:none; }
+.more-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
+.more-grid button { background:var(--cream);border:1px solid var(--tan);border-radius:8px;padding:14px 6px;font-family:'Nunito',sans-serif;font-size:.8rem;color:var(--brown-dk);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;min-height:72px; }
+.more-grid button .ni { font-size:1.5rem; }
+.more-grid button.active { border-color:var(--red);color:var(--red);font-weight:700; }
+main { padding:26px 30px;max-width:1200px;margin:0 auto;flex:1;width:100%; }
 .section { display:none; }
 .section.active { display:block; }
 
@@ -232,7 +238,25 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
 @media(max-width:640px){
   /* ── Layout ── */
-  main{padding:14px 10px;}
+  main{padding:14px 10px calc(84px + env(safe-area-inset-bottom));}
+  html{-webkit-text-size-adjust:100%;}
+  /* ── Bottom tab bar (phones), same pattern as the contractor portal ── */
+  nav{position:fixed;left:0;right:0;bottom:0;z-index:60;border-top:1px solid var(--tan);border-bottom:none;box-shadow:0 -2px 10px rgba(45,27,14,.08);display:grid;grid-template-columns:repeat(5,1fr);overflow:visible;padding:4px 4px calc(4px + env(safe-area-inset-bottom));}
+  nav button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px 4px !important;font-size:.64rem !important;font-weight:600;min-height:52px;border-bottom:none;border-top:3px solid transparent;overflow:hidden;text-overflow:ellipsis;letter-spacing:0 !important;}
+  nav button .ni{margin:0;font-size:1.25rem;line-height:1.1;}
+  nav button.active{border-top-color:var(--red);text-decoration:none;}
+  nav button:hover{text-decoration:none;}
+  nav button.nav-secondary{display:none;}
+  nav button.nav-more{display:flex;}
+  /* ── Modals slide up as sheets ── */
+  .modal-overlay{align-items:flex-end;}
+  .modal{width:100% !important;max-width:100%;border-radius:12px 12px 0 0;max-height:94vh;padding-bottom:calc(20px + env(safe-area-inset-bottom));}
+  .btn{min-height:44px;}
+  .btn-sm{min-height:36px;}
+  input,select,textarea{font-size:16px !important;}
+  td,th{padding:8px 8px;font-size:.84rem;}
+  .hdr-text h1{font-size:1rem;}
+  #notif-banner .notif-item{padding:8px 12px;}
   header{padding:8px 12px;flex-wrap:wrap;gap:4px;justify-content:space-between !important;overflow:visible;}
   .hdr-text h1{font-size:1.05rem;white-space:nowrap;}
   .hdr-text p{font-size:.55rem;letter-spacing:.06em;}
@@ -476,6 +500,18 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   <main id="main-content"></main>
 </div>
 
+<!-- ==================== MORE NAV (phones) ==================== -->
+<div class="modal-overlay" id="more-nav-modal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-title">More</div>
+    <div id="more-nav-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('more-nav-modal');logout()">Sign Out</button>
+      <button class="btn btn-primary" onclick="closeModal('more-nav-modal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- ==================== INVOICE MODAL ==================== -->
 <div class="modal-overlay" id="invoice-modal">
   <div class="modal" style="max-width:760px;">
@@ -516,8 +552,12 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <div class="fg" style="margin-top:10px;padding:10px 12px;background:var(--cream-dk);border-radius:8px;">
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;font-weight:700;color:var(--brown);">
         <input type="checkbox" id="confirm-delivery-fee" style="width:18px;height:18px;margin:0;" onchange="updateConfirmTotal()"/>
-        <span>🚚 Add delivery fee (<span id="confirm-delivery-fee-amt">$10.00</span>)</span>
+        <span>🚚 Add delivery fee</span>
       </label>
+      <div id="confirm-delivery-fee-fields" style="display:none;margin-top:8px;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span style="font-size:.84rem;color:var(--muted);">$</span><input type="number" id="confirm-delivery-fee-amt" step="0.01" min="0" value="10.00" style="width:90px;padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" oninput="updateConfirmTotal()"/>
+        <input type="text" id="confirm-delivery-fee-note" maxlength="60" placeholder="Note on invoice, e.g. 50% off" style="flex:1;min-width:150px;padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;"/>
+      </div>
       <div id="confirm-total-line" style="margin-top:6px;font-size:.84rem;color:var(--muted);"></div>
     </div>
     <div class="fg" style="margin-top:10px;">
@@ -956,7 +996,7 @@ async function loadFromSupabase() {
     retailerName:retMap[o.retailer_id]||o.retailer_name||'', date:o.order_date||o.date||'', delivery:o.delivery_date||'',
     status:o.status||'Pending', notes:o.notes||'',
     products:(itemsByOrder ? (itemsByOrder[o.id]||[]) : (o.order_items||[]))
-              .map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0)})),
+              .map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0),note:i.note||''})),
     total:parseFloat(o.total)||0, created:o.created_at||''
   }));
   // Normalize legacy SKU names so everything consolidates under current product names
@@ -1066,7 +1106,7 @@ function setupRetailerRealtime(rid,pin) {
           id:o.id,invoiceNum:o.invoice_num,retailerId:rid,retailerName:r.name,
           date:o.order_date||o.date||'',delivery:o.delivery_date||'',status:o.status||'Pending',
           notes:o.notes||'',
-          products:(o.items||[]).map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0)})),
+          products:(o.items||[]).map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0),note:i.note||''})),
           total:parseFloat(o.total)||0
         }));
         const maxInv=db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100);
@@ -1082,11 +1122,11 @@ const PRODUCTS = ['CC Mandelbites','Confetti Mandelbites','Gluten-Free Chocolate
   'Two Pack Chocolate Chip','Mandel Bread Rounds'];
 const PRODUCT_PRICES = {
   'CC Mandelbites':6.00,'Confetti Mandelbites':6.00,'Gluten-Free Chocolate-Chip':6.20,'Confetti':6.00,'Almond':6.40,
-  'Indiv. Mandel - Chocolate Chip':1.50,'Indiv. Mandel - Almond':1.50,'Indiv. Mandel - Confetti':1.50,'Indiv. Mandel - GF Choc Chip':1.50,
+  'Indiv. Mandel - Chocolate Chip':1.25,'Indiv. Mandel - Almond':1.25,'Indiv. Mandel - Confetti':1.25,'Indiv. Mandel - GF Choc Chip':1.25,
   'Two Pack Chocolate Chip':2.50,'CC Mandel Bread':16.00,
   'Mandel Bread Rounds':1.75,
   // Legacy SKUs (historical orders)
-  'Individual Mandel Bread':1.50,'Two Packs':2.50
+  'Individual Mandel Bread':1.25,'Two Packs':2.50
 };
 const PRODUCT_DESC = {
   'CC Mandelbites':'Chocolate-Chip Mandel Bread in snackable bite-sized pieces. Our classic flavor and top seller.',
@@ -1138,12 +1178,22 @@ const PRODUCT_IMAGES = {
 // Logo image reference - reuse the login logo for header & invoices
 const LFB_LOGO_SRC = document.querySelector('.login-mark-svg img')?.src || '';
 // Logo removed from portal header - kept only for invoices
+// One delivery-fee row for the new-order and edit-order forms: amount is editable,
+// plus a short note that prints next to the fee on the invoice (e.g. "50% off").
+function deliveryRowHtml(amount,note,addBtnId,onInput){
+  const oi=onInput?` oninput="${onInput}"`:'';
+  return `<span style="font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;white-space:nowrap;">🚚 Delivery</span>`+
+    `<input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:44px;" class="eo-del-qty" title="Qty"/>`+
+    `<input type="number" value="${Number(amount||0).toFixed(2)}" step="0.01" min="0" style="width:84px;" class="eo-del-price" title="Fee amount"${oi}/>`+
+    `<input type="text" value="${esc(note||'')}" maxlength="60" placeholder="Note, e.g. 50% off" style="flex:1;min-width:90px;" class="eo-del-note" title="Shown next to the fee on the invoice"/>`+
+    `<button class="btn-icon" onclick="this.parentElement.remove();${onInput?onInput+';':''}document.getElementById('${addBtnId}').style.display=''" title="Remove delivery fee" style="flex-shrink:0;">✕</button>`;
+}
 function addNewOrderDeliveryFee(){
   const list=document.getElementById('o-prod-list');
   if(list.querySelector('.delivery-row'))return;
   const div=document.createElement('div');div.className='prod-item delivery-row';
-  div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;';
-  div.innerHTML='<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" class="eo-del-qty"/><input type="number" value="10.00" step="0.01" min="0" style="width:90px;" class="eo-del-price"/><button class="btn-icon" onclick="this.parentElement.remove();document.getElementById(\'o-add-delivery-btn\').style.display=\'\'" title="Remove" style="flex-shrink:0;">✕</button>';
+  div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;';
+  div.innerHTML=deliveryRowHtml(DELIVERY_FEE_AMOUNT,'','o-add-delivery-btn','');
   list.appendChild(div);
   document.getElementById('o-add-delivery-btn').style.display='none';
 }
@@ -1151,8 +1201,8 @@ function addDeliveryFeeRow(){
   const list=document.getElementById('eo-prod-list');
   const div=document.createElement('div');div.className='prod-item delivery-row';
   div.dataset.delivery='1';
-  div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;';
-  div.innerHTML='<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" class="eo-del-qty"/><input type="number" value="10.00" step="0.01" min="0" style="width:90px;" class="eo-del-price" oninput="updateEOTotal()"/><button class="btn-icon" onclick="this.parentElement.remove();updateEOTotal();document.getElementById(\'eo-add-delivery-btn\').style.display=\'\'" title="Remove delivery fee" style="flex-shrink:0;">✕</button>';
+  div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;';
+  div.innerHTML=deliveryRowHtml(DELIVERY_FEE_AMOUNT,'','eo-add-delivery-btn','updateEOTotal()');
   list.appendChild(div);
   document.getElementById('eo-add-delivery-btn').style.display='none';
   updateEOTotal();
@@ -1177,12 +1227,14 @@ const DELIVERY_FEE_AMOUNT = 10;
 function getDeliveryFee(retailerId){return DELIVERY_FEE_AMOUNT;}
 function setDeliveryFee(retailerId,fee){}
 function orderDeliveryFee(o){return (o.products||[]).filter(p=>p.product==='Delivery').reduce((s,p)=>s+((Number(p.qty)||1)*(Number(p.price)||0)),0);}
+function orderDeliveryNote(o){const d=(o.products||[]).find(p=>p.product==='Delivery');return d&&d.note?String(d.note):'';}
+function deliveryFeeLabel(o){const n=orderDeliveryNote(o);return 'Delivery fee'+(n?' ('+n+')':'');}
 function orderProductSubtotal(o){return (o.products||[]).filter(p=>p.product!=='Delivery').reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);}
 // Delivery fee line shown on order detail + invoice tables (4 columns)
 function deliveryFeeRowHtml(o,cellStyle){
   const fee=orderDeliveryFee(o); if(!(fee>0)) return '';
   const cs=cellStyle||'';
-  return `<tr><td style="${cs}">🚚 Delivery fee</td><td style="${cs}text-align:center;">1</td><td style="${cs}text-align:right;">${fmtCur(fee)}</td><td style="${cs}text-align:right;"><strong>${fmtCur(fee)}</strong></td></tr>`;
+  return `<tr><td style="${cs}">🚚 ${esc(deliveryFeeLabel(o))}</td><td style="${cs}text-align:center;">1</td><td style="${cs}text-align:right;">${fmtCur(fee)}</td><td style="${cs}text-align:right;"><strong>${fmtCur(fee)}</strong></td></tr>`;
 }
 
 // Catalog display groupings
@@ -1354,7 +1406,7 @@ async function doLogin() {
     db.orders=(orders||[]).map(o=>({
       id:o.id,invoiceNum:o.invoice_num,retailerId:rid,retailerName:retailer.name,
       date:o.order_date||o.date||'',delivery:o.delivery_date||'',status:o.status||'Pending',notes:o.notes||'',
-      products:(o.items||[]).map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0)})),
+      products:(o.items||[]).map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0),note:i.note||''})),
       total:parseFloat(o.total)||0
     }));
     db.nextInvoice=db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100)+1;
@@ -1409,24 +1461,45 @@ function bootApp() {
 // =====================================================================
 //  NAV
 // =====================================================================
-function buildAdminNav() {
-  document.getElementById('main-nav').innerHTML=`
-    <button onclick="showSection('dashboard')">📊 Dashboard</button>
-    <button onclick="showSection('calendar')">📅 Calendar</button>
-    <button onclick="showSection('analytics')">📈 Analytics</button>
-    <button onclick="showSection('retailers')">🏪 Partners</button>
-    <button onclick="showSection('orders')">📦 Orders</button>
-    <button onclick="showSection('auto-orders')">🔄 Auto-Orders</button>
-    <button onclick="showSection('bake')">🍞 Production</button>
-    <button onclick="showSection('settings')">⚙️ Settings</button>`
+// Nav items per role. On phones the first four show in a fixed bottom tab bar and
+// the rest live behind "More"; on desktop every item shows in the top nav.
+const NAV_ITEMS = {
+  admin: [
+    {id:'dashboard',icon:'📊',label:'Dashboard'},
+    {id:'orders',icon:'📦',label:'Orders'},
+    {id:'retailers',icon:'🏪',label:'Partners'},
+    {id:'calendar',icon:'📅',label:'Calendar'},
+    {id:'analytics',icon:'📈',label:'Analytics'},
+    {id:'auto-orders',icon:'🔄',label:'Auto-Orders'},
+    {id:'bake',icon:'🍞',label:'Production'},
+    {id:'settings',icon:'⚙️',label:'Settings'}
+  ],
+  retailer: [
+    {id:'r-home',icon:'🏠',label:'Home'},
+    {id:'r-new-order',icon:'➕',label:'Place Order'},
+    {id:'r-orders',icon:'📦',label:'My Orders'},
+    {id:'r-auto',icon:'🔄',label:'Auto-Order'},
+    {id:'r-account',icon:'✏️',label:'My Account'}
+  ]
+};
+const NAV_PRIMARY_COUNT = 4;
+function navItems(){ return NAV_ITEMS[session&&session.type==='admin'?'admin':'retailer']; }
+function navIsPrimary(id){ return navItems().findIndex(n=>n.id===id) < NAV_PRIMARY_COUNT; }
+function buildNav() {
+  const items=navItems();
+  document.getElementById('main-nav').innerHTML=items.map((n,i)=>
+    `<button data-section="${n.id}" class="${i<NAV_PRIMARY_COUNT?'nav-primary':'nav-secondary'}" onclick="showSection('${n.id}')"><span class="ni">${n.icon}</span><span class="nl">${esc(n.label)}</span></button>`
+  ).join('')+`<button class="nav-more" onclick="openMoreNav()"><span class="ni">☰</span><span class="nl">More</span></button>`;
 }
-function buildRetailerNav() {
-  document.getElementById('main-nav').innerHTML=`
-    <button onclick="showSection('r-home')">🏠 Home</button>
-    <button onclick="showSection('r-orders')">📦 My Orders</button>
-    <button onclick="showSection('r-new-order')">➕ Place Order</button>
-    <button onclick="showSection('r-auto')">🔄 Auto-Order</button>
-    <button onclick="showSection('r-account')">✏️ My Account</button>`;
+function buildAdminNav(){ buildNav(); }
+function buildRetailerNav(){ buildNav(); }
+function openMoreNav() {
+  const active=document.querySelector('.section.active')?.id.replace(/^sec-/,'');
+  const items=navItems().filter(n=>!navIsPrimary(n.id));
+  const who=session&&session.type==='admin'?'Admin':(session&&session.retailer?session.retailer.name:'');
+  document.getElementById('more-nav-body').innerHTML=`<div class="more-grid">${items.map(n=>`<button class="${n.id===active?'active':''}" onclick="closeModal('more-nav-modal');showSection('${n.id}')"><span class="ni">${n.icon}</span><span>${esc(n.label)}</span></button>`).join('')}</div>
+    <p style="font-size:.78rem;color:var(--muted);margin:14px 0 0;">Signed in as <strong>${esc(who)}</strong></p>`;
+  openModal('more-nav-modal');
 }
 
 function showSection(name) {
@@ -1434,11 +1507,11 @@ function showSection(name) {
   document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.classList.add('active');
-  const maps={admin:['dashboard','calendar','analytics','retailers','orders','auto-orders','bake','settings'],retailer:['r-home','r-orders','r-new-order','r-auto','r-account']};
-  const map=session.type==='admin'?maps.admin:maps.retailer;
-  const idx=map.indexOf(name);
-  const navBtns=document.querySelectorAll('nav button');
-  if(idx>=0&&navBtns[idx]) navBtns[idx].classList.add('active');
+  const navBtn=document.querySelector(`nav button[data-section="${name}"]`);
+  if(navBtn){ navBtn.classList.add('active'); navBtn.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'}); }
+  const moreBtn=document.querySelector('nav button.nav-more');
+  if(moreBtn) moreBtn.classList.toggle('active', !navIsPrimary(name));
+  window.scrollTo({top:0,behavior:'instant'});
   if(name==='dashboard') refreshDashboard();
   if(name==='calendar') renderCalendar();
   if(name==='analytics') refreshAnalytics();
@@ -1988,8 +2061,7 @@ function getPriceForRetailer(product, retailerId) {
   if(retailerId) {
     const r=db.retailers.find(x=>x.id===Number(retailerId));
     if(r&&r.priceOverrides&&r.priceOverrides[product]!=null) return Number(r.priceOverrides[product])||0;
-    // Hotels pay $3 per 2-pack, everyone else pays $2.50
-    if(r&&isHotelAccount(r)&&(product==='Two Pack Chocolate Chip'||product==='Two Packs')) return 3.00;
+    // Two-packs are $2.50 for every account (hotel surcharge retired Nov 2026)
   }
   return Number(PRODUCT_PRICES[product])||0;
 }
@@ -2010,14 +2082,12 @@ function refreshOrderPricesForRetailer(retailerId) {
       priceInput.value=getPriceForRetailer(prodSel.value, retailerId);
     }
   });
-  // Delivery fee removed
-  document.querySelectorAll('#o-prod-list .delivery-row').forEach(r=>r.remove());
+  // Delivery fee row is per-order; leave it as entered
 }
 function getProdRows(listId) {
   return Array.from(document.querySelectorAll(`#${listId} .prod-item`)).map(r=>{
     if(r.classList.contains('delivery-row')) {
-      const inputs=r.querySelectorAll('input');
-      return {product:'Delivery',qty:1,price:parseFloat(inputs[1].value)||0};
+      return {product:'Delivery',qty:1,price:parseFloat(r.querySelector('.eo-del-price')?.value)||0,note:(r.querySelector('.eo-del-note')?.value||'').trim()};
     }
     const inputs=r.querySelectorAll('input,select');
     return {product:inputs[0].value,qty:Number(inputs[1].value)||1,price:parseFloat(inputs[2].value)||0};
@@ -2175,7 +2245,7 @@ async function submitNewOrder() {
   }
   // Include delivery fee if present
   const delRow=document.querySelector('#o-prod-list .delivery-row');
-  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice});}
+  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;const delNote=(delRow.querySelector('.eo-del-note')?.value||'').trim();if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice,note:delNote});}
   const retailer=db.retailers.find(r=>r.id===retailerId)||{};
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
   const inv=db.nextInvoice++;
@@ -2185,7 +2255,7 @@ async function submitNewOrder() {
       retailer_id:retailerId,invoice_num:inv,order_date:date,delivery_date:delivery||null,status,notes,total
     }).select().single();
     if(oErr){toast('Error creating order: '+oErr.message);db.nextInvoice--;return;}
-    const {error:iErr}=await sbClient.from('order_items').insert(products.map(p=>({order_id:newOrder.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
+    const {error:iErr}=await sbClient.from('order_items').insert(products.map(p=>({order_id:newOrder.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0),...(p.note?{note:String(p.note).slice(0,60)}:{})})));
     if(iErr){toast('Order saved but items failed: '+iErr.message);}
     sendOrderNotification(retailer.name||'Partner', products, total, newOrder.id, delivery||null, notes);
     // Reload from Supabase now that both order + items are fully written
@@ -2278,9 +2348,12 @@ function openConfirmOrderModal() {
   if(notesInput) notesInput.value='';
   // Delivery fee toggle: on if the order already carries one, otherwise off
   const feeBox=document.getElementById('confirm-delivery-fee');
-  if(feeBox) feeBox.checked=orderDeliveryFee(o)>0;
+  const curFee=orderDeliveryFee(o);
+  if(feeBox) feeBox.checked=curFee>0;
   const feeAmt=document.getElementById('confirm-delivery-fee-amt');
-  if(feeAmt) feeAmt.textContent=fmtCur(DELIVERY_FEE_AMOUNT);
+  if(feeAmt) feeAmt.value=(curFee>0?curFee:DELIVERY_FEE_AMOUNT).toFixed(2);
+  const feeNote=document.getElementById('confirm-delivery-fee-note');
+  if(feeNote) feeNote.value=orderDeliveryNote(o);
   updateConfirmTotal();
   // Pre-fill email from retailer profile
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
@@ -2303,26 +2376,31 @@ function updateConfirmTotal() {
   const o=db.orders.find(x=>x.id===modalOrderId);
   const line=document.getElementById('confirm-total-line'); if(!o||!line) return;
   const on=!!document.getElementById('confirm-delivery-fee')?.checked;
+  const fields=document.getElementById('confirm-delivery-fee-fields'); if(fields) fields.style.display=on?'flex':'none';
+  const fee=on?Math.max(0,parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0):0;
   const sub=orderProductSubtotal(o);
   line.innerHTML=on
-    ? `Products ${fmtCur(sub)} + delivery ${fmtCur(DELIVERY_FEE_AMOUNT)} = <strong style="color:var(--brown-dk);">${fmtCur(sub+DELIVERY_FEE_AMOUNT)}</strong> on the invoice`
+    ? `Products ${fmtCur(sub)} + delivery ${fmtCur(fee)} = <strong style="color:var(--brown-dk);">${fmtCur(sub+fee)}</strong> on the invoice`
     : `Invoice total <strong style="color:var(--brown-dk);">${fmtCur(sub)}</strong> (no delivery fee)`;
 }
 // Add or remove the 'Delivery' line item on an order so the fee is part of the
 // stored total and shows on the invoice. Only touches the Delivery row; product
 // rows are left alone.
-async function applyDeliveryFee(o,wantFee) {
+async function applyDeliveryFee(o,wantFee,feeAmount,feeNote) {
+  const amt=wantFee?Math.max(0,Number(feeAmount)||0):0;
+  const note=wantFee?String(feeNote||'').trim().slice(0,60):'';
   const hasFee=orderDeliveryFee(o)>0;
-  if(wantFee===hasFee) return null;
+  if(!wantFee&&!hasFee) return null;
+  if(wantFee&&hasFee&&Math.abs(orderDeliveryFee(o)-amt)<0.005&&orderDeliveryNote(o)===note) return null;
   const products=o.products.filter(p=>p.product!=='Delivery');
-  if(wantFee) products.push({product:'Delivery',qty:1,price:DELIVERY_FEE_AMOUNT});
+  if(wantFee&&amt>0) products.push({product:'Delivery',qty:1,price:amt,note});
   const total=products.reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);
   _writeActive=true;
   try {
     const {error:dErr}=await sbClient.from('order_items').delete().eq('order_id',o.id).eq('product','Delivery');
     if(dErr) return dErr.message;
-    if(wantFee) {
-      const {error:iErr}=await sbClient.from('order_items').insert({order_id:o.id,product:'Delivery',qty:1,unit_price:DELIVERY_FEE_AMOUNT,subtotal:DELIVERY_FEE_AMOUNT});
+    if(wantFee&&amt>0) {
+      const {error:iErr}=await sbClient.from('order_items').insert({order_id:o.id,product:'Delivery',qty:1,unit_price:amt,subtotal:amt,...(note?{note}:{})});
       if(iErr) return iErr.message;
     }
     const {error:tErr}=await sbClient.from('orders').update({total}).eq('id',o.id);
@@ -2336,10 +2414,12 @@ async function confirmOrder() {
   const deliveryDate=document.getElementById('confirm-delivery-date').value;
   const notes=document.getElementById('confirm-notes').value.trim();
   const wantFee=!!document.getElementById('confirm-delivery-fee')?.checked;
+  const feeAmount=parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0;
+  const feeNote=document.getElementById('confirm-delivery-fee-note')?.value||'';
   const btn=document.querySelector('#confirm-order-modal .btn-primary');
   if(btn){btn.textContent='Sending…';btn.disabled=true;}
   // Delivery fee on/off first, so the stored total and the email agree
-  const feeErr=await applyDeliveryFee(o,wantFee);
+  const feeErr=await applyDeliveryFee(o,wantFee,feeAmount,feeNote);
   if(feeErr){if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}toast('Could not update the delivery fee: '+feeErr);return;}
   // Update status and delivery date in Supabase
   const updates={status:'Confirmed'};
@@ -2371,7 +2451,7 @@ async function confirmOrder() {
       delivery_date: deliveryDate ? fmtDate(deliveryDate) : 'To be confirmed',
       order_notes: notes||'None',
       order_date: fmtDate(o.date),
-      orders: productItems.map(p=>({name:String(getProductDisplayName(p.product)),units:String(p.qty),price:'$'+(Number(p.price)||0).toFixed(2)})).concat(orderDeliveryFee(o)>0?[{name:'Delivery fee',units:'1',price:'$'+orderDeliveryFee(o).toFixed(2)}]:[]),
+      orders: productItems.map(p=>({name:String(getProductDisplayName(p.product)),units:String(p.qty),price:'$'+(Number(p.price)||0).toFixed(2)})).concat(orderDeliveryFee(o)>0?[{name:deliveryFeeLabel(o),units:'1',price:'$'+orderDeliveryFee(o).toFixed(2)}]:[]),
       cost: {
         shipping: '$'+orderDeliveryFee(o).toFixed(2),
         subtotal: '$'+orderProductSubtotal(o).toFixed(2),
@@ -2550,7 +2630,7 @@ async function genOrderFromAO(id) {
     retailer_id:ao.retailerId,invoice_num:inv,order_date:todayStr(),status:'Pending',notes,total
   }).select().single();
   if(error){toast('Error creating order: '+error.message);db.nextInvoice--;return;}
-  await sbClient.from('order_items').insert(ao.products.map(p=>({order_id:newOrder.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
+  await sbClient.from('order_items').insert(ao.products.map(p=>({order_id:newOrder.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0),...(p.note?{note:String(p.note).slice(0,60)}:{})})));
   db.orders.unshift({id:newOrder.id,invoiceNum:inv,retailerId:ao.retailerId,retailerName:ao.retailerName,date:todayStr(),delivery:'',status:'Pending',notes,products:ao.products,total,created:new Date().toISOString()});
   toast(`${invNum(inv)} created from auto-order!`);
 }
@@ -2850,7 +2930,7 @@ async function commitImport(type) {
       const inv=db.nextInvoice++;
       const {data:newOrd,error}=await sbClient.from('orders').insert({retailer_id:retailer.id,invoice_num:inv,order_date:normDate(r[1])||todayStr(),delivery_date:normDate(r[2])||null,status:String(r[3]||'Pending'),notes:String(r[4]||''),total}).select().single();
       if(!error&&newOrd){
-        await sbClient.from('order_items').insert(products.map(p=>({order_id:newOrd.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
+        await sbClient.from('order_items').insert(products.map(p=>({order_id:newOrd.id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0),...(p.note?{note:String(p.note).slice(0,60)}:{})})));
         db.orders.unshift({id:newOrd.id,invoiceNum:inv,retailerId:retailer.id,retailerName:retailer.name,date:normDate(r[1]),delivery:normDate(r[2]),status:String(r[3]||'Pending'),notes:String(r[4]||''),products,total,created:new Date().toISOString()});
         count++;
       }
@@ -4164,8 +4244,8 @@ function openEditOrder(id) {
       hasDelivery=true;
       const div=document.createElement('div');div.className='prod-item delivery-row';
       div.dataset.delivery='1';
-      div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;';
-      div.innerHTML=`<span style="flex:1;font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;">🚚 Delivery Fee</span><input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:64px;" class="eo-del-qty"/><input type="number" value="${p.price}" step="0.01" min="0" style="width:90px;" class="eo-del-price" oninput="updateEOTotal()"/><button class="btn-icon" onclick="this.parentElement.remove();updateEOTotal();document.getElementById('eo-add-delivery-btn').style.display=''" title="Remove delivery fee" style="flex-shrink:0;">✕</button>`;
+      div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;';
+      div.innerHTML=deliveryRowHtml(p.price,p.note||'','eo-add-delivery-btn','updateEOTotal()');
       list.appendChild(div);
     } else { addProdRow('eo-prod-list',p.product,p.qty,p.price); }
   });
@@ -4200,7 +4280,7 @@ async function _saveEditOrderInner() {
   if(!products.length){toast('Add at least one product.');return;}
   // Include delivery fee if present
   const delRow=document.querySelector('#eo-prod-list .delivery-row');
-  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice});}
+  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;const delNote=(delRow.querySelector('.eo-del-note')?.value||'').trim();if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice,note:delNote});}
   const invNew=Number(document.getElementById('eo-inv').value)||0;
   const date=document.getElementById('eo-date').value;
   const delivery=document.getElementById('eo-delivery').value;
@@ -4215,7 +4295,7 @@ async function _saveEditOrderInner() {
     // order ends up with duplicated items (this happened to INV-0108 and 0147)
     const {error:dErr}=await sbClient.from('order_items').delete().eq('order_id',id);
     if(dErr){toast('⚠️ Could not update line items ('+dErr.message+'). Order info saved; items left unchanged.');return;}
-    const {error:iErr}=await sbClient.from('order_items').insert(products.map(p=>({order_id:id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0)})));
+    const {error:iErr}=await sbClient.from('order_items').insert(products.map(p=>({order_id:id,product:p.product,qty:Number(p.qty)||1,unit_price:Number(p.price)||0,subtotal:(Number(p.qty)||1)*(Number(p.price)||0),...(p.note?{note:String(p.note).slice(0,60)}:{})})));
     if(iErr){toast('⚠️ Items failed to save: '+iErr.message+'. Please re-open the order and check its products.');return;}
     // Update nextInvoice if we used a higher number
     if(invNew >= db.nextInvoice) db.nextInvoice = invNew + 1;
