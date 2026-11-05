@@ -257,6 +257,16 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   td,th{padding:8px 8px;font-size:.84rem;}
   .hdr-text h1{font-size:1rem;}
   #notif-banner .notif-item{padding:8px 12px;}
+  /* ── Keep forms and tables inside the screen ── */
+  .form-row{grid-template-columns:minmax(0,1fr) !important;}
+  .fg{min-width:0;}
+  .fg input,.fg select,.fg textarea{width:100%;min-width:0;max-width:100%;box-sizing:border-box;}
+  .prod-item{grid-template-columns:minmax(0,1fr) 54px 72px auto !important;gap:6px;padding:6px 8px;}
+  .prod-item select,.prod-item input{min-width:0;width:100%;box-sizing:border-box;}
+  .prod-item.delivery-row{display:flex;}
+  .panel{max-width:100%;overflow-x:hidden;}
+  .tbl-wrap{max-width:100%;}
+  select{max-width:100%;}
   header{padding:8px 12px;flex-wrap:wrap;gap:4px;justify-content:space-between !important;overflow:visible;}
   .hdr-text h1{font-size:1.05rem;white-space:nowrap;}
   .hdr-text p{font-size:.55rem;letter-spacing:.06em;}
