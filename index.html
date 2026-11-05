@@ -308,11 +308,37 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 
   /* ── Tables ── */
   .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  table{min-width:520px;}
-  .modal table{min-width:400px;}
+  table{min-width:0;width:100%;}
+  .modal table{min-width:0;font-size:.84rem;}
+  .modal table td,.modal table th{padding:6px 6px !important;}
+  /* ── Data tables become stacked cards (labels stamped from the header by stampTableLabels) ── */
+  .tbl-wrap{overflow:visible;}
+  .tbl-wrap table.stacked,.tbl-wrap table.stacked tbody{display:block;width:100%;}
+  .tbl-wrap table.stacked thead{display:none;}
+  .tbl-wrap table.stacked tr{display:block;background:var(--white);border:1px solid var(--tan);border-radius:8px;padding:8px 12px;margin-bottom:10px;}
+  .tbl-wrap table.stacked tr:hover{background:var(--white);}
+  .tbl-wrap table.stacked td{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:5px 0 !important;border:none !important;text-align:left !important;font-size:.86rem;line-height:1.35;}
+  .tbl-wrap table.stacked td::before{content:attr(data-label);color:var(--muted);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
+  .tbl-wrap table.stacked td[data-label=""]::before{content:none;}
+  .tbl-wrap table.stacked td.td-actions{display:flex;justify-content:flex-start;flex-wrap:wrap;gap:6px;padding-top:8px !important;border-top:1px dashed var(--tan) !important;margin-top:4px;}
+  .tbl-wrap table.stacked td.td-actions::before{content:none;}
+  .tbl-wrap table.stacked td.td-actions .btn{flex:1 1 auto;justify-content:center;}
+  .tbl-wrap table.stacked td.td-empty{display:none;}
 
   /* ── Invoice ── */
   .invoice-box{padding:16px 14px;}
+
+  /* ── Sign-in screen ── */
+  #login-screen{padding:28px 16px 32px;justify-content:flex-start;}
+  .login-mark-svg{width:190px;margin-bottom:8px;}
+  .login-logo{margin-bottom:18px;}
+  .login-logo h1{font-size:1.3rem !important;}
+  .login-logo p{font-size:.7rem;}
+  .login-card{padding:22px 18px;max-width:100%;}
+  .login-btn{min-height:48px;}
+  #admin-login-corner{position:static !important;width:100%;max-width:420px;margin:18px auto 0;display:flex;flex-direction:column;align-items:center;}
+  #admin-login-toggle{opacity:.6 !important;padding:8px 14px;}
+  #admin-login-form{width:100% !important;padding:22px 18px !important;}
   .inv-header{flex-direction:column;gap:12px;}
   .inv-meta{text-align:left;}
 
@@ -4175,6 +4201,33 @@ function fillRetailerSelects() {
       (isFilter?sep+inactive.map(r=>`<option value="${r.id}"${Number(cur)===r.id?' selected':''}>${esc(r.name)} (Inactive)</option>`).join(''):'');
   });
 }
+// Phones show data tables as stacked cards; each cell carries its column header
+// in data-label so the CSS can print it. Runs after every render via the observer.
+function stampTableLabels(root){
+  (root||document).querySelectorAll('.tbl-wrap table').forEach(t=>{
+    const ths=[...t.querySelectorAll('thead th')].map(th=>th.textContent.trim());
+    if(!ths.length) return;
+    t.classList.add('stacked');
+    t.querySelectorAll('tbody tr').forEach(tr=>{
+      [...tr.children].forEach((td,i)=>{
+        if(td.colSpan>1){ td.dataset.label=''; return; }
+        const l=ths[i]||''; td.dataset.label=l;
+        const isAct=/action/i.test(l)||!!td.querySelector('button');
+        td.classList.toggle('td-actions',isAct);
+        td.classList.toggle('td-empty',!isAct&&!td.textContent.trim()&&!td.querySelector('*'));
+      });
+    });
+  });
+}
+(function(){
+  let pending=false;
+  const run=()=>{pending=false;stampTableLabels();};
+  new MutationObserver(muts=>{
+    if(pending) return;
+    for(const m of muts){ const el=m.target.nodeType===1?m.target:m.target.parentElement; if(el&&el.closest&&el.closest('.tbl-wrap')){pending=true;setTimeout(run,0);break;} }
+  }).observe(document.documentElement,{childList:true,subtree:true});
+  document.addEventListener('DOMContentLoaded',()=>stampTableLabels());
+})();
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
