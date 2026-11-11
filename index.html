@@ -618,9 +618,10 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <div class="fg" style="margin-top:10px;padding:10px 12px;background:var(--cream-dk);border-radius:8px;">
       <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;font-weight:700;color:var(--brown);">
         <input type="checkbox" id="confirm-delivery-fee" style="width:18px;height:18px;margin:0;" onchange="updateConfirmTotal()"/>
-        <span>🚚 Add delivery fee</span>
+        <span>🚚 Add a delivery or shipping fee</span>
       </label>
       <div id="confirm-delivery-fee-fields" style="display:none;margin-top:8px;gap:8px;align-items:center;flex-wrap:wrap;">
+        <select id="confirm-delivery-fee-kind" onchange="updateConfirmTotal()" style="padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;background:var(--white);"><option value="Delivery">🚚 Delivery fee</option><option value="Shipping">📦 Shipping</option></select>
         <span style="font-size:.84rem;color:var(--muted);">$</span><input type="number" id="confirm-delivery-fee-amt" step="0.01" min="0" value="10.00" style="width:90px;padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" oninput="updateConfirmTotal()"/>
         <input type="text" id="confirm-delivery-fee-note" maxlength="60" placeholder="Note on invoice, e.g. 50% off" style="flex:1;min-width:150px;padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;"/>
       </div>
@@ -1246,9 +1247,10 @@ const LFB_LOGO_SRC = document.querySelector('.login-mark-svg img')?.src || '';
 // Logo removed from portal header - kept only for invoices
 // One delivery-fee row for the new-order and edit-order forms: amount is editable,
 // plus a short note that prints next to the fee on the invoice (e.g. "50% off").
-function deliveryRowHtml(amount,note,addBtnId,onInput){
+function deliveryRowHtml(amount,note,addBtnId,onInput,kind){
   const oi=onInput?` oninput="${onInput}"`:'';
-  return `<span style="font-size:.85rem;font-weight:700;color:var(--brown);padding:4px 0;white-space:nowrap;">🚚 Delivery</span>`+
+  const k=FEE_KINDS[kind]?kind:'Delivery';
+  return `<select class="eo-del-kind" title="Fee type" style="font-weight:700;color:var(--brown);padding:5px 6px;border:1px solid var(--tan);border-radius:4px;background:var(--white);font-family:'Nunito',sans-serif;font-size:.84rem;">${Object.keys(FEE_KINDS).map(x=>`<option value="${x}"${x===k?' selected':''}>${FEE_KINDS[x].icon} ${FEE_KINDS[x].label}</option>`).join('')}</select>`+
     `<input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:44px;" class="eo-del-qty" title="Qty"/>`+
     `<input type="number" value="${Number(amount||0).toFixed(2)}" step="0.01" min="0" style="width:84px;" class="eo-del-price" title="Fee amount"${oi}/>`+
     `<input type="text" value="${esc(note||'')}" maxlength="60" placeholder="Note, e.g. 50% off" style="flex:1;min-width:90px;" class="eo-del-note" title="Shown next to the fee on the invoice"/>`+
@@ -1259,7 +1261,7 @@ function addNewOrderDeliveryFee(){
   if(list.querySelector('.delivery-row'))return;
   const div=document.createElement('div');div.className='prod-item delivery-row';
   div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;';
-  div.innerHTML=deliveryRowHtml(DELIVERY_FEE_AMOUNT,'','o-add-delivery-btn','');
+  div.innerHTML=deliveryRowHtml(DELIVERY_FEE_AMOUNT,'','o-add-delivery-btn','','Delivery');
   list.appendChild(div);
   document.getElementById('o-add-delivery-btn').style.display='none';
 }
@@ -1268,7 +1270,7 @@ function addDeliveryFeeRow(){
   const div=document.createElement('div');div.className='prod-item delivery-row';
   div.dataset.delivery='1';
   div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;';
-  div.innerHTML=deliveryRowHtml(DELIVERY_FEE_AMOUNT,'','eo-add-delivery-btn','updateEOTotal()');
+  div.innerHTML=deliveryRowHtml(DELIVERY_FEE_AMOUNT,'','eo-add-delivery-btn','updateEOTotal()','Delivery');
   list.appendChild(div);
   document.getElementById('eo-add-delivery-btn').style.display='none';
   updateEOTotal();
@@ -1290,17 +1292,22 @@ const PRODUCT_INCREMENT = {
 // or via the Add Delivery Fee row in the new/edit order forms. Stored as a
 // 'Delivery' line item (qty 1) on the order so it flows into the total + invoice.
 const DELIVERY_FEE_AMOUNT = 10;
+// Fee line kinds: a flat local delivery fee, or a shipping charge (carrier). Both are
+// stored as a qty-1 line item whose product is the kind name.
+const FEE_KINDS = { Delivery:{label:'Delivery fee',icon:'🚚'}, Shipping:{label:'Shipping',icon:'📦'} };
+function isFeeItem(p){ return !!p && (p.product==='Delivery' || p.product==='Shipping'); }
+function feeKindOf(o){ const f=(o.products||[]).find(x=>isFeeItem(x)); return f && FEE_KINDS[f.product] ? f.product : 'Delivery'; }
 function getDeliveryFee(retailerId){return DELIVERY_FEE_AMOUNT;}
 function setDeliveryFee(retailerId,fee){}
-function orderDeliveryFee(o){return (o.products||[]).filter(p=>p.product==='Delivery').reduce((s,p)=>s+((Number(p.qty)||1)*(Number(p.price)||0)),0);}
-function orderDeliveryNote(o){const d=(o.products||[]).find(p=>p.product==='Delivery');return d&&d.note?String(d.note):'';}
-function deliveryFeeLabel(o){const n=orderDeliveryNote(o);return 'Delivery fee'+(n?' ('+n+')':'');}
-function orderProductSubtotal(o){return (o.products||[]).filter(p=>p.product!=='Delivery').reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);}
+function orderDeliveryFee(o){return (o.products||[]).filter(p=>isFeeItem(p)).reduce((s,p)=>s+((Number(p.qty)||1)*(Number(p.price)||0)),0);}
+function orderDeliveryNote(o){const d=(o.products||[]).find(p=>isFeeItem(p));return d&&d.note?String(d.note):'';}
+function deliveryFeeLabel(o){const n=orderDeliveryNote(o);return FEE_KINDS[feeKindOf(o)].label+(n?' ('+n+')':'');}
+function orderProductSubtotal(o){return (o.products||[]).filter(p=>!isFeeItem(p)).reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);}
 // Delivery fee line shown on order detail + invoice tables (4 columns)
 function deliveryFeeRowHtml(o,cellStyle){
   const fee=orderDeliveryFee(o); if(!(fee>0)) return '';
   const cs=cellStyle||'';
-  return `<tr><td style="${cs}">🚚 ${esc(deliveryFeeLabel(o))}</td><td style="${cs}text-align:center;">1</td><td style="${cs}text-align:right;">${fmtCur(fee)}</td><td style="${cs}text-align:right;"><strong>${fmtCur(fee)}</strong></td></tr>`;
+  return `<tr><td style="${cs}">${FEE_KINDS[feeKindOf(o)].icon} ${esc(deliveryFeeLabel(o))}</td><td style="${cs}text-align:center;">1</td><td style="${cs}text-align:right;">${fmtCur(fee)}</td><td style="${cs}text-align:right;"><strong>${fmtCur(fee)}</strong></td></tr>`;
 }
 
 // Catalog display groupings
@@ -1741,7 +1748,7 @@ function buildAdminContent() {
     <div class="prod-list" id="o-prod-list"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <button class="btn btn-outline btn-sm" onclick="addProdRow('o-prod-list')">+ Add Product</button>
-      <button class="btn btn-outline btn-sm" id="o-add-delivery-btn" onclick="addNewOrderDeliveryFee()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
+      <button class="btn btn-outline btn-sm" id="o-add-delivery-btn" onclick="addNewOrderDeliveryFee()" style="background:var(--cream-dk);">🚚 Add Delivery / Shipping Fee</button>
     </div>
     <div class="form-row" id="o-custom-wrap" style="display:none;background:var(--cream);border:1px dashed var(--tan);border-radius:8px;padding:10px 12px;">
       <div class="fg"><label>Customer Name</label><input id="co-name" placeholder="e.g. Aunt Rachel"/></div>
@@ -2144,7 +2151,7 @@ function refreshOrderPricesForRetailer(retailerId) {
   document.querySelectorAll('#o-prod-list .prod-item').forEach(row=>{
     const prodSel=row.querySelector('select');
     const priceInput=row.querySelectorAll('input')[1];
-    if(prodSel&&priceInput&&prodSel.value&&prodSel.value!=='Delivery') {
+    if(prodSel&&priceInput&&prodSel.value&&!isFeeItem({product:prodSel.value})) {
       priceInput.value=getPriceForRetailer(prodSel.value, retailerId);
     }
   });
@@ -2153,7 +2160,7 @@ function refreshOrderPricesForRetailer(retailerId) {
 function getProdRows(listId) {
   return Array.from(document.querySelectorAll(`#${listId} .prod-item`)).map(r=>{
     if(r.classList.contains('delivery-row')) {
-      return {product:'Delivery',qty:1,price:parseFloat(r.querySelector('.eo-del-price')?.value)||0,note:(r.querySelector('.eo-del-note')?.value||'').trim()};
+      return {product:(FEE_KINDS[r.querySelector('.eo-del-kind')?.value]?r.querySelector('.eo-del-kind').value:'Delivery'),qty:1,price:parseFloat(r.querySelector('.eo-del-price')?.value)||0,note:(r.querySelector('.eo-del-note')?.value||'').trim()};
     }
     const inputs=r.querySelectorAll('input,select');
     return {product:inputs[0].value,qty:Number(inputs[1].value)||1,price:parseFloat(inputs[2].value)||0};
@@ -2311,7 +2318,7 @@ async function submitNewOrder() {
   }
   // Include delivery fee if present
   const delRow=document.querySelector('#o-prod-list .delivery-row');
-  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;const delNote=(delRow.querySelector('.eo-del-note')?.value||'').trim();if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice,note:delNote});}
+  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;const delNote=(delRow.querySelector('.eo-del-note')?.value||'').trim();const delKind=FEE_KINDS[delRow.querySelector('.eo-del-kind')?.value]?delRow.querySelector('.eo-del-kind').value:'Delivery';if(delPrice>0)products.push({product:delKind,qty:1,price:delPrice,note:delNote});}
   const retailer=db.retailers.find(r=>r.id===retailerId)||{};
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
   const inv=db.nextInvoice++;
@@ -2354,7 +2361,7 @@ function renderOrders() {
   const sumEl=document.getElementById('orders-summary');
   if(sumEl){
     const filtTotal=orders.reduce((s,o)=>s+(o.total||0),0);
-    const filtUnits=orders.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
+    const filtUnits=orders.reduce((s,o)=>s+o.products.filter(p=>!isFeeItem(p)).reduce((ps,p)=>ps+(p.qty||0),0),0);
     sumEl.innerHTML=`<strong>${orders.length}</strong> order${orders.length!==1?'s':''} &nbsp;·&nbsp; <strong>${filtUnits}</strong> units &nbsp;·&nbsp; <strong>${fmtCur(filtTotal)}</strong>`;
   }
   if(!orders.length){tbody.innerHTML='<tr><td colspan="8" class="empty-row">No orders found.</td></tr>';return;}
@@ -2363,7 +2370,7 @@ function renderOrders() {
     <td style="vertical-align:middle;">${esc(o.retailerName)}</td>
     <td style="vertical-align:middle;">${fmtDate(o.date)}</td>
     <td style="vertical-align:middle;">${o.delivery?fmtDate(o.delivery):' - '}</td>
-    <td style="vertical-align:middle;">${o.products.filter(p=>p.product!=='Delivery').length} item${o.products.filter(p=>p.product!=='Delivery').length!==1?'s':''}</td>
+    <td style="vertical-align:middle;">${o.products.filter(p=>!isFeeItem(p)).length} item${o.products.filter(p=>!isFeeItem(p)).length!==1?'s':''}</td>
     <td style="vertical-align:middle;"><strong>${fmtCur(o.total)}</strong></td>
     <td style="vertical-align:middle;"><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
     <td style="vertical-align:middle;white-space:nowrap;">
@@ -2391,7 +2398,7 @@ function viewOrderDetail(id) {
     <strong style="display:block;margin-bottom:8px;color:var(--brown);">Products:</strong>
     <table style="width:100%;font-size:.87rem;border-collapse:collapse;">
       <thead style="background:var(--tan);"><tr><th style="padding:7px 10px;text-align:left;">Product</th><th style="padding:7px 10px;text-align:center;">Qty</th><th style="padding:7px 10px;text-align:right;">Unit Price</th><th style="padding:7px 10px;text-align:right;">Subtotal</th></tr></thead>
-      <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td style="padding:6px 10px;">${esc(getProductDisplayName(p.product))}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}${deliveryFeeRowHtml(o,'padding:6px 10px;')}</tbody>
+      <tbody>${o.products.filter(p=>!isFeeItem(p)).map(p=>`<tr><td style="padding:6px 10px;">${esc(getProductDisplayName(p.product))}</td><td style="padding:6px 10px;text-align:center;">${p.qty}</td><td style="padding:6px 10px;text-align:right;">${fmtCur(p.price)}</td><td style="padding:6px 10px;text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}${deliveryFeeRowHtml(o,'padding:6px 10px;')}</tbody>
       <tfoot><tr><td colspan="3" style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">Order Total:</td><td style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">${fmtCur(o.total)}</td></tr></tfoot>
     </table>
     <p style="margin-top:14px;font-size:.8rem;color:var(--muted);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>`;
@@ -2420,6 +2427,8 @@ function openConfirmOrderModal() {
   if(feeAmt) feeAmt.value=(curFee>0?curFee:DELIVERY_FEE_AMOUNT).toFixed(2);
   const feeNote=document.getElementById('confirm-delivery-fee-note');
   if(feeNote) feeNote.value=orderDeliveryNote(o);
+  const feeKind=document.getElementById('confirm-delivery-fee-kind');
+  if(feeKind) feeKind.value=feeKindOf(o);
   updateConfirmTotal();
   // Pre-fill email from retailer profile
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
@@ -2445,28 +2454,30 @@ function updateConfirmTotal() {
   const fields=document.getElementById('confirm-delivery-fee-fields'); if(fields) fields.style.display=on?'flex':'none';
   const fee=on?Math.max(0,parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0):0;
   const sub=orderProductSubtotal(o);
+  const kindSel=document.getElementById('confirm-delivery-fee-kind'); const kindLabel=(FEE_KINDS[kindSel?.value]||FEE_KINDS.Delivery).label.toLowerCase();
   line.innerHTML=on
-    ? `Products ${fmtCur(sub)} + delivery ${fmtCur(fee)} = <strong style="color:var(--brown-dk);">${fmtCur(sub+fee)}</strong> on the invoice`
+    ? `Products ${fmtCur(sub)} + ${kindLabel} ${fmtCur(fee)} = <strong style="color:var(--brown-dk);">${fmtCur(sub+fee)}</strong> on the invoice`
     : `Invoice total <strong style="color:var(--brown-dk);">${fmtCur(sub)}</strong> (no delivery fee)`;
 }
 // Add or remove the 'Delivery' line item on an order so the fee is part of the
 // stored total and shows on the invoice. Only touches the Delivery row; product
 // rows are left alone.
-async function applyDeliveryFee(o,wantFee,feeAmount,feeNote) {
+async function applyDeliveryFee(o,wantFee,feeAmount,feeNote,feeKind) {
   const amt=wantFee?Math.max(0,Number(feeAmount)||0):0;
   const note=wantFee?String(feeNote||'').trim().slice(0,60):'';
+  const kind=FEE_KINDS[feeKind]?feeKind:'Delivery';
   const hasFee=orderDeliveryFee(o)>0;
   if(!wantFee&&!hasFee) return null;
-  if(wantFee&&hasFee&&Math.abs(orderDeliveryFee(o)-amt)<0.005&&orderDeliveryNote(o)===note) return null;
-  const products=o.products.filter(p=>p.product!=='Delivery');
-  if(wantFee&&amt>0) products.push({product:'Delivery',qty:1,price:amt,note});
+  if(wantFee&&hasFee&&Math.abs(orderDeliveryFee(o)-amt)<0.005&&orderDeliveryNote(o)===note&&feeKindOf(o)===kind) return null;
+  const products=o.products.filter(p=>!isFeeItem(p));
+  if(wantFee&&amt>0) products.push({product:kind,qty:1,price:amt,note});
   const total=products.reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);
   _writeActive=true;
   try {
-    const {error:dErr}=await sbClient.from('order_items').delete().eq('order_id',o.id).eq('product','Delivery');
+    const {error:dErr}=await sbClient.from('order_items').delete().eq('order_id',o.id).in('product',Object.keys(FEE_KINDS));
     if(dErr) return dErr.message;
     if(wantFee&&amt>0) {
-      const {error:iErr}=await sbClient.from('order_items').insert({order_id:o.id,product:'Delivery',qty:1,unit_price:amt,subtotal:amt,...(note?{note}:{})});
+      const {error:iErr}=await sbClient.from('order_items').insert({order_id:o.id,product:kind,qty:1,unit_price:amt,subtotal:amt,...(note?{note}:{})});
       if(iErr) return iErr.message;
     }
     const {error:tErr}=await sbClient.from('orders').update({total}).eq('id',o.id);
@@ -2482,10 +2493,11 @@ async function confirmOrder() {
   const wantFee=!!document.getElementById('confirm-delivery-fee')?.checked;
   const feeAmount=parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0;
   const feeNote=document.getElementById('confirm-delivery-fee-note')?.value||'';
+  const feeKind=document.getElementById('confirm-delivery-fee-kind')?.value||'Delivery';
   const btn=document.querySelector('#confirm-order-modal .btn-primary');
   if(btn){btn.textContent='Sending…';btn.disabled=true;}
-  // Delivery fee on/off first, so the stored total and the email agree
-  const feeErr=await applyDeliveryFee(o,wantFee,feeAmount,feeNote);
+  // Fee on/off first, so the stored total and the email agree
+  const feeErr=await applyDeliveryFee(o,wantFee,feeAmount,feeNote,feeKind);
   if(feeErr){if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}toast('Could not update the delivery fee: '+feeErr);return;}
   // Update status and delivery date in Supabase
   const updates={status:'Confirmed'};
@@ -2510,7 +2522,7 @@ async function confirmOrder() {
   }
   if(retailerEmail) {
     // Retailer confirmation - tells the PARTNER their order is confirmed
-    const productItems=o.products.filter(p=>p.product!=='Delivery');
+    const productItems=o.products.filter(p=>!isFeeItem(p));
     const confirmParams = {
       retailer_name: o.retailerName,
       order_id: invNum(o.invoiceNum),
@@ -2565,7 +2577,7 @@ function showInvoice(id) {
       </div>
       <table class="inv-table">
         <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Subtotal</th></tr></thead>
-        <tbody>${o.products.filter(p=>p.product!=='Delivery').map(p=>`<tr><td>${esc(getProductDisplayName(p.product))}</td><td style="text-align:center;">${p.qty}</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}${deliveryFeeRowHtml(o)}</tbody>
+        <tbody>${o.products.filter(p=>!isFeeItem(p)).map(p=>`<tr><td>${esc(getProductDisplayName(p.product))}</td><td style="text-align:center;">${p.qty}</td><td style="text-align:right;">${fmtCur(p.price)}</td><td style="text-align:right;"><strong>${fmtCur(p.qty*p.price)}</strong></td></tr>`).join('')}${deliveryFeeRowHtml(o)}</tbody>
         <tfoot><tr><td colspan="3" style="text-align:right;">Total Due:</td><td style="text-align:right;">${fmtCur(o.total)}</td></tr></tfoot>
       </table>
       ${o.notes?`<p style="margin-top:14px;font-size:.84rem;color:var(--muted);"><strong>Notes:</strong> ${esc(o.notes)}</p>`:''}
@@ -2738,7 +2750,7 @@ function refreshDashboard() {
   const dayOfYear=Math.ceil((nowDash-new Date(curYear,0,1))/(1000*60*60*24));
   const weeksElapsed=Math.max(1,Math.round(dayOfYear/7));
   const totalUnits=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===curYear;})
-    .reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
+    .reduce((s,o)=>s+o.products.filter(p=>!isFeeItem(p)).reduce((ps,p)=>ps+(p.qty||0),0),0);
   const avgPerWeek=Math.round(totalUnits/weeksElapsed);
   const revAll=db.orders.reduce((s,o)=>s+(o.total||0),0);
   // Online (Goldbelly) revenue for the current year - confirmed or projected at known rates
@@ -2795,7 +2807,7 @@ function generateSummary() {
     <div class="sum-hdr"><h2>🍞 Lazar Family Bakehouse</h2><p>Partner Summary · ${fmtDate(start)} - ${fmtDate(end)}</p></div>
     ${Object.values(byR).map(g=>{
       const rt=g.orders.reduce((s,o)=>s+(o.total||0),0);
-      const prods={};g.orders.forEach(o=>o.products.filter(p=>p.product&&p.product!=='Delivery').forEach(p=>prods[p.product]=(prods[p.product]||0)+p.qty));
+      const prods={};g.orders.forEach(o=>o.products.filter(p=>p.product&&!isFeeItem(p)).forEach(p=>prods[p.product]=(prods[p.product]||0)+p.qty));
       return `<div class="sum-retailer"><div class="sum-rh">🏪 ${esc(g.name)}</div><div class="sum-rb">
         <table style="width:100%;border-collapse:collapse;font-size:.86rem;"><thead><tr><th style="text-align:left;padding:4px 8px;color:var(--muted);font-size:.73rem;text-transform:uppercase;">Product</th><th style="padding:4px 8px;color:var(--muted);font-size:.73rem;text-transform:uppercase;">Total Qty</th></tr></thead>
         <tbody>${Object.entries(prods).map(([p,q])=>`<tr><td style="padding:4px 8px;">${esc(p)}</td><td style="padding:4px 8px;text-align:center;font-weight:700;">${q}</td></tr>`).join('')}</tbody></table>
@@ -3032,11 +3044,11 @@ function renderRetailerHome() {
     const avgOrder=myOrders.length?(total/myOrders.length):0;
     // Large recent order alert: any single order with 40+ units placed in last 7 days
     const sevenDaysAgo=new Date(); sevenDaysAgo.setDate(sevenDaysAgo.getDate()-7);
-    const bigRecent=myOrders.filter(o=>{if(!o.date||new Date(o.date+'T12:00:00')<sevenDaysAgo)return false;return o.products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0)>=40;});
+    const bigRecent=myOrders.filter(o=>{if(!o.date||new Date(o.date+'T12:00:00')<sevenDaysAgo)return false;return o.products.filter(p=>!isFeeItem(p)).reduce((s,p)=>s+(p.qty||0),0)>=40;});
     // Most recent order info
     const sorted=[...myOrders].sort((a,b)=>new Date(b.date)-new Date(a.date));
     const lastOrder=sorted[0];
-    const lastOrderUnits=lastOrder?lastOrder.products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0):0;
+    const lastOrderUnits=lastOrder?lastOrder.products.filter(p=>!isFeeItem(p)).reduce((s,p)=>s+(p.qty||0),0):0;
     stats.innerHTML=`
       <div class="stat-card"><div class="si"></div><div class="sl">Total Orders</div><div class="sv">${myOrders.length||' - '}</div></div>
       <div class="stat-card"><div class="si">💰</div><div class="sl">Lifetime Value</div><div class="sv">${fmtCur(total)}</div></div>
@@ -3046,7 +3058,7 @@ function renderRetailerHome() {
       ${lastOrderUnits>0?`<div class="stat-card"><div class="si">🍪</div><div class="sl">Last Order Units</div><div class="sv">${lastOrderUnits}</div></div>`:''}`;
     // Big order alert banner
     if(bigRecent.length>0){
-      const bigUnits=bigRecent[0].products.filter(p=>p.product!=='Delivery').reduce((s,p)=>s+(p.qty||0),0);
+      const bigUnits=bigRecent[0].products.filter(p=>!isFeeItem(p)).reduce((s,p)=>s+(p.qty||0),0);
       const alertEl=document.getElementById('r-big-order-alert');
       if(alertEl) alertEl.innerHTML=`<div style="background:var(--brown-dk);color:var(--cream);border-radius:4px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:12px;"><span style="font-size:1.5rem;">🎉</span><div><strong>Your latest order of ${bigUnits} units has been received!</strong><br><span style="font-size:.83rem;opacity:.85;">Thank you - we're on it. You'll hear from us within 24 hours.</span></div></div>`;
     }
@@ -3060,7 +3072,7 @@ function renderRetailerHome() {
     const recentOrders=db.orders.filter(o=>o.date&&!isNaN(new Date(o.date+'T12:00:00'))&&new Date(o.date+'T12:00:00')>=cutoff60);
     // Product popularity (anonymized)
     const prodQty={};
-    recentOrders.forEach(o=>o.products.forEach(p=>{if(p.qty>0&&p.product!=='Delivery')prodQty[p.product]=(prodQty[p.product]||0)+p.qty;}));
+    recentOrders.forEach(o=>o.products.forEach(p=>{if(p.qty>0&&!isFeeItem(p))prodQty[p.product]=(prodQty[p.product]||0)+p.qty;}));
     const topProds=Object.entries(prodQty).sort((a,b)=>b[1]-a[1]).slice(0,3);
     // Monthly ordering partners this month
     const thisMonthPartners=new Set(db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();}).map(o=>o.retailerId)).size;
@@ -3108,7 +3120,7 @@ function renderRetailerOrders() {
     <td><strong>${invNum(o.invoiceNum)}</strong></td>
     <td>${fmtDate(o.date)}</td>
     <td>${o.delivery?fmtDate(o.delivery):' - '}</td>
-    <td>${o.products.filter(p=>p.product!=='Delivery').length} item${o.products.filter(p=>p.product!=='Delivery').length!==1?'s':''}</td>
+    <td>${o.products.filter(p=>!isFeeItem(p)).length} item${o.products.filter(p=>!isFeeItem(p)).length!==1?'s':''}</td>
     <td><strong>${fmtCur(o.total)}</strong></td>
     <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
     <td>
@@ -3120,7 +3132,7 @@ function renderRetailerOrders() {
 }
 function retailerReorder(orderId) {
   const o=db.orders.find(x=>x.id===orderId);if(!o)return;
-  const productItems=o.products.filter(p=>p.product!=='Delivery');
+  const productItems=o.products.filter(p=>!isFeeItem(p));
   if(!productItems.length){toast('⚠️ No products found in that order.');return;}
   // Switch to new order tab and pre-fill the product rows
   showSection('r-new-order');
@@ -3271,7 +3283,7 @@ function generateBakeList() {
   const totals={};
   activeOrders.forEach(o=>{
     o.products.forEach(p=>{
-      if(!p.product||p.product==='Delivery'||!p.qty) return;
+      if(!p.product||isFeeItem(p)||!p.qty) return;
       totals[p.product]=(totals[p.product]||0)+Number(p.qty);
     });
   });
@@ -3294,7 +3306,7 @@ function generateBakeList() {
 
   // Build order-by-order breakdown
   const orderRows=activeOrders.map(o=>{
-    const items=o.products.filter(p=>p.product&&p.product!=='Delivery'&&p.qty>0);
+    const items=o.products.filter(p=>p.product&&!isFeeItem(p)&&p.qty>0);
     return `<div style="font-size:.78rem;color:var(--muted);padding:3px 0 3px 12px;border-left:2px solid var(--tan);">
       <strong style="color:var(--brown-dk);">${invNum(o.invoiceNum)}</strong> · ${esc(o.retailerName)} · <span class="badge ${sBadge(o.status)}">${o.status}</span>
      - ${items.map(p=>`${p.qty}× ${esc(getProductDisplayName(p.product))}`).join(', ')}
@@ -3331,8 +3343,8 @@ function generateBakeList() {
             </div>
             <div style="padding:10px 14px;display:flex;flex-direction:column;gap:6px;">
               ${orders.map(o=>{
-                const items=o.products.filter(p=>p.product&&p.product!=='Delivery'&&p.qty>0);
-                const hasDelivery=o.products.some(p=>p.product==='Delivery');
+                const items=o.products.filter(p=>p.product&&!isFeeItem(p)&&p.qty>0);
+                const hasDelivery=o.products.some(p=>isFeeItem(p));
                 return `<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 10px;background:var(--cream);border-radius:8px;">
                   <div style="flex:1;">
                     <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
@@ -3567,7 +3579,7 @@ function refreshAnalytics() {
   // Products sold - with distinct colors per product
   const PROD_COLORS=['#9B4F1E','#C8A870','#6B3A1F','#A0623A','#e03318','#3D6B3A','#3A5A6B','#6B3A5A','#5A6B3A'];
   const byProd={};
-  db.orders.forEach(o=>o.products.forEach(p=>{if(p.qty>0&&p.product!=='Delivery')byProd[p.product]=(byProd[p.product]||0)+p.qty;}));
+  db.orders.forEach(o=>o.products.forEach(p=>{if(p.qty>0&&!isFeeItem(p))byProd[p.product]=(byProd[p.product]||0)+p.qty;}));
   // Goldbelly boxes bleed into product unit totals as their actual contents
   const GB_COMPONENTS={
     'grandma-jeanne-sampler':{'CC Mandelbites':1,'Almond':1,'Confetti Mandelbites':1,'Gluten-Free Chocolate-Chip':1,'Two Pack Chocolate Chip':2},
@@ -3670,7 +3682,7 @@ function refreshAnalytics() {
     db.orders.forEach(o=>{
       if(!o.date)return;const d=new Date(o.date+'T12:00:00');if(isNaN(d))return;
       const target=d.getFullYear()===curY?byProdCur:d.getFullYear()===prvY?byProdPrv:null;
-      if(target)o.products.forEach(p=>{if(p.qty>0&&p.product!=='Delivery')target[p.product]=(target[p.product]||0)+p.qty;});
+      if(target)o.products.forEach(p=>{if(p.qty>0&&!isFeeItem(p))target[p.product]=(target[p.product]||0)+p.qty;});
     });
     // Goldbelly boxes count here too, decomposed into their contents, so this
     // panel uses the same accounting as Products Sold (all time, both channels)
@@ -3718,7 +3730,7 @@ function refreshAnalytics() {
       const yData=years.map(y=>{
         const yOrds=db.orders.filter(o=>{if(!o.date)return false;const d=new Date(o.date+'T12:00:00');return !isNaN(d)&&d.getFullYear()===y;});
         const rev=yOrds.reduce((s,o)=>s+(o.total||0),0);
-        const units=yOrds.reduce((s,o)=>s+o.products.filter(p=>p.product!=='Delivery').reduce((ps,p)=>ps+(p.qty||0),0),0);
+        const units=yOrds.reduce((s,o)=>s+o.products.filter(p=>!isFeeItem(p)).reduce((ps,p)=>ps+(p.qty||0),0),0);
         const partners=new Set(yOrds.map(o=>o.retailerId)).size;
         const yF=new Date(y,0,1), yT=new Date(y,11,31,23,59);
         const gb=gbRange(yF,yT), web=webRange(yF,yT);
@@ -3738,8 +3750,8 @@ function refreshAnalytics() {
 //  whenever a retailer places an order through the portal.
 // =====================================================================
 function sendOrderNotification(retailerName, items, total, orderId, deliveryDate, notes) {
-  const productItems = items.filter(p => p.product && p.product !== 'Delivery');
-  const deliveryItem = items.find(p => p.product === 'Delivery');
+  const productItems = items.filter(p => p.product && !isFeeItem(p));
+  const deliveryItem = items.find(p => isFeeItem(p));
   const orderRows = productItems.map(p => ({
     name: String(getProductDisplayName(p.product)),
     units: String(p.qty),
@@ -4084,7 +4096,7 @@ function openCalDayModal(ds){
   document.getElementById('cal-day-title').textContent='📅 '+fmtDate(ds);
   const items=[];
   db.orders.filter(o=>o.delivery===ds&&o.status!=='Pending').forEach(o=>{
-    const what=o.products.filter(p=>p.product!=='Delivery').map(p=>`${p.qty}× ${getProductDisplayName(p.product)}`).join(', ');
+    const what=o.products.filter(p=>!isFeeItem(p)).map(p=>`${p.qty}× ${getProductDisplayName(p.product)}`).join(', ');
     items.push(`<div style="margin:3px 0 8px;">
       <div class="cal-chip c-order" style="cursor:pointer;white-space:normal;" onclick="closeModal('cal-day-modal');viewOrderDetail(${o.id})">📦 ${esc(o.retailerName)} - ${invNum(o.invoiceNum)} · ${fmtCur(o.total)} (${o.status})</div>
       ${what?`<div style="font-size:.74rem;color:var(--muted);padding:3px 2px 0 8px;line-height:1.4;">What's in it: ${esc(what)}</div>`:''}
@@ -4333,12 +4345,12 @@ function openEditOrder(id) {
   list.innerHTML='';
   let hasDelivery=false;
   (o.products||[]).forEach(p=>{
-    if(p.product==='Delivery') {
+    if(isFeeItem(p)) {
       hasDelivery=true;
       const div=document.createElement('div');div.className='prod-item delivery-row';
       div.dataset.delivery='1';
       div.style.cssText='background:var(--cream-dk);border-radius:8px;padding:4px 6px;display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;';
-      div.innerHTML=deliveryRowHtml(p.price,p.note||'','eo-add-delivery-btn','updateEOTotal()');
+      div.innerHTML=deliveryRowHtml(p.price,p.note||'','eo-add-delivery-btn','updateEOTotal()',p.product);
       list.appendChild(div);
     } else { addProdRow('eo-prod-list',p.product,p.qty,p.price); }
   });
@@ -4373,7 +4385,7 @@ async function _saveEditOrderInner() {
   if(!products.length){toast('Add at least one product.');return;}
   // Include delivery fee if present
   const delRow=document.querySelector('#eo-prod-list .delivery-row');
-  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;const delNote=(delRow.querySelector('.eo-del-note')?.value||'').trim();if(delPrice>0)products.push({product:'Delivery',qty:1,price:delPrice,note:delNote});}
+  if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;const delNote=(delRow.querySelector('.eo-del-note')?.value||'').trim();const delKind=FEE_KINDS[delRow.querySelector('.eo-del-kind')?.value]?delRow.querySelector('.eo-del-kind').value:'Delivery';if(delPrice>0)products.push({product:delKind,qty:1,price:delPrice,note:delNote});}
   const invNew=Number(document.getElementById('eo-inv').value)||0;
   const date=document.getElementById('eo-date').value;
   const delivery=document.getElementById('eo-delivery').value;
@@ -4427,7 +4439,7 @@ async function _saveEditOrderInner() {
     <div class="prod-list" id="eo-prod-list"></div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
       <button class="btn btn-outline btn-sm" onclick="addProdRow('eo-prod-list')">+ Add Product</button>
-      <button class="btn btn-outline btn-sm" id="eo-add-delivery-btn" onclick="addDeliveryFeeRow()" style="background:var(--cream-dk);">🚚 Add Delivery Fee</button>
+      <button class="btn btn-outline btn-sm" id="eo-add-delivery-btn" onclick="addDeliveryFeeRow()" style="background:var(--cream-dk);">🚚 Add Delivery / Shipping Fee</button>
     </div>
     <div style="background:var(--cream);border-radius:9px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
       <span style="font-weight:700;color:var(--brown-dk);">Order Total</span>
