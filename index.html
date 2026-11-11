@@ -621,9 +621,8 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
         <span>🚚 Add a delivery or shipping fee</span>
       </label>
       <div id="confirm-delivery-fee-fields" style="display:none;margin-top:8px;gap:8px;align-items:center;flex-wrap:wrap;">
-        <select id="confirm-delivery-fee-kind" onchange="updateConfirmTotal()" style="padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;background:var(--white);"><option value="Delivery">🚚 Delivery fee</option><option value="Shipping">📦 Shipping</option></select>
-        <span style="font-size:.84rem;color:var(--muted);">$</span><input type="number" id="confirm-delivery-fee-amt" step="0.01" min="0" value="10.00" style="width:90px;padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" oninput="updateConfirmTotal()"/>
-        <input type="text" id="confirm-delivery-fee-note" maxlength="60" placeholder="Note on invoice, e.g. 50% off" style="flex:1;min-width:150px;padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;"/>
+        <select id="confirm-delivery-fee-kind" onchange="syncFeeAmountInput(this,document.getElementById('confirm-delivery-fee-amt'));updateConfirmTotal()" style="padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;background:var(--white);"><option value="Delivery">🚚 Delivery fee ($10)</option><option value="Shipping">📦 Shipping (custom)</option></select>
+        <span style="font-size:.84rem;color:var(--muted);">$</span><input type="number" id="confirm-delivery-fee-amt" step="0.01" min="0" value="10.00" style="width:100px;padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" oninput="updateConfirmTotal()"/>
       </div>
       <div id="confirm-total-line" style="margin-top:6px;font-size:.84rem;color:var(--muted);"></div>
     </div>
@@ -1250,10 +1249,10 @@ const LFB_LOGO_SRC = document.querySelector('.login-mark-svg img')?.src || '';
 function deliveryRowHtml(amount,note,addBtnId,onInput,kind){
   const oi=onInput?` oninput="${onInput}"`:'';
   const k=FEE_KINDS[kind]?kind:'Delivery';
-  return `<select class="eo-del-kind" title="Fee type" style="font-weight:700;color:var(--brown);padding:5px 6px;border:1px solid var(--tan);border-radius:4px;background:var(--white);font-family:'Nunito',sans-serif;font-size:.84rem;">${Object.keys(FEE_KINDS).map(x=>`<option value="${x}"${x===k?' selected':''}>${FEE_KINDS[x].icon} ${FEE_KINDS[x].label}</option>`).join('')}</select>`+
+  return `<select class="eo-del-kind" title="Fee type" onchange="syncFeeAmountInput(this,this.parentElement.querySelector('.eo-del-price'));${onInput||''}" style="font-weight:700;color:var(--brown);padding:5px 6px;border:1px solid var(--tan);border-radius:4px;background:var(--white);font-family:'Nunito',sans-serif;font-size:.84rem;">${Object.keys(FEE_KINDS).map(x=>`<option value="${x}"${x===k?' selected':''}>${FEE_KINDS[x].icon} ${FEE_KINDS[x].label}${FEE_KINDS[x].fixed!=null?' ($'+Number(FEE_KINDS[x].fixed).toFixed(0)+')':' (custom)'}</option>`).join('')}</select>`+
     `<input type="number" value="1" readonly style="opacity:.6;background:var(--cream);cursor:default;width:44px;" class="eo-del-qty" title="Qty"/>`+
-    `<input type="number" value="${Number(amount||0).toFixed(2)}" step="0.01" min="0" style="width:84px;" class="eo-del-price" title="Fee amount"${oi}/>`+
-    `<input type="text" value="${esc(note||'')}" maxlength="60" placeholder="Note, e.g. 50% off" style="flex:1;min-width:90px;" class="eo-del-note" title="Shown next to the fee on the invoice"/>`+
+    `<input type="number" value="${Number(amount||0).toFixed(2)}" step="0.01" min="0" style="width:90px;${k==='Delivery'?'opacity:.7;':''}" class="eo-del-price" title="${k==='Delivery'?'Flat delivery fee':'Amount charged'}"${k==='Delivery'?' readonly':''}${oi}/>`+
+    `<span style="flex:1;"></span>`+
     `<button class="btn-icon" onclick="this.parentElement.remove();${onInput?onInput+';':''}document.getElementById('${addBtnId}').style.display=''" title="Remove delivery fee" style="flex-shrink:0;">✕</button>`;
 }
 function addNewOrderDeliveryFee(){
@@ -1294,14 +1293,21 @@ const PRODUCT_INCREMENT = {
 const DELIVERY_FEE_AMOUNT = 10;
 // Fee line kinds: a flat local delivery fee, or a shipping charge (carrier). Both are
 // stored as a qty-1 line item whose product is the kind name.
-const FEE_KINDS = { Delivery:{label:'Delivery fee',icon:'🚚'}, Shipping:{label:'Shipping',icon:'📦'} };
+const FEE_KINDS = { Delivery:{label:'Delivery fee',icon:'🚚',fixed:DELIVERY_FEE_AMOUNT}, Shipping:{label:'Shipping',icon:'📦'} };
+// Delivery is always the flat fee; Shipping is whatever the carrier charged.
+function syncFeeAmountInput(kindEl, amtEl){
+  if(!kindEl||!amtEl) return;
+  const k=FEE_KINDS[kindEl.value]||FEE_KINDS.Delivery;
+  if(k.fixed!=null){ amtEl.value=Number(k.fixed).toFixed(2); amtEl.readOnly=true; amtEl.style.opacity='.7'; }
+  else { amtEl.readOnly=false; amtEl.style.opacity=''; if(!(parseFloat(amtEl.value)>0)||Number(amtEl.value)===DELIVERY_FEE_AMOUNT) amtEl.value=''; amtEl.placeholder='Amount'; }
+}
 function isFeeItem(p){ return !!p && (p.product==='Delivery' || p.product==='Shipping'); }
 function feeKindOf(o){ const f=(o.products||[]).find(x=>isFeeItem(x)); return f && FEE_KINDS[f.product] ? f.product : 'Delivery'; }
 function getDeliveryFee(retailerId){return DELIVERY_FEE_AMOUNT;}
 function setDeliveryFee(retailerId,fee){}
 function orderDeliveryFee(o){return (o.products||[]).filter(p=>isFeeItem(p)).reduce((s,p)=>s+((Number(p.qty)||1)*(Number(p.price)||0)),0);}
 function orderDeliveryNote(o){const d=(o.products||[]).find(p=>isFeeItem(p));return d&&d.note?String(d.note):'';}
-function deliveryFeeLabel(o){const n=orderDeliveryNote(o);return FEE_KINDS[feeKindOf(o)].label+(n?' ('+n+')':'');}
+function deliveryFeeLabel(o){return FEE_KINDS[feeKindOf(o)].label;}
 function orderProductSubtotal(o){return (o.products||[]).filter(p=>!isFeeItem(p)).reduce((s,p)=>s+((Number(p.qty)||0)*(Number(p.price)||0)),0);}
 // Delivery fee line shown on order detail + invoice tables (4 columns)
 function deliveryFeeRowHtml(o,cellStyle){
@@ -2425,10 +2431,10 @@ function openConfirmOrderModal() {
   if(feeBox) feeBox.checked=curFee>0;
   const feeAmt=document.getElementById('confirm-delivery-fee-amt');
   if(feeAmt) feeAmt.value=(curFee>0?curFee:DELIVERY_FEE_AMOUNT).toFixed(2);
-  const feeNote=document.getElementById('confirm-delivery-fee-note');
-  if(feeNote) feeNote.value=orderDeliveryNote(o);
   const feeKind=document.getElementById('confirm-delivery-fee-kind');
   if(feeKind) feeKind.value=feeKindOf(o);
+  if(feeKind&&feeKind.value==='Delivery') syncFeeAmountInput(feeKind,feeAmt);
+  else if(feeAmt){ feeAmt.readOnly=false; feeAmt.style.opacity=''; }
   updateConfirmTotal();
   // Pre-fill email from retailer profile
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
@@ -2452,7 +2458,8 @@ function updateConfirmTotal() {
   const line=document.getElementById('confirm-total-line'); if(!o||!line) return;
   const on=!!document.getElementById('confirm-delivery-fee')?.checked;
   const fields=document.getElementById('confirm-delivery-fee-fields'); if(fields) fields.style.display=on?'flex':'none';
-  const fee=on?Math.max(0,parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0):0;
+  const kSel=document.getElementById('confirm-delivery-fee-kind'); const kDef=FEE_KINDS[kSel?.value]||FEE_KINDS.Delivery;
+  const fee=on?(kDef.fixed!=null?kDef.fixed:Math.max(0,parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0)):0;
   const sub=orderProductSubtotal(o);
   const kindSel=document.getElementById('confirm-delivery-fee-kind'); const kindLabel=(FEE_KINDS[kindSel?.value]||FEE_KINDS.Delivery).label.toLowerCase();
   line.innerHTML=on
@@ -2463,9 +2470,9 @@ function updateConfirmTotal() {
 // stored total and shows on the invoice. Only touches the Delivery row; product
 // rows are left alone.
 async function applyDeliveryFee(o,wantFee,feeAmount,feeNote,feeKind) {
-  const amt=wantFee?Math.max(0,Number(feeAmount)||0):0;
-  const note=wantFee?String(feeNote||'').trim().slice(0,60):'';
   const kind=FEE_KINDS[feeKind]?feeKind:'Delivery';
+  const amt=wantFee?(FEE_KINDS[kind].fixed!=null?FEE_KINDS[kind].fixed:Math.max(0,Number(feeAmount)||0)):0;
+  const note='';
   const hasFee=orderDeliveryFee(o)>0;
   if(!wantFee&&!hasFee) return null;
   if(wantFee&&hasFee&&Math.abs(orderDeliveryFee(o)-amt)<0.005&&orderDeliveryNote(o)===note&&feeKindOf(o)===kind) return null;
@@ -2492,10 +2499,11 @@ async function confirmOrder() {
   const notes=document.getElementById('confirm-notes').value.trim();
   const wantFee=!!document.getElementById('confirm-delivery-fee')?.checked;
   const feeAmount=parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0;
-  const feeNote=document.getElementById('confirm-delivery-fee-note')?.value||'';
+  const feeNote='';
   const feeKind=document.getElementById('confirm-delivery-fee-kind')?.value||'Delivery';
   const btn=document.querySelector('#confirm-order-modal .btn-primary');
   if(btn){btn.textContent='Sending…';btn.disabled=true;}
+  if(wantFee&&feeKind==='Shipping'&&!(feeAmount>0)){ if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;} toast('Enter the shipping amount.'); return; }
   // Fee on/off first, so the stored total and the email agree
   const feeErr=await applyDeliveryFee(o,wantFee,feeAmount,feeNote,feeKind);
   if(feeErr){if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}toast('Could not update the delivery fee: '+feeErr);return;}
