@@ -611,6 +611,11 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <p style="margin:0 0 14px;color:var(--muted);font-size:.9rem;">Review the delivery date and add any notes before sending the confirmation email to the retailer.</p>
     <div class="form-row">
       <div class="fg">
+        <label>Invoice #</label>
+        <input type="number" id="confirm-invoice-num" min="1"/>
+        <span id="confirm-invoice-hint" style="font-size:.74rem;color:var(--muted);"></span>
+      </div>
+      <div class="fg">
         <label>Confirmed Delivery Date</label>
         <input type="date" id="confirm-delivery-date"/>
       </div>
@@ -663,6 +668,10 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <div class="form-row">
       <div class="fg"><label>Portal PIN (4-8 chars)</label><input type="text" id="er-pin" maxlength="8" placeholder="Unique login PIN"/></div>
       <div class="fg"><label>Status</label><select id="er-status"><option>Active</option><option>Inactive</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label>New Packaging Since <span style="font-weight:400;color:var(--muted);">(blank = not converted yet)</span></label><input type="date" id="er-pkg-date"/></div>
+      <div class="fg"></div>
     </div>
     <div class="form-row">
       <div class="fg"><label>Invoice "Bill To" Name <span style="font-weight:400;color:var(--muted);">(blank = business name)</span></label><input type="text" id="er-billing-name" placeholder="e.g. Le Meridien Denver Downtown 3200"/></div>
@@ -1051,6 +1060,7 @@ async function loadFromSupabase() {
             restockGroup:r.restock_group||'A',
             joined:r.joined_date||'',priceOverrides:r.price_overrides||undefined,
             billingName:r.billing_name||'',billingAddress:r.billing_address||'',
+            pkgConvertedOn:r.packaging_converted_on||'',
             deliveryFee:getDeliveryFee(r.id)};
   });
   // Build items-by-order map if we used the fallback path
@@ -1593,9 +1603,9 @@ function showSection(name) {
   window.scrollTo({top:0,behavior:'instant'});
   if(name==='dashboard') refreshDashboard();
   if(name==='calendar') renderCalendar();
-  if(name==='analytics') refreshAnalytics();
+  if(name==='analytics') { refreshAnalytics(); renderPackagingConversion(); }
   if(name==='retailers') renderRetailers();
-  if(name==='orders'){renderOrders();fillRetailerSelects();}
+  if(name==='orders'){renderOrders();fillRetailerSelects();renderInvoiceTracker();}
   if(name==='auto-orders'){renderAutoOrders();fillRetailerSelects();}
   if(name==='bake'){renderBakeTab();}
   if(name==='summary') fillRetailerSelects();
@@ -1695,6 +1705,10 @@ function buildAdminContent() {
       <div class="panel-title">🔄 Product Movement: Current vs Prior Year</div>
       <div id="anal-prod-yoy"></div>
     </div>
+    <div class="panel" style="grid-column:span 2;">
+      <div class="panel-title">📦 New Packaging: Before vs After</div>
+      <div id="anal-pkg"></div>
+    </div>
   </div>
   <!-- Yearly Breakdown - full width -->
   <div class="panel" style="margin-top:18px;">
@@ -1742,6 +1756,7 @@ function buildAdminContent() {
 <!-- ORDERS -->
 <section class="section" id="sec-orders">
   <h2 class="page-h">Orders</h2><p class="page-sub">Create and manage orders with invoice tracking.</p>
+  <div id="invoice-tracker" style="display:flex;gap:8px 22px;flex-wrap:wrap;align-items:center;background:var(--white);border:1px solid var(--tan);border-left:4px solid var(--red);border-radius:4px;padding:10px 16px;margin-bottom:18px;font-size:.9rem;"></div>
   <div class="panel">
     <div class="panel-title">➕ Create New Order</div>
     <div class="form-row">
@@ -2208,7 +2223,7 @@ function renderRetailers() {
   if(!db.retailers.length){tbody.innerHTML='<tr><td colspan="9" class="empty-row">No partners yet.</td></tr>';return;}
   const list=sortedRetailers();
   tbody.innerHTML=list.map(r=>`<tr>
-    <td><strong>${esc(r.name)}</strong></td>
+    <td><strong>${esc(r.name)}</strong>${r.pkgConvertedOn?` <span class="badge b-confirmed" title="New packaging since ${fmtDate(r.pkgConvertedOn)}" style="font-size:.62rem;">New pkg</span>`:''}</td>
     <td>${esc(r.contact||' - ')}</td>
     <td>${r.email?`<a href="mailto:${esc(r.email)}" style="color:var(--brown)">${esc(r.email)}</a>`:' - '}</td>
     <td>${esc(r.phone||' - ')}</td>
@@ -2229,6 +2244,7 @@ function editRetailer(id) {
   ['name','contact','email','phone','day','notes','pin','status'].forEach(f=>{ const el=document.getElementById('er-'+f); if(el) el.value=r[f]||''; });
   const bnEl=document.getElementById('er-billing-name'); if(bnEl) bnEl.value=r.billingName||'';
   const baEl=document.getElementById('er-billing-address'); if(baEl) baEl.value=r.billingAddress||'';
+  const pkEl=document.getElementById('er-pkg-date'); if(pkEl) pkEl.value=r.pkgConvertedOn||'';
   const eeEl=document.getElementById('er-email-enrollment');
   if(eeEl) eeEl.value=r.emailEnrollment||"New - Don't Send Yet";
   const rgEl=document.getElementById('er-restock-group');
@@ -2248,7 +2264,8 @@ async function saveRetailerEdit() {
     email_enrollment:document.getElementById('er-email-enrollment').value,
     restock_group:document.getElementById('er-restock-group').value,
     billing_name:document.getElementById('er-billing-name').value.trim()||null,
-    billing_address:document.getElementById('er-billing-address').value.trim()||null};
+    billing_address:document.getElementById('er-billing-address').value.trim()||null,
+    packaging_converted_on:document.getElementById('er-pkg-date').value||null};
   const mpVal=parseFloat(document.getElementById('er-minis-price').value);
   if(!isNaN(mpVal)&&mpVal>0) updates.price_overrides={...(r.priceOverrides||{}),Minis:mpVal};
   const {error}=await sbClient.from('retailers').update(updates).eq('id',id);
@@ -2258,6 +2275,7 @@ async function saveRetailerEdit() {
     emailEnrollment:updates.email_enrollment,
     restockGroup:updates.restock_group,
     billingName:updates.billing_name||'',billingAddress:updates.billing_address||'',
+    pkgConvertedOn:updates.packaging_converted_on||'',
     priceOverrides:updates.price_overrides||r.priceOverrides});
   renderRetailers();fillRetailerSelects();closeModal('retailer-modal');toast('✅ Retailer updated!');
 }
@@ -2293,6 +2311,54 @@ async function deleteRetailer(id, name) {
 //  All order_items inserts must use Number(p.price)||0 for unit_price.
 // =====================================================================
 function invNum(n){return (n&&n>0)?'INV-'+String(n).padStart(4,'0'):'TBD';}
+// New packaging: for each converted partner, compare an equal window before and
+// after the switch (up to 90 days each side). Units and revenue are wholesale
+// products only (fees excluded), per week so different window lengths compare.
+function renderPackagingConversion(){
+  const el=document.getElementById('anal-pkg'); if(!el) return;
+  const DAY=864e5, MAXW=90, today=new Date(); today.setHours(12,0,0,0);
+  const conv=db.retailers.filter(r=>r.pkgConvertedOn);
+  const activeNot=db.retailers.filter(r=>!r.pkgConvertedOn&&r.status==='Active').length;
+  if(!conv.length){ el.innerHTML=`<p style="color:var(--muted);font-size:.88rem;">No partners marked as converted yet. Open a partner in <strong>Partners → Edit</strong> and set <strong>New Packaging Since</strong> to the date they got the new bags. ${activeNot} active partner${activeNot===1?'':'s'} to go.</p>`; return; }
+  const sumWin=(rid,from,to)=>{ let u=0,rev=0,n=0; db.orders.forEach(o=>{ if(o.retailerId!==rid||!o.date) return; const d=new Date(o.date+'T12:00:00'); if(d<from||d>=to) return; n++; o.products.forEach(p=>{ if(isFeeItem(p)) return; u+=Number(p.qty)||0; rev+=(Number(p.qty)||0)*(Number(p.price)||0); }); }); return {u,rev,n}; };
+  let T={wk:0};
+  const rows=conv.map(r=>{
+    const c=new Date(r.pkgConvertedOn+'T12:00:00');
+    const days=Math.min(MAXW, Math.floor((today-c)/DAY));
+    if(days<1) return {r,days:0};
+    const before=sumWin(r.id,new Date(c-days*DAY),c), after=sumWin(r.id,c,new Date(c.getTime()+days*DAY));
+    const wk=days/7; T.wk+=wk;
+    return {r,days,wk,before,after};
+  }).sort((a,b)=>String(a.r.pkgConvertedOn).localeCompare(String(b.r.pkgConvertedOn)));
+  const pct=(a,b)=>b>0?Math.round((a-b)/b*100):null;
+  const chg=v=>v===null?'<span style="color:var(--muted);">new</span>':`<strong style="color:${v>=0?'#2e7d4f':'var(--danger)'};">${v>=0?'▲':'▼'} ${Math.abs(v)}%</strong>`;
+  const per=(x,wk)=>wk>0?x/wk:0;
+  el.innerHTML=`
+    <p style="font-size:.8rem;color:var(--muted);margin:0 0 10px;">${conv.length} partner${conv.length===1?'':'s'} on new packaging · ${activeNot} active not yet. Each partner is compared over the same number of days before and after their switch (up to ${MAXW}); figures are per week, wholesale products only.</p>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Partner</th><th>Switched</th><th>Window</th><th>Units/wk before</th><th>Units/wk after</th><th>Change</th><th>Revenue/wk before</th><th>Revenue/wk after</th></tr></thead>
+      <tbody>${rows.map(x=>x.days<1?`<tr><td><strong>${esc(x.r.name)}</strong></td><td>${fmtDate(x.r.pkgConvertedOn)}</td><td colspan="6" style="color:var(--muted);">Starts counting after today</td></tr>`:`<tr>
+        <td><strong>${esc(x.r.name)}</strong></td><td>${fmtDate(x.r.pkgConvertedOn)}</td>
+        <td>${x.days} day${x.days===1?'':'s'}${x.days<28?' <span style="color:var(--muted);font-size:.74rem;">(early)</span>':''}</td>
+        <td>${per(x.before.u,x.wk).toFixed(1)}</td><td>${per(x.after.u,x.wk).toFixed(1)}</td>
+        <td>${chg(pct(x.after.u,x.before.u))}</td>
+        <td>${fmtCur(per(x.before.rev,x.wk))}</td><td>${fmtCur(per(x.after.rev,x.wk))}</td></tr>`).join('')}</tbody>
+      ${T.wk>0?(()=>{ const live=rows.filter(x=>x.days>0); const sb=live.reduce((a,x)=>a+per(x.before.u,x.wk),0), sa=live.reduce((a,x)=>a+per(x.after.u,x.wk),0), rb=live.reduce((a,x)=>a+per(x.before.rev,x.wk),0), ra=live.reduce((a,x)=>a+per(x.after.rev,x.wk),0);
+        return `<tfoot><tr style="font-weight:700;background:var(--cream-dk);"><td>All converted (combined)</td><td></td><td></td><td>${sb.toFixed(1)}</td><td>${sa.toFixed(1)}</td><td>${chg(pct(sa,sb))}</td><td>${fmtCur(rb)}</td><td>${fmtCur(ra)}</td></tr></tfoot>`; })():''}
+    </table></div>`;
+}
+// Highest invoice number in use, and the order it belongs to
+function lastInvoiceOrder(){ return db.orders.filter(o=>o.invoiceNum>0).sort((a,b)=>b.invoiceNum-a.invoiceNum||String(b.date).localeCompare(String(a.date)))[0]||null; }
+function nextInvoiceNum(){ const l=lastInvoiceOrder(); return Math.max(l?l.invoiceNum+1:101, 101); }
+function renderInvoiceTracker(){
+  const el=document.getElementById('invoice-tracker'); if(!el) return;
+  const l=lastInvoiceOrder(); const tbd=db.orders.filter(o=>!(o.invoiceNum>0)).length;
+  el.innerHTML=l
+    ? `<div><span style="color:var(--muted);">Last invoice used</span> <strong>${invNum(l.invoiceNum)}</strong> <span style="color:var(--muted);">· ${esc(l.retailerName)} · ${fmtDate(l.date)}</span></div>
+       <div><span style="color:var(--muted);">Next invoice</span> <strong style="color:var(--red);">${invNum(nextInvoiceNum())}</strong></div>
+       ${tbd?`<div style="color:var(--muted);">${tbd} order${tbd===1?'':'s'} still TBD</div>`:''}`
+    : '<div style="color:var(--muted);">No invoice numbers assigned yet.</div>';
+}
 function toggleCustomOrderFields(sel){
   const wrap=document.getElementById('o-custom-wrap'); if(!wrap) return;
   const name=sel.options[sel.selectedIndex]?.text||'';
@@ -2313,7 +2379,7 @@ async function submitNewOrder() {
       notes=notes?tag+' · '+notes:tag;
     }
   }
-  const products=getProdRows('o-prod-list');
+  const products=getProdRows('o-prod-list').filter(p=>!isFeeItem(p)); // fee row is added once, below
   if(!retailerId){toast('Select a retailer.');return;}
   if(!date){toast('Set an order date.');return;}
   if(!products.length){toast('Add at least one product.');return;}
@@ -2327,6 +2393,7 @@ async function submitNewOrder() {
   if(delRow){const delPrice=parseFloat(delRow.querySelector('.eo-del-price')?.value)||0;const delNote=(delRow.querySelector('.eo-del-note')?.value||'').trim();const delKind=FEE_KINDS[delRow.querySelector('.eo-del-kind')?.value]?delRow.querySelector('.eo-del-kind').value:'Delivery';if(delPrice>0)products.push({product:delKind,qty:1,price:delPrice,note:delNote});}
   const retailer=db.retailers.find(r=>r.id===retailerId)||{};
   const total=products.reduce((s,p)=>s+(p.qty*p.price),0);
+  db.nextInvoice=Math.max(db.nextInvoice,nextInvoiceNum());
   const inv=db.nextInvoice++;
   _writeActive = true;
   try {
@@ -2423,6 +2490,10 @@ function openConfirmOrderModal() {
   // Pre-fill delivery date if already set
   const dateInput=document.getElementById('confirm-delivery-date');
   if(dateInput) dateInput.value=o.delivery||'';
+  const invInput=document.getElementById('confirm-invoice-num');
+  if(invInput) invInput.value=o.invoiceNum>0?o.invoiceNum:nextInvoiceNum();
+  const invHint=document.getElementById('confirm-invoice-hint');
+  if(invHint){ const l=lastInvoiceOrder(); invHint.textContent=o.invoiceNum>0?'Already assigned':(l?`Next number. Last used: ${invNum(l.invoiceNum)}`:''); }
   const notesInput=document.getElementById('confirm-notes');
   if(notesInput) notesInput.value='';
   // Delivery fee toggle: on if the order already carries one, otherwise off
@@ -2509,6 +2580,8 @@ async function confirmOrder() {
   if(feeErr){if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}toast('Could not update the delivery fee: '+feeErr);return;}
   // Update status and delivery date in Supabase
   const updates={status:'Confirmed'};
+  const invEntered=Number(document.getElementById('confirm-invoice-num')?.value)||0;
+  if(invEntered>0) updates.invoice_num=invEntered;
   if(deliveryDate) updates.delivery_date=deliveryDate;
   if(notes) updates.notes=notes;
   const {error}=await sbClient.from('orders').update(updates).eq('id',o.id);
@@ -2516,8 +2589,9 @@ async function confirmOrder() {
   if(error){toast('Error confirming order: '+error.message);return;}
   if(deliveryDate) o.delivery=deliveryDate;
   if(notes) o.notes=notes;
+  if(invEntered>0){ o.invoiceNum=invEntered; if(invEntered>=db.nextInvoice) db.nextInvoice=invEntered+1; }
   o.status='Confirmed';
-  renderOrders();refreshDashboard();
+  renderOrders();refreshDashboard();renderInvoiceTracker();
   // Send confirmation email to retailer
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
   const emailInput=document.getElementById('confirm-email');
@@ -4343,7 +4417,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 function openEditOrder(id) {
   const o=db.orders.find(x=>x.id===id);if(!o)return;
   document.getElementById('eo-id').value=id;
-  document.getElementById('eo-inv').value=o.invoiceNum||0;
+  document.getElementById('eo-inv').value=o.invoiceNum>0?o.invoiceNum:nextInvoiceNum();
+  const eoHint=document.getElementById('eo-inv-hint'); if(eoHint){ const l=lastInvoiceOrder(); eoHint.textContent=o.invoiceNum>0?'':(l?`Filled with the next number. Last used: ${invNum(l.invoiceNum)}`:''); }
   document.getElementById('eo-retailer').value=o.retailerName;
   document.getElementById('eo-date').value=o.date||'';
   document.getElementById('eo-delivery').value=o.delivery||'';
@@ -4373,7 +4448,7 @@ function openEditOrder(id) {
   document.getElementById('edit-order-modal').classList.add('open');
 }
 function updateEOTotal() {
-  const rows=getProdRows('eo-prod-list');
+  const rows=getProdRows('eo-prod-list').filter(p=>!isFeeItem(p));
   let total=rows.reduce((s,p)=>s+(p.qty*p.price),0);
   // Include delivery fee row if present
   const delRow=document.querySelector('#eo-prod-list .delivery-row');
@@ -4389,7 +4464,7 @@ async function saveEditOrder() {
 async function _saveEditOrderInner() {
   const id=Number(document.getElementById('eo-id').value);
   const o=db.orders.find(x=>x.id===id);if(!o){toast('⚠️ Order not found.');return;}
-  const products=getProdRows('eo-prod-list');
+  const products=getProdRows('eo-prod-list').filter(p=>!isFeeItem(p)); // fee row is added once, below
   if(!products.length){toast('Add at least one product.');return;}
   // Include delivery fee if present
   const delRow=document.querySelector('#eo-prod-list .delivery-row');
@@ -4413,7 +4488,7 @@ async function _saveEditOrderInner() {
     // Update nextInvoice if we used a higher number
     if(invNew >= db.nextInvoice) db.nextInvoice = invNew + 1;
     await loadFromSupabase();
-    refreshDashboard(); renderOrders();
+    refreshDashboard(); renderOrders(); renderInvoiceTracker();
     closeModal('edit-order-modal');
     toast('✅ Order updated successfully!');
   } finally {
@@ -4428,7 +4503,7 @@ async function _saveEditOrderInner() {
     <h3 style="font-family:'Playfair Display',serif;color:var(--brown-dk);margin-bottom:18px;">Edit Order</h3>
     <input type="hidden" id="eo-id"/>
     <div class="form-row">
-      <div class="fg"><label>Invoice # <span style="font-size:.75rem;color:var(--muted);">(admin-assigned)</span></label><input type="number" id="eo-inv" min="0" style="width:100%;"/></div>
+      <div class="fg"><label>Invoice # <span style="font-size:.75rem;color:var(--muted);">(admin-assigned)</span></label><input type="number" id="eo-inv" min="0" style="width:100%;"/><span id="eo-inv-hint" style="font-size:.74rem;color:var(--muted);"></span></div>
       <div class="fg"><label>Retailer</label><input id="eo-retailer" readonly style="opacity:.6;"/></div>
     </div>
     <div class="form-row">
