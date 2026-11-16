@@ -1749,7 +1749,8 @@ function buildAdminContent() {
   </div>
   <div class="panel">
     <div class="panel-title">🏪 All Retailers</div>
-    <div class="tbl-wrap"><table><thead><tr><th>Business</th><th>Contact</th><th>Email</th><th>Phone</th><th>Delivery Day</th><th>PIN</th><th>Status</th><th title="Which alternating Tuesday this partner gets the restock nudge">Wk</th><th>Actions</th></tr></thead><tbody id="retailers-tbody"></tbody></table></div>
+    <div id="pkg-filter" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;font-size:.84rem;"></div>
+    <div class="tbl-wrap"><table><thead><tr><th>Business</th><th>Packaging</th><th>Contact</th><th>Email</th><th>Phone</th><th>Delivery Day</th><th>PIN</th><th>Status</th><th title="Which alternating Tuesday this partner gets the restock nudge">Wk</th><th>Actions</th></tr></thead><tbody id="retailers-tbody"></tbody></table></div>
   </div>
 </section>
 
@@ -2220,10 +2221,16 @@ function sortedRetailers() {
 }
 function renderRetailers() {
   const tbody=document.getElementById('retailers-tbody');if(!tbody)return;
-  if(!db.retailers.length){tbody.innerHTML='<tr><td colspan="9" class="empty-row">No partners yet.</td></tr>';return;}
-  const list=sortedRetailers();
+  if(!db.retailers.length){tbody.innerHTML='<tr><td colspan="10" class="empty-row">No partners yet.</td></tr>';return;}
+  const act=db.retailers.filter(r=>r.status==='Active'); const nNew=act.filter(r=>r.pkgConvertedOn).length;
+  const pf=document.getElementById('pkg-filter');
+  if(pf){ const chip=(k,label)=>`<button class="btn btn-sm ${window._pkgFilter===k?'btn-primary':'btn-outline'}" onclick="window._pkgFilter='${k}';renderRetailers()">${label}</button>`;
+    pf.innerHTML=`<strong style="color:var(--brown);">📦 New packaging:</strong> ${nNew} of ${act.length} active converted ${chip('all','All')} ${chip('new','Converted')} ${chip('old','Not yet')}`; }
+  const f=window._pkgFilter||'all';
+  const list=sortedRetailers().filter(r=>f==='all'||(f==='new'?!!r.pkgConvertedOn:!r.pkgConvertedOn));
   tbody.innerHTML=list.map(r=>`<tr>
-    <td><strong>${esc(r.name)}</strong>${r.pkgConvertedOn?` <span class="badge b-confirmed" title="New packaging since ${fmtDate(r.pkgConvertedOn)}" style="font-size:.62rem;">New pkg</span>`:''}</td>
+    <td><strong>${esc(r.name)}</strong></td>
+    <td>${r.pkgConvertedOn?`<span class="badge b-confirmed" title="Click to change">New · ${fmtDate(r.pkgConvertedOn)}</span>`:`<span class="badge b-inactive">Old bags</span> <button class="btn btn-outline btn-sm" style="padding:2px 8px;font-size:.72rem;" onclick="markPkgConverted(${r.id})">Mark converted</button>`}</td>
     <td>${esc(r.contact||' - ')}</td>
     <td>${r.email?`<a href="mailto:${esc(r.email)}" style="color:var(--brown)">${esc(r.email)}</a>`:' - '}</td>
     <td>${esc(r.phone||' - ')}</td>
@@ -2237,6 +2244,14 @@ function renderRetailers() {
       <button class="btn btn-sm" style="background:#c0392b;color:#fff;" onclick="deleteRetailer(${r.id},'${esc(r.name).replace(/'/g,"\\'")}')">Delete</button>
     </td>
   </tr>`).join('');
+}
+async function markPkgConverted(id){
+  const r=db.retailers.find(x=>x.id===id); if(!r) return;
+  const d=prompt(`Date ${r.name} switched to the new packaging (YYYY-MM-DD):`, todayStr()); if(!d) return;
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d)){ toast('Use the format YYYY-MM-DD.'); return; }
+  const {error}=await sbClient.from('retailers').update({packaging_converted_on:d}).eq('id',id);
+  if(error){ toast('Could not save: '+error.message); return; }
+  r.pkgConvertedOn=d; renderRetailers(); toast(`✅ ${r.name} marked as converted ${fmtDate(d)}.`);
 }
 function editRetailer(id) {
   const r=db.retailers.find(x=>x.id===id);if(!r)return;
