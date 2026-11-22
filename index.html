@@ -1199,8 +1199,8 @@ function setupRetailerRealtime(rid,pin) {
 }
 
 const PRODUCTS = ['CC Mandelbites','Confetti Mandelbites','Gluten-Free Chocolate-Chip','Almond',
-  'Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip',
-  'Two Pack Chocolate Chip'];
+  'Two Pack Chocolate Chip',
+  'Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip'];
 const PRODUCT_PRICES = {
   'CC Mandelbites':6.00,'Confetti Mandelbites':6.00,'Gluten-Free Chocolate-Chip':6.20,'Confetti':6.00,'Almond':6.40,
   'Indiv. Mandel - Chocolate Chip':1.25,'Indiv. Mandel - Almond':1.25,'Indiv. Mandel - Confetti':1.25,'Indiv. Mandel - GF Choc Chip':1.25,
@@ -1248,10 +1248,10 @@ const PRODUCT_IMAGES = {
   'Confetti Mandelbites':'images/confetti-mandelbites.jpg?v=3',
   'Gluten-Free Chocolate-Chip':'images/gf-choc-chip-mandelbites.jpg?v=3',
   'Almond':'images/almond-mandelbites.jpg?v=3',
+  'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg',
   'Indiv. Mandel - Chocolate Chip':'images/indiv-choc-chip-mandel-bread.jpg',
   'Indiv. Mandel - Almond':'images/indiv-almond-mandel-bread.jpg',
-  'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg',
-  'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg'
+  'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg'
 };
 // Load saved product images from localStorage (only override if saved value is non-empty)
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k]&&!/^images\//.test(saved[k]))PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
@@ -1344,8 +1344,8 @@ function deliveryFeeRowHtml(o,cellStyle){
 // Catalog display groupings
 const PRODUCT_SECTIONS = [
   {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Confetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
-  {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
-  {label:'Specialty Items',icon:'',products:['Two Pack Chocolate Chip']}
+  {label:'Specialty Items',icon:'',products:['Two Pack Chocolate Chip']},
+  {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']}
 ];
 function productOpts(sel='') {
   // A product that's no longer sold (e.g. Mandel Bread Rounds) stays selected on old orders
