@@ -1249,9 +1249,9 @@ const PRODUCT_IMAGES = {
   'Gluten-Free Chocolate-Chip':'images/gf-choc-chip-mandelbites.jpg?v=3',
   'Almond':'images/almond-mandelbites.jpg?v=3',
   'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg',
-  'Indiv. Mandel - Chocolate Chip':'images/indiv-choc-chip-mandel-bread.jpg',
-  'Indiv. Mandel - Almond':'images/indiv-almond-mandel-bread.jpg',
-  'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg'
+  'Indiv. Mandel - Chocolate Chip':'images/indiv-choc-chip-mandel-bread.jpg?v=2',
+  'Indiv. Mandel - Almond':'images/indiv-almond-mandel-bread.jpg?v=2',
+  'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg?v=2'
 };
 // Load saved product images from localStorage (only override if saved value is non-empty)
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k]&&!/^images\//.test(saved[k]))PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
