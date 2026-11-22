@@ -377,6 +377,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
   .bar-chart{height:100px;gap:2px;}
   .bar-label{font-size:.55rem !important;}
   .bar-val{font-size:.55rem !important;}
+  .mbars{gap:3px;}
 
   /* ── Catalog ── */
   .catalog-grid{grid-template-columns:1fr !important;}
@@ -423,6 +424,8 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 .bar { background:var(--red); border-radius:3px 3px 0 0; width:100%; min-height:3px; transition:height .3s; cursor:default; }
 .bar:hover { background:var(--red-dk); }
 .bar-label { font-size:.58rem; color:var(--muted); }
+.mbars { display:flex; flex-wrap:nowrap; align-items:flex-end; gap:8px; width:100%; flex-basis:100%; }
+.mbars .bar-wrap { min-width:0; align-self:stretch; }
 .bar-val { font-size:.52rem; color:var(--muted); text-align:center; white-space:nowrap; overflow:hidden; max-width:100%; }
 .top-ret-row { display:flex; align-items:center; gap:8px; margin-bottom:8px; }
 .top-ret-rank { font-size:.75rem; font-weight:700; color:var(--gold); width:18px; text-align:center; }
@@ -1197,7 +1200,7 @@ function setupRetailerRealtime(rid,pin) {
 
 const PRODUCTS = ['CC Mandelbites','Confetti Mandelbites','Gluten-Free Chocolate-Chip','Almond',
   'Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip',
-  'Two Pack Chocolate Chip','Mandel Bread Rounds'];
+  'Two Pack Chocolate Chip'];
 const PRODUCT_PRICES = {
   'CC Mandelbites':6.00,'Confetti Mandelbites':6.00,'Gluten-Free Chocolate-Chip':6.20,'Confetti':6.00,'Almond':6.40,
   'Indiv. Mandel - Chocolate Chip':1.25,'Indiv. Mandel - Almond':1.25,'Indiv. Mandel - Confetti':1.25,'Indiv. Mandel - GF Choc Chip':1.25,
@@ -1241,15 +1244,14 @@ const PRODUCT_DISPLAY_NAMES = {
 function getProductDisplayName(p){return PRODUCT_DISPLAY_NAMES[p]||p;}
 
 const PRODUCT_IMAGES = {
-  'CC Mandelbites':'images/cc-mandelbites.jpg?v=2',
-  'Confetti Mandelbites':'images/confetti-mandelbites.jpg?v=2',
-  'Gluten-Free Chocolate-Chip':'images/gf-choc-chip-mandelbites.jpg?v=2',
-  'Almond':'images/almond-mandelbites.jpg?v=2',
+  'CC Mandelbites':'images/cc-mandelbites.jpg?v=3',
+  'Confetti Mandelbites':'images/confetti-mandelbites.jpg?v=3',
+  'Gluten-Free Chocolate-Chip':'images/gf-choc-chip-mandelbites.jpg?v=3',
+  'Almond':'images/almond-mandelbites.jpg?v=3',
   'Indiv. Mandel - Chocolate Chip':'images/indiv-choc-chip-mandel-bread.jpg',
   'Indiv. Mandel - Almond':'images/indiv-almond-mandel-bread.jpg',
   'Indiv. Mandel - GF Choc Chip':'images/indiv-gf-choc-chip-mandel-bread.jpg',
-  'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg',
-  'Mandel Bread Rounds':'images/mandel-bread-rounds.jpg'
+  'Two Pack Chocolate Chip':'images/two-pack-choc-chip.jpg'
 };
 // Load saved product images from localStorage (only override if saved value is non-empty)
 (function(){try{const saved=JSON.parse(localStorage.getItem('lfb_product_images')||'{}');for(const k in saved){if(saved[k]&&!/^images\//.test(saved[k]))PRODUCT_IMAGES[k]=saved[k];}}catch(e){}})();
@@ -1343,10 +1345,12 @@ function deliveryFeeRowHtml(o,cellStyle){
 const PRODUCT_SECTIONS = [
   {label:'Mandelbites (Packaged)',icon:'',products:['CC Mandelbites','Confetti Mandelbites','Gluten-Free Chocolate-Chip','Almond']},
   {label:'Individual Mandel Bread',icon:'',products:['Indiv. Mandel - Chocolate Chip','Indiv. Mandel - Almond','Indiv. Mandel - GF Choc Chip']},
-  {label:'Specialty Items',icon:'',products:['Two Pack Chocolate Chip','Mandel Bread Rounds']}
+  {label:'Specialty Items',icon:'',products:['Two Pack Chocolate Chip']}
 ];
 function productOpts(sel='') {
-  return PRODUCT_SECTIONS.map(sec=>
+  // A product that's no longer sold (e.g. Mandel Bread Rounds) stays selected on old orders
+  const listed=PRODUCT_SECTIONS.some(sec=>sec.products.includes(sel));
+  return (sel&&!listed?`<option value="${esc(sel)}" selected>${esc(getProductDisplayName(sel))} (discontinued)</option>`:'')+PRODUCT_SECTIONS.map(sec=>
     `<optgroup label="${sec.label}">`+
     sec.products.map(p=>`<option value="${p}"${p===sel?' selected':''}>${getProductDisplayName(p)}</option>`).join('')+
     `</optgroup>`
@@ -3652,7 +3656,7 @@ function refreshAnalytics() {
   const maxM=Math.max(...monthTotals,1);
   const bars=document.getElementById('anal-monthly-bars'); if(bars){
     const fmtK=v=>v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v);
-    bars.innerHTML=months.map((mo,i)=>{
+    bars.innerHTML='<div class="mbars">'+months.map((mo,i)=>{
       const hBM=monthBM[i]>0?Math.max(3,Math.round((monthBM[i]/maxM)*130)):0;
       const hGB=monthGB[i]>0?Math.max(3,Math.round((monthGB[i]/maxM)*130)):0;
       const hWEB=monthWEB[i]>0?Math.max(3,Math.round((monthWEB[i]/maxM)*130)):0;
@@ -3668,12 +3672,12 @@ function refreshAnalytics() {
         <div style="width:100%;height:6px;border-radius:3px;overflow:hidden;display:flex;margin-top:2px;background:var(--cream-dk);" title="${monthTotals[i]>0?pBM+'% Brick & Mortar / '+pGB+'% Goldbelly / '+pWEB+'% Website':''}">
           ${monthTotals[i]>0?`<div style="width:${pBM}%;background:var(--red);"></div><div style="width:${pGB}%;background:#b8860b;"></div><div style="flex:1;background:#3A5A6B;"></div>`:''}
         </div>
-      </div>`;}).join('')+
-      `<div style="flex-basis:100%;display:flex;gap:16px;justify-content:center;font-size:.7rem;color:var(--muted);padding-top:8px;">
+      </div>`;}).join('')+'</div>'+
+      `<div style="flex-basis:100%;display:flex;flex-wrap:wrap;gap:6px 16px;justify-content:center;font-size:.7rem;color:var(--muted);padding-top:8px;white-space:nowrap;">
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--red);margin-right:4px;"></span>Brick & Mortar</span>
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#b8860b;margin-right:4px;"></span>Online (Goldbelly)</span>
         <span><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#3A5A6B;margin-right:4px;"></span>Website</span>
-        <span>Small bar under each month = that month's split (hover for exact %)</span>
+        <span style="white-space:normal;text-align:center;">Small bar under each month = that month's split (hover for exact %)</span>
       </div>`;
   }
 
@@ -4052,10 +4056,10 @@ const GB_PACKAGES = {
     summary:'Each box: 1 bag Chocolate-Chip, 1 Almond, 1 Confetti, 1 Gluten-Free CC + 2 Mandel Bread two-packs + thank-you card, red wrap',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/grandma-jeanne-sampler',
     contents:[
-      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/cc-mandelbites.jpg?v=2'},
-      {item:'Almond MandelBites - 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg?v=2'},
-      {item:'Confetti MandelBites - 8 oz bag', qty:1, img:'images/confetti-mandelbites.jpg?v=2'},
-      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg?v=2'},
+      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/cc-mandelbites.jpg?v=3'},
+      {item:'Almond MandelBites - 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg?v=3'},
+      {item:'Confetti MandelBites - 8 oz bag', qty:1, img:'images/confetti-mandelbites.jpg?v=3'},
+      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg?v=3'},
       {item:'Choc-Chip Mandel Bread Two-Pack - 2 oz', qty:2, img:'images/two-pack-choc-chip.jpg'},
       {item:'Thank You card + red wrap & Grandma sticker', qty:1}
     ]},
@@ -4063,9 +4067,9 @@ const GB_PACKAGES = {
     summary:'Each box: 2 bags Chocolate-Chip, 1 Almond, 1 Gluten-Free CC + thank-you card, navy & white wrap',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/the-shabbat-mandelbites-box',
     contents:[
-      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg?v=2'},
-      {item:'Almond MandelBites - 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg?v=2'},
-      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg?v=2'},
+      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg?v=3'},
+      {item:'Almond MandelBites - 8 oz bag', qty:1, img:'images/almond-mandelbites.jpg?v=3'},
+      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:1, img:'images/gf-choc-chip-mandelbites.jpg?v=3'},
       {item:'Thank You card + navy & white wrap', qty:1}
     ]},
   'mandelbites-pick-your-mix-6-pack': {name:'"Pick Your Mix" 6-Pack', price:89.95, payout:61.00, serves:12,
@@ -4073,7 +4077,7 @@ const GB_PACKAGES = {
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/mandelbites-pick-your-mix-6-pack',
     note:"Customer picks the mix - check the Goldbelly order for which 6 bags. Combos: 6 CC · 6 GF · 3 CC+3 Confetti · 3 CC+3 Almond · 3 CC+3 GF · 3 Confetti+3 Almond · 2 CC+2 Almond+2 Confetti.",
     contents:[
-      {item:'MandelBites 8 oz bags - customer\'s choice of mix', qty:6, img:'images/cc-mandelbites.jpg?v=2'},
+      {item:'MandelBites 8 oz bags - customer\'s choice of mix', qty:6, img:'images/cc-mandelbites.jpg?v=3'},
       {item:'Thank You card + gift wrap', qty:1}
     ]},
   'treat-the-office': {name:'"Treat the Office" - 24 Pack', price:124.95, payout:85.00, serves:24,
@@ -4087,10 +4091,10 @@ const GB_PACKAGES = {
     summary:'Each box: 2 bags of EVERY flavor - 2 Chocolate-Chip, 2 Almond, 2 Confetti, 2 Gluten-Free CC (8 bags) + thank-you card',
     url:'https://www.goldbelly.com/restaurants/lazar-family-bakehouse/bakehouse-tour',
     contents:[
-      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg?v=2'},
-      {item:'Almond MandelBites - 8 oz bag', qty:2, img:'images/almond-mandelbites.jpg?v=2'},
-      {item:'Confetti MandelBites - 8 oz bag', qty:2, img:'images/confetti-mandelbites.jpg?v=2'},
-      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/gf-choc-chip-mandelbites.jpg?v=2'},
+      {item:'Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/cc-mandelbites.jpg?v=3'},
+      {item:'Almond MandelBites - 8 oz bag', qty:2, img:'images/almond-mandelbites.jpg?v=3'},
+      {item:'Confetti MandelBites - 8 oz bag', qty:2, img:'images/confetti-mandelbites.jpg?v=3'},
+      {item:'GF Chocolate-Chip MandelBites - 8 oz bag', qty:2, img:'images/gf-choc-chip-mandelbites.jpg?v=3'},
       {item:'Thank You card + red wrap & Grandma sticker', qty:1}
     ]}
 };
