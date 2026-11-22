@@ -3287,6 +3287,7 @@ async function retailerPlaceOrder() {
   if(error){toast('⚠️ Error placing order: '+error.message);db.nextInvoice--;return;}
   db.orders.unshift({id:data.order_id,invoiceNum:inv,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery:delivery||'',status:'Pending',notes:orderNotes,products,total,created:new Date().toISOString()});
   sendOrderNotification(r.name, products, total, data.order_id, delivery||null, notes);
+  sendOrderReceivedEmail(data.order_id);
   document.getElementById('ro-prod-list').innerHTML='';
   document.getElementById('ro-notes').value='';
   addProdRow('ro-prod-list','',1,'',true);
@@ -3331,6 +3332,7 @@ async function retailerPlaceFromAO(id) {
   if(error){toast('⚠️ Error placing order: '+error.message);db.nextInvoice--;return;}
   db.orders.unshift({id:data.order_id,invoiceNum:inv,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery:'',status:'Pending',notes,products:allItems,total});
   sendOrderNotification(r.name, allItems, total, data.order_id, todayStr(), notes);
+  sendOrderReceivedEmail(data.order_id);
   toast(`✅ Order ${invNum(inv)} placed!`);showSection('r-orders');
 }
 
@@ -3871,6 +3873,15 @@ function refreshAnalytics() {
 //  Sends an order notification to Jake + Victoria (ADMIN_NOTIFY_EMAILS)
 //  whenever a retailer places an order through the portal.
 // =====================================================================
+// "We received your order" email to the PARTNER (server-side, via the order-received
+// edge function + Resend). Only for orders a partner places themselves; the function
+// checks their PIN and sends at most once per order.
+function sendOrderReceivedEmail(orderId) {
+  if(!orderId || session?.type!=='retailer' || !session.retailer) return;
+  sbClient.functions.invoke('order-received',{body:{order_id:orderId,retailer_id:session.retailer.id,pin:session.pin}})
+    .then(({data,error})=>{ if(error) console.warn('[LFB] order-received email failed:',error); else console.log('[LFB] order-received email:',data); })
+    .catch(err=>console.warn('[LFB] order-received email failed:',err));
+}
 function sendOrderNotification(retailerName, items, total, orderId, deliveryDate, notes) {
   const productItems = items.filter(p => p.product && !isFeeItem(p));
   const deliveryItem = items.find(p => isFeeItem(p));
@@ -4007,9 +4018,10 @@ async function retailerPlaceCatalogOrder() {
   const total=allItems.reduce((s,p)=>s+(p.qty*p.price),0);
   db.orders.unshift({id:data.order_id,invoiceNum:0,retailerId:r.id,retailerName:r.name,date:todayStr(),delivery,status:'Pending',notes:notes||'Submitted via partner portal',products:allItems,total});
   sendOrderNotification(r.name, allItems, total, data.order_id, delivery, notes);
+  sendOrderReceivedEmail(data.order_id);
   resetCatalog();
   document.getElementById('ro-notes').value='';
-  toast(`✅ Order submitted! We'll confirm your invoice number within 24 hours.`);
+  toast(`✅ Order submitted! A copy is on its way to your email, and we'll confirm within 24 hours.`);
   showSection('r-orders');
 }
 
