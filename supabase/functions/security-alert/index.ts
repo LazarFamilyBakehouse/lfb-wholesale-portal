@@ -6,11 +6,13 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const ALERT_TO = (Deno.env.get("SECURITY_ALERT_TO") ?? "info@lazarfamilybakehouse.com").split(",").map(s => s.trim()).filter(Boolean);
+// Victoria is copied on every portal email
+if (!ALERT_TO.some(e => e.toLowerCase() === "victoria@lazarfamilybakehouse.com")) ALERT_TO.push("victoria@lazarfamilybakehouse.com");
 const FROM_EMAIL = Deno.env.get("DIGEST_FROM") ?? "orders@lazarfamilybakehouse.com";
 Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const rid = body.retailer_id ?? null;
-  const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+  const sb = createClient(Deno.env.get("SUPABASE_URL"), Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"));
   let name = "Unknown partner";
   if (rid) { const { data } = await sb.from("retailers").select("name").eq("id", rid).maybeSingle(); if (data && data.name) name = data.name; }
   const since = new Date(Date.now() - 15 * 60 * 1000).toISOString();
