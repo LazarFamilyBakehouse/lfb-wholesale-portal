@@ -6,6 +6,9 @@
 //                     Friendly re-engagement check-in, no discount.
 //   ?dryrun=true    → Routes ALL emails to dryrun_email (default: info@lazarfamilybakehouse.com).
 //                     No partners receive emails. Subject prefixed with [DRY RUN].
+//   ?group=A|B    → limit the active-track nudge to one restock group (used by the
+//                   weekly alternating cron with force=true so half the partners get
+//                   nudged each week instead of everyone at once).
 // Triggered by pg_cron or manual via admin portal buttons.
 
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
@@ -16,7 +19,8 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const FROM_EMAIL = "Lazar Family Bakehouse <orders@lazarfamilybakehouse.com>";
 const REPLY_TO = "info@lazarfamilybakehouse.com";
-const BCC_EMAIL = "info@lazarfamilybakehouse.com";   // you get a copy of every send
+const BCC_EMAIL = "info@lazarfamilybakehouse.com";
+const TEAM_EMAILS = ["info@lazarfamilybakehouse.com", "victoria@lazarfamilybakehouse.com"]; // Jake + Victoria get a copy of every send   // you get a copy of every send
 const PORTAL_URL = "https://partners.lazarfamilybakehouse.com";
 const LOGO_URL = "https://partners.lazarfamilybakehouse.com/images/lfb-logo-transparent.png";
 
@@ -42,6 +46,8 @@ serve(async (req: Request) => {
   try {
     // Determine track from query string or body (default: active)
     const url = new URL(req.url);
+    // Restock group (A/B): weekly alternation so partners are not all nudged at once
+    const group = (url.searchParams.get("group") || "").trim().toUpperCase();
     let track = url.searchParams.get("track") || "active";
     const force = url.searchParams.get("force") === "true";
     const dryrun = url.searchParams.get("dryrun") === "true";
@@ -92,10 +98,10 @@ serve(async (req: Request) => {
     //    email_enrollment drives targeting:
     //      'Active'              → biweekly restock nudge
     //      'Previously Ordered'  → monthly "We Miss You" check-in
-    //      'New - Don't Send Yet'→ never emailed by the cron
+    //      'New - Don\'t Send Yet'→ never emailed by the cron
     const { data: retailers, error: retErr } = await supabase
       .from("retailers")
-      .select("id, name, contact, email, created_at, pin, email_enrollment")
+      .select("id, name, contact, email, created_at, pin, email_enrollment, restock_group")
       .eq("status", "Active")
       .neq("email", "");
     if (retErr) throw retErr;
@@ -107,7 +113,7 @@ serve(async (req: Request) => {
     //    (still needed for the "last order date" line in the inactive email body).
     const { data: allOrders, error: ordErr } = await supabase
       .from("orders")
-      .select("retailer_id, order_date");
+      .select("retailer_id, order_date, order_items(product)");
     if (ordErr) throw ordErr;
 
     // retailer_id -> most recent order_date (YYYY-MM-DD)
@@ -117,6 +123,30 @@ serve(async (req: Request) => {
       const prev = lastOrderMap.get(o.retailer_id);
       if (!prev || o.order_date > prev) lastOrderMap.set(o.retailer_id, o.order_date);
     }
+
+    // Product families each partner actually buys (personalizes the nudge copy).
+    function famFor(p) {
+      const n = (p || "").toLowerCase();
+      if (n.includes("rounds")) return null;
+      if (n.includes("minis")) return "Minis";
+      if (n.includes("two pack") || n.includes("two-pack")) return "Two-Packs";
+      if (n.includes("mandelbite")) return "MandelBites";
+      if (n.includes("mandel")) return "Mandel Bread";
+      if (n.includes("chocolate") || n.includes("confetti") || n.includes("funfetti") || n.includes("almond") || n.includes("gluten")) return "MandelBites";
+      return null;
+    }
+    const FAM_ORDER = ["MandelBites", "Mandel Bread", "Two-Packs", "Minis"];
+    const prodFams = new Map<number, string[]>();
+    for (const o of allOrders || []) {
+      for (const it of ((o as any).order_items || [])) {
+        const f = famFor(it.product);
+        if (!f) continue;
+        const arr = prodFams.get(o.retailer_id) || [];
+        if (!arr.includes(f)) { arr.push(f); prodFams.set(o.retailer_id, arr); }
+      }
+    }
+    for (const [k, arr] of prodFams) prodFams.set(k, FAM_ORDER.filter((f) => arr.includes(f)));
+
 
     const today = new Date();
     const daysBetween = (isoDate: string) => {
@@ -131,6 +161,7 @@ serve(async (req: Request) => {
       // Skip if they just ordered within the last RESTOCK_QUIET_DAYS (avoid nudging right after a restock).
       targets = retailers.filter((r: any) => {
         if (r.email_enrollment !== "Active") return false;
+        if (group && (r.restock_group || "A").toUpperCase() !== group) return false;
         const last = lastOrderMap.get(r.id);
         if (last && daysBetween(last) < RESTOCK_QUIET_DAYS) return false;
         return true;
@@ -154,7 +185,7 @@ serve(async (req: Request) => {
     const errors: string[] = [];
     const subject = track === "active"
       ? "Time to Restock? A Quick Check-In from Lazar Family Bakehouse"
-      : "We Miss You — A Note from Lazar Family Bakehouse";
+      : "We Miss You: A Note from Lazar Family Bakehouse";
 
     // CC overrides: retailer name -> emails that should be CC'd instead of TO
     const CC_OVERRIDES: Record<string, string[]> = {
@@ -166,15 +197,19 @@ serve(async (req: Request) => {
       const last = lastOrderMap.get(retailer.id) || null;
       const pin = retailer.pin || "";
       const html = track === "active"
-        ? buildActiveHtml(firstName, retailer.name, pin)
+        ? buildActiveHtml(firstName, retailer.name, pin, prodFams.get(retailer.id) || [])
         : buildInactiveHtml(firstName, retailer.name, last, pin);
 
       // Split emails into TO and CC based on overrides
       const allEmails = retailer.email.split(",").map((e: string) => e.trim()).filter(Boolean);
       const ccList = CC_OVERRIDES[retailer.name] || [];
       const ccLower = ccList.map((e: string) => e.toLowerCase());
-      const toEmails = allEmails.filter((e: string) => !ccLower.includes(e.toLowerCase()));
-      const ccEmails = allEmails.filter((e: string) => ccLower.includes(e.toLowerCase()));
+      let toEmails = allEmails.filter((e: string) => !ccLower.includes(e.toLowerCase()));
+      let ccEmails = allEmails.filter((e: string) => ccLower.includes(e.toLowerCase()));
+    // Safety net: if the CC override empties the To line (partner whose only
+    // contact is on the CC list, e.g. SkyMarket -> Brandon), promote CC to To
+    // so the send never silently fails.
+    if (toEmails.length === 0 && ccEmails.length > 0) { toEmails = ccEmails; ccEmails = []; }
 
       // In dryrun mode, redirect ALL recipients to the dryrun email
       // so real partners never get emailed during testing.
@@ -182,8 +217,8 @@ serve(async (req: Request) => {
         from: FROM_EMAIL,
         to: dryrun ? [dryrunEmail] : toEmails,
         reply_to: REPLY_TO,
-        bcc: dryrun ? [] : [BCC_EMAIL],
-        subject: dryrun ? `[DRY RUN — for ${retailer.name}] ${subject}` : subject,
+        bcc: dryrun ? [] : TEAM_EMAILS,
+        subject: dryrun ? `[DRY RUN - for ${retailer.name}] ${subject}` : subject,
         html,
       };
       if (!dryrun && ccEmails.length) emailPayload.cc = ccEmails;
@@ -210,7 +245,22 @@ serve(async (req: Request) => {
 
     console.log(`[LFB Reminder:${track}] Sent ${sent}/${targets.length}. Errors: ${errors.length}`);
 
-    return jsonResp({
+    // Alert Jake if any sends failed, so a miss can never hide silently again.
+  if (!dryrun && errors.length > 0) {
+    try {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + RESEND_API_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: FROM_EMAIL,
+          to: TEAM_EMAILS,
+          subject: "\u26a0\ufe0f Restock reminder: " + errors.length + " send" + (errors.length === 1 ? "" : "s") + " FAILED (" + track + " track)",
+          html: "<div style=\u0027font-family:Georgia,serif;max-width:600px;margin:0 auto;background:#fdf6ee;padding:24px;border-radius:12px;\u0027><h2 style=\u0027color:#c0392b;margin:0 0 8px;\u0027>Some reminder emails did not send</h2><p style=\u0027color:#2d1b0e;\u0027>Sent " + sent + " of " + targets.length + ". These failed:</p><ul style=\u0027color:#2d1b0e;\u0027>" + errors.map((x) => "<li>" + x + "</li>").join("") + "</ul><p style=\u0027color:#7a6a58;font-size:14px;\u0027>Usually a bad or missing email address on the partner record. Check the Retailers tab in the portal.</p></div>",
+        }),
+      });
+    } catch (_e) { /* the alert itself must never break the run */ }
+  }
+  return jsonResp({
       sent,
       track,
       dryrun: dryrun || undefined,
@@ -233,7 +283,11 @@ function jsonResp(data: any, status = 200) {
 }
 
 // ───────────────────────── ACTIVE (biweekly restock nudge) ─────────────────────────
-function buildActiveHtml(firstName: string, storeName: string, pin: string): string {
+function buildActiveHtml(firstName: string, storeName: string, pin: string, fams: string[] = []): string {
+  const MAINS = ["MandelBites", "Mandel Bread", "Two-Packs"];
+  const famsList = MAINS.concat(fams.filter((f) => !MAINS.includes(f)));
+  const prodNames = famsList.length > 1 ? famsList.slice(0, -1).join(", ") + " and " + famsList[famsList.length - 1] : famsList[0];
+  const prodLine = "Our " + prodNames + (famsList.length === 1 ? " moves" : " move") + " fast with your customers, and we\u0027d hate for you to run low.";
   return shell(`
     <h1 style="font-family:Georgia,'Playfair Display',serif;font-size:22px;color:#2d1b0e;margin:0;">
       Time to Restock?
@@ -242,8 +296,7 @@ function buildActiveHtml(firstName: string, storeName: string, pin: string): str
     <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">Hi ${firstName},</p>
     <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">
       We hope you're doing well! Just a friendly follow-up to see if
-      <strong>${storeName}</strong> needs a restock. Our Mandelbites, Mandel Bread,
-      Two-Packs, and Mandel Bread Rounds move fast with your customers, and we'd hate for you to run low.
+      <strong>${storeName}</strong> needs a restock. ${prodLine}
     </p>
     <p style="font-size:16px;line-height:1.7;margin:0 0 24px;">
       Placing a new order takes just a minute through your partner portal:
@@ -252,13 +305,12 @@ function buildActiveHtml(firstName: string, storeName: string, pin: string): str
     ${loginBox(storeName, pin)}
     <p style="font-size:14px;line-height:1.6;color:#5c4a3a;margin:0 0 8px;">As a reminder, here are our minimums:</p>
     <ul style="font-size:14px;line-height:1.8;color:#5c4a3a;margin:0 0 24px;padding-left:20px;">
-      <li>Mandelbites pouches — 8 units (increments of 8)</li>
-      <li>Two-Pack — 25 units (increments of 25)</li>
-      <li>Individual pieces — 40 units (increments of 40)</li>
-      <li>Mandel Bread Rounds — 40 units (increments of 40). Our classic mandel bread reimagined in cookie form.</li>
-    </ul>
+      <li>MandelBites pouches: 8 units (increments of 8)</li>
+      <li>Two-Pack: 25 units (increments of 25)</li>
+      <li>Individual pieces: 40 units (increments of 40)</li>
+      </ul>
     <p style="font-size:16px;line-height:1.7;margin:0;">
-      Thanks for being part of the Lazar Family Bakehouse family — we truly appreciate your partnership!
+      Thanks for being part of the Lazar Family Bakehouse family. We truly appreciate your partnership!
     </p>
   `);
 }
@@ -282,9 +334,7 @@ function buildInactiveHtml(firstName: string, storeName: string, lastOrderDate: 
     </p>
     ${lastLine}
     <p style="font-size:16px;line-height:1.7;margin:0 0 18px;">
-      Our Mandelbites come in four flavors: Chocolate Chip, Funfetti, Gluten-Free Chocolate Chip, and Almond.
-      We also have <strong>Mandel Bread Rounds</strong>, a great addition to any bakery display case that also
-      make for delicious ice cream sandwiches.
+      Our MandelBites come in four flavors: Chocolate-Chip, Confetti, Gluten-Free Chocolate-Chip, and Almond. We also make our Two-Pack Chocolate Chip, plus individual pieces of mandel bread in Chocolate Chip, Almond, and Gluten-Free Chocolate Chip.
     </p>
     <p style="font-size:16px;line-height:1.7;margin:0 0 24px;">
       If anything's changed on your side, like a different buyer, new delivery preferences,
