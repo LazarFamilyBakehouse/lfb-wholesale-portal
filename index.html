@@ -3888,9 +3888,11 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
   const orderRows = productItems.map(p => ({
     name: String(getProductDisplayName(p.product)),
     units: String(p.qty),
-    price: '$' + (Number(p.price)||0).toFixed(2)
+    price: '$' + (Number(p.price)||0).toFixed(2),
+    subtotal: '$' + ((Number(p.qty)||0)*(Number(p.price)||0)).toFixed(2)
   }));
-  const deliveryFee = 0;
+  // The actual delivery/shipping fee on this order (0 when there isn't one)
+  const deliveryFee = items.filter(p => isFeeItem(p)).reduce((s,p) => s + (Number(p.qty)||1)*(Number(p.price)||0), 0);
   const deliveryDisplay = deliveryDate || 'Not specified';
   const notesDisplay = notes || 'None';
   // Admin notification - tells YOU a new order needs review
@@ -3901,7 +3903,7 @@ function sendOrderNotification(retailerName, items, total, orderId, deliveryDate
     order_notes: notesDisplay,
     order_date: todayStr(),
     orders: orderRows,
-    cost: { shipping: '$0.00', tax: '$0.00', total: '$' + Number(total).toFixed(2) },
+    cost: { shipping: '$' + deliveryFee.toFixed(2), tax: '$0.00', total: '$' + Number(total).toFixed(2) },
     email: ADMIN_NOTIFY_EMAILS
   }).catch(err => console.warn('EmailJS admin notification failed:', err));
 }
