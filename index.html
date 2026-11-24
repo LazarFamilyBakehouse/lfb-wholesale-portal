@@ -640,6 +640,29 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
       <div id="confirm-total-line" style="margin-top:6px;font-size:.84rem;color:var(--muted);"></div>
     </div>
     <div class="fg" style="margin-bottom:12px;padding:10px 12px;background:#fbf3df;border:1px dashed var(--gold);border-radius:8px;margin-top:10px;"><label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;font-weight:700;color:var(--brown);"><input type="checkbox" id="confirm-foc" style="width:18px;height:18px;margin:0;" onchange="focToggle('confirm');updateConfirmTotal()"/><span>🎁 Free of charge <span style="font-weight:400;color:var(--muted);font-size:.82rem;">(free fill, sample, replacement…)</span></span></label><div id="confirm-foc-fields" style="display:none;margin-top:8px;gap:10px;align-items:center;flex-wrap:wrap;"><select id="confirm-foc-reason" style="padding:7px 8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;background:var(--white);"><option>Free fill</option><option>Sample</option><option>Replacement</option><option>Other</option></select><span style="font-size:.8rem;color:var(--muted);">Total becomes $0. Units still count for production; the dollar value is kept for reference.</span></div></div>
+    <div class="fg" style="margin-top:10px;padding:10px 12px;background:#efe8f8;border-radius:8px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;font-weight:700;color:var(--brown);">
+        <input type="checkbox" id="confirm-ship-on" style="width:18px;height:18px;margin:0;" onchange="confirmShipToggle()"/>
+        <span>📦 Ship it now <span style="font-weight:400;color:var(--muted);font-size:.82rem;">(confirm and mark shipped in one step)</span></span>
+      </label>
+      <div id="confirm-ship-fields" style="display:none;margin-top:10px;">
+        <div class="form-row">
+          <div class="fg" style="flex:2;">
+            <label>Tracking Number</label>
+            <input id="confirm-ship-tracking" placeholder="Paste the tracking number" autocomplete="off" oninput="confirmShipChanged()"/>
+          </div>
+          <div class="fg">
+            <label>Carrier</label>
+            <select id="confirm-ship-carrier" onchange="_confirmCarrierManual=true"><option>USPS</option><option>UPS</option><option>FedEx</option><option>Other</option></select>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin:8px 0 0;font-size:.86rem;font-weight:400;color:var(--brown);text-transform:none;letter-spacing:0;">
+          <input type="checkbox" id="confirm-ship-email" style="width:16px;height:16px;margin:0;" checked/>
+          <span>Also send the tracking email <span style="color:var(--muted);">(with the Track Your Package button)</span></span>
+        </label>
+        <div style="margin-top:6px;font-size:.78rem;color:var(--muted);line-height:1.35;">Ship date is today. No tracking number yet? Leave it blank and add it later with the 📦 button on the order.</div>
+      </div>
+    </div>
     <div class="fg" style="margin-top:10px;">
       <label>Partner Email <span style="color:var(--muted);font-weight:400;">(for confirmation email)</span></label>
       <input type="email" id="confirm-email" style="width:100%;padding:8px;border:1px solid var(--tan);border-radius:6px;font-family:inherit;font-size:.9rem;" placeholder="partner@example.com"/>
@@ -651,7 +674,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('confirm-order-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="confirmOrder()">✉️ Confirm & Send Email</button>
+      <button class="btn btn-primary" id="confirm-send-btn" onclick="confirmOrder()">✉️ Confirm & Send Email</button>
     </div>
   </div>
 </div>
@@ -2690,8 +2713,24 @@ function viewOrderDetail(id) {
   openModal('order-detail-modal');
 }
 function openInvoiceFromDetail(){closeModal('order-detail-modal');showInvoice(modalOrderId);}
+// "Ship it now" inside the Confirm window: confirm + mark shipped in one step
+let _confirmCarrierManual=false;
+function confirmBtnLabel(){return document.getElementById('confirm-ship-on')?.checked?'📦 Confirm, Ship & Send Email':'✉️ Confirm & Send Email';}
+function confirmShipToggle(){
+  const on=!!document.getElementById('confirm-ship-on')?.checked;
+  const f=document.getElementById('confirm-ship-fields'); if(f) f.style.display=on?'block':'none';
+  const b=document.getElementById('confirm-send-btn'); if(b&&!b.disabled) b.textContent=confirmBtnLabel();
+  if(on) setTimeout(()=>document.getElementById('confirm-ship-tracking')?.focus(),50);
+}
+function confirmShipChanged(){
+  if(_confirmCarrierManual) return;
+  const c=detectCarrier(document.getElementById('confirm-ship-tracking').value); if(c) document.getElementById('confirm-ship-carrier').value=c;
+}
 function openConfirmOrderModal() {
   const o=db.orders.find(x=>x.id===modalOrderId);if(!o)return;
+  { const sb=document.getElementById('confirm-ship-on'); if(sb){ sb.checked=false; _confirmCarrierManual=false;
+    document.getElementById('confirm-ship-tracking').value=''; document.getElementById('confirm-ship-carrier').value='USPS';
+    document.getElementById('confirm-ship-email').checked=true; confirmShipToggle(); } }
   // Pre-fill delivery date if already set
   const dateInput=document.getElementById('confirm-delivery-date');
   if(dateInput) dateInput.value=o.delivery||'';
@@ -2779,34 +2818,41 @@ async function confirmOrder() {
   const feeAmount=parseFloat(document.getElementById('confirm-delivery-fee-amt')?.value)||0;
   const feeNote='';
   const feeKind=document.getElementById('confirm-delivery-fee-kind')?.value||'Delivery';
+  const shipOn=!!document.getElementById('confirm-ship-on')?.checked;
+  const shipNum=shipOn?cleanTracking(document.getElementById('confirm-ship-tracking')?.value):'';
+  const shipCarrier=document.getElementById('confirm-ship-carrier')?.value||'USPS';
+  const shipEmail=shipOn&&!!shipNum&&!!document.getElementById('confirm-ship-email')?.checked;
   const btn=document.querySelector('#confirm-order-modal .btn-primary');
   if(btn){btn.textContent='Sending…';btn.disabled=true;}
-  if(wantFee&&feeKind==='Shipping'&&!(feeAmount>0)){ if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;} toast('Enter the shipping amount.'); return; }
+  if(wantFee&&feeKind==='Shipping'&&!(feeAmount>0)){ if(btn){btn.textContent=confirmBtnLabel();btn.disabled=false;} toast('Enter the shipping amount.'); return; }
   const foc=getFoc('confirm'); o.foc=foc.on; o.focReason=foc.reason||'';
   // Fee on/off first, so the stored total and the email agree
   const feeErr=await applyDeliveryFee(o,wantFee,feeAmount,feeNote,feeKind);
-  if(feeErr){if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}toast('Could not update the delivery fee: '+feeErr);return;}
+  if(feeErr){if(btn){btn.textContent=confirmBtnLabel();btn.disabled=false;}toast('Could not update the delivery fee: '+feeErr);return;}
   // Update status and delivery date in Supabase
-  const updates={status:'Confirmed',free_of_charge:foc.on,foc_reason:foc.reason,total:foc.on?0:orderValue(o)};
+  const updates={status:shipOn?'Shipped':'Confirmed',free_of_charge:foc.on,foc_reason:foc.reason,total:foc.on?0:orderValue(o)};
+  if(shipOn) Object.assign(updates,{tracking_number:shipNum||null,tracking_carrier:shipCarrier,shipped_at:localToday()});
   const invEntered=Number(document.getElementById('confirm-invoice-num')?.value)||0;
   if(invEntered>0) updates.invoice_num=invEntered;
   if(deliveryDate) updates.delivery_date=deliveryDate;
   if(notes) updates.notes=notes;
   const {error}=await sbClient.from('orders').update(updates).eq('id',o.id);
-  if(btn){btn.textContent='Confirm & Send Email';btn.disabled=false;}
+  if(btn){btn.textContent=confirmBtnLabel();btn.disabled=false;}
   if(error){toast('Error confirming order: '+error.message);return;}
   if(deliveryDate) o.delivery=deliveryDate;
   if(notes) o.notes=notes;
   if(invEntered>0){ o.invoiceNum=invEntered; if(invEntered>=db.nextInvoice) db.nextInvoice=invEntered+1; }
-  o.status='Confirmed'; o.total=updates.total;
+  o.status=updates.status; o.total=updates.total;
+  if(shipOn) Object.assign(o,{trackingNumber:shipNum,trackingCarrier:shipCarrier,shippedAt:updates.shipped_at});
   renderOrders();refreshDashboard();renderInvoiceTracker();
   // Send confirmation email to retailer
   const retailer=db.retailers.find(r=>r.id===o.retailerId)||{};
   const emailInput=document.getElementById('confirm-email');
   const retailerEmail=(emailInput?emailInput.value.trim():'')||retailer.email||'';
   // If a new email was entered, save it to the retailer profile in Supabase
+  let emailSaved=Promise.resolve();
   if(retailerEmail && retailerEmail!==retailer.email && retailer.id) {
-    sbClient.from('retailers').update({email:retailerEmail}).eq('id',retailer.id)
+    emailSaved=sbClient.from('retailers').update({email:retailerEmail}).eq('id',retailer.id)
       .then(()=>{retailer.email=retailerEmail;console.log('[LFB] Saved email to retailer profile:',retailerEmail);})
       .catch(err=>console.warn('[LFB] Could not save retailer email:',err));
   }
@@ -2817,7 +2863,7 @@ async function confirmOrder() {
       retailer_name: o.retailerName,
       order_id: invNum(o.invoiceNum),
       delivery_date: deliveryDate ? fmtDate(deliveryDate) : 'To be confirmed',
-      order_notes: (foc.on?'Free of charge ('+foc.reason+')'+(notes?' · ':''):'')+(notes||(foc.on?'':'None')),
+      order_notes: [foc.on?'Free of charge ('+foc.reason+')':'', shipOn?('Shipped'+(shipNum?' via '+((CARRIERS[shipCarrier]||{}).label||'carrier')+' · Tracking '+shipNum:'')):'', notes].filter(Boolean).join(' · ')||'None',
       order_date: fmtDate(o.date),
       orders: productItems.map(p=>({name:String(getProductDisplayName(p.product)),units:String(p.qty),price:'$'+(Number(p.price)||0).toFixed(2)})).concat(orderDeliveryFee(o)>0?[{name:deliveryFeeLabel(o),units:'1',price:'$'+orderDeliveryFee(o).toFixed(2)}]:[]),
       cost: {
@@ -2829,12 +2875,21 @@ async function confirmOrder() {
       to_email: retailerEmail
     };
     console.log('[LFB] Sending confirmation email to:', retailerEmail, 'params:', confirmParams);
-    emailjs.send(EMAILJS_SERVICE, EMAILJS_CONFIRM_TPL, confirmParams)
-      .then(res=>{console.log('[LFB] Confirmation email sent successfully:', res);toast('📧 Confirmation email sent to '+retailerEmail);})
-      .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);toast('Order confirmed but email failed: '+(err.text||err));});
+    const done=shipOn?'Order confirmed and shipped':'Order confirmed';
+    const confP=emailjs.send(EMAILJS_SERVICE, EMAILJS_CONFIRM_TPL, confirmParams)
+      .then(res=>{console.log('[LFB] Confirmation email sent successfully:', res);return (shipOn?'📦 Confirmed and shipped. ':'📧 ')+'Confirmation email sent to '+retailerEmail+'.';})
+      .catch(err=>{console.error('[LFB] EmailJS retailer confirmation FAILED:', err);return done+' but email failed: '+(err.text||err)+'.';});
+    // Tracking email (Resend) goes out alongside it when "Ship it now" has a tracking number
+    const shipP=!shipEmail?Promise.resolve(''):Promise.resolve(emailSaved)
+      .then(()=>sbClient.functions.invoke('order-shipped',{body:{order_id:o.id}}))
+      .then(({data,error:fnErr})=>{
+        if(fnErr||!data||!data.ok){console.warn('[LFB] order-shipped email failed:',(data&&data.error)||fnErr);return ' The tracking email did not send; use the 📦 button to resend it.';}
+        o.shipEmailAt=new Date().toISOString(); return ' Tracking email sent too.';
+      }).catch(err=>{console.warn('[LFB] order-shipped email failed:',err);return ' The tracking email did not send; use the 📦 button to resend it.';});
+    Promise.all([confP,shipP]).then(([a,b])=>toast(a+b));
   } else {
     console.warn('[LFB] No retailer email found - cannot send confirmation. Retailer:', o.retailerName);
-    toast('Order confirmed but no email on file for '+o.retailerName+'. Add their email in Partners to send confirmations.');
+    toast((shipOn?'Order confirmed and shipped':'Order confirmed')+' but no email on file for '+o.retailerName+'. Add their email in Partners to send confirmations.');
   }
   closeModal('confirm-order-modal');
 }
