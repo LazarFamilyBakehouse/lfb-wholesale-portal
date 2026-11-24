@@ -152,6 +152,10 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
 .b-pending   { background:#fff3cd;color:#856404; }
 .b-confirmed { background:#cce5ff;color:#004085; }
 .b-delivered { background:#d1ecf1;color:#0c5460; }
+.b-shipped   { background:#e6dcf5;color:#4a2d73; }
+.track-line { font-size:.74rem;margin-top:3px;white-space:nowrap; }
+.track-line a, a.track-link { color:var(--red);font-weight:700;text-decoration:none; }
+.track-line a:hover, a.track-link:hover { text-decoration:underline; }
 .b-auto      { background:#e2d9f3;color:#4a235a; }
 .b-inactive  { background:var(--tan);color:var(--brown); }
 .b-paused    { background:#f8d7da;color:#721c24; }
@@ -602,6 +606,7 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
       <button class="btn btn-outline" onclick="closeModal('order-detail-modal')">Close</button>
       <button class="btn btn-gold" onclick="openInvoiceFromDetail()">🧾 View Invoice</button>
       <button class="btn btn-sage" id="order-confirm-btn" onclick="openConfirmOrderModal()" style="display:none;">✅ Confirm & Notify</button>
+      <button class="btn btn-outline" id="order-ship-btn" onclick="openShipModal()" style="display:none;">📦 Mark Shipped</button>
       <button class="btn btn-primary" id="order-status-btn"></button>
     </div>
   </div>
@@ -647,6 +652,46 @@ tbody td { padding:10px 13px;color:var(--brown-dk); }
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('confirm-order-modal')">Cancel</button>
       <button class="btn btn-primary" onclick="confirmOrder()">✉️ Confirm & Send Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MARK SHIPPED MODAL ==================== -->
+<div class="modal-overlay" id="ship-order-modal">
+  <div class="modal">
+    <div class="modal-title">📦 Shipping & Tracking</div>
+    <p id="ship-order-sub" style="margin:0 0 14px;color:var(--muted);font-size:.9rem;"></p>
+    <div class="form-row">
+      <div class="fg" style="flex:2;">
+        <label>Tracking Number</label>
+        <input id="ship-tracking" placeholder="Paste the tracking number" autocomplete="off" oninput="shipTrackingChanged()"/>
+      </div>
+      <div class="fg">
+        <label>Carrier</label>
+        <select id="ship-carrier" onchange="shipCarrierPicked()"><option>USPS</option><option>UPS</option><option>FedEx</option><option>Other</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>Ship Date</label>
+        <input type="date" id="ship-date"/>
+      </div>
+      <div class="fg" style="flex:2;">
+        <label>Tracking Link</label>
+        <div id="ship-link-preview" style="font-size:.86rem;padding-top:9px;"></div>
+      </div>
+    </div>
+    <div class="fg" style="margin-top:10px;padding:10px 12px;background:var(--cream-dk);border-radius:8px;">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;margin:0;font-weight:700;color:var(--brown);">
+        <input type="checkbox" id="ship-email-on" style="width:18px;height:18px;margin:0;" checked/>
+        <span>✉️ Email the partner their tracking info</span>
+      </label>
+      <div id="ship-email-note" style="margin-top:6px;font-size:.82rem;color:var(--muted);word-break:break-word;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('ship-order-modal')">Cancel</button>
+      <button class="btn btn-outline" id="ship-clear-btn" onclick="clearShipping()" style="display:none;">Remove tracking</button>
+      <button class="btn btn-primary" id="ship-save-btn" onclick="saveShipping()">📦 Save & Mark Shipped</button>
     </div>
   </div>
 </div>
@@ -1078,7 +1123,8 @@ async function loadFromSupabase() {
     products:(itemsByOrder ? (itemsByOrder[o.id]||[]) : (o.order_items||[]))
               .map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0),note:i.note||''})),
     total:parseFloat(o.total)||0, created:o.created_at||'',
-    foc:!!o.free_of_charge, focReason:o.foc_reason||''
+    foc:!!o.free_of_charge, focReason:o.foc_reason||'',
+    trackingNumber:o.tracking_number||'', trackingCarrier:o.tracking_carrier||'', shippedAt:o.shipped_at||'', shipEmailAt:o.shipped_email_sent_at||''
   }));
   // Normalize legacy SKU names so everything consolidates under current product names
   const SKU_NORMALIZE = {'Two Packs':'Two Pack Chocolate Chip','Individual Mandel Bread':'Indiv. Mandel - Chocolate Chip','Funfetti':'Confetti Mandelbites','Funfetti Mandelbites':'Confetti Mandelbites','Indiv. Mandel - Funfetti':'Indiv. Mandel - Confetti'};
@@ -1188,7 +1234,8 @@ function setupRetailerRealtime(rid,pin) {
           date:o.order_date||o.date||'',delivery:o.delivery_date||'',status:o.status||'Pending',
           notes:o.notes||'',
           products:(o.items||[]).map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0),note:i.note||''})),
-          total:parseFloat(o.total)||0
+          total:parseFloat(o.total)||0,
+          trackingNumber:o.tracking_number||'', trackingCarrier:o.tracking_carrier||'', shippedAt:o.shipped_at||''
         }));
         const maxInv=db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100);
         db.nextInvoice=maxInv+1;
@@ -1513,7 +1560,8 @@ async function doLogin() {
       id:o.id,invoiceNum:o.invoice_num,retailerId:rid,retailerName:retailer.name,
       date:o.order_date||o.date||'',delivery:o.delivery_date||'',status:o.status||'Pending',notes:o.notes||'',
       products:(o.items||[]).map(i=>({product:i.product||i.product_name||i.name||'',qty:Number(i.qty||i.quantity||0),price:parseFloat(i.unit_price||i.price||0),note:i.note||''})),
-      total:parseFloat(o.total)||0
+      total:parseFloat(o.total)||0,
+      trackingNumber:o.tracking_number||'', trackingCarrier:o.tracking_carrier||'', shippedAt:o.shipped_at||''
     }));
     db.nextInvoice=db.orders.reduce((m,o)=>Math.max(m,o.invoiceNum||0),100)+1;
     // Load this partner's auto-orders from the database (PIN-checked RPC)
@@ -1781,7 +1829,7 @@ function buildAdminContent() {
       <div class="fg"><label>Retailer *</label><select id="o-retailer" onchange="refreshOrderPricesForRetailer(this.value);toggleCustomOrderFields(this);"><option value="">-- Select --</option></select></div>
       <div class="fg"><label>Order Date *</label><input type="date" id="o-date"/></div>
       <div class="fg"><label>Delivery Date</label><input type="date" id="o-delivery"/></div>
-      <div class="fg"><label>Status</label><select id="o-status"><option>Pending</option><option>Confirmed</option><option>Delivered</option></select></div>
+      <div class="fg"><label>Status</label><select id="o-status"><option>Pending</option><option>Confirmed</option><option>Shipped</option><option>Delivered</option></select></div>
     </div>
     <div style="font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--brown);margin-bottom:8px;">Products</div>
     <div class="prod-list" id="o-prod-list"></div>
@@ -1805,7 +1853,7 @@ function buildAdminContent() {
     <div class="panel-title">📦 All Orders</div>
     <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center;">
       <select id="f-status" onchange="renderOrders()" style="padding:7px 11px;border:1px solid var(--tan);border-radius:8px;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown-dk);">
-        <option value="">All Statuses</option><option>Pending</option><option>Confirmed</option><option>Delivered</option>
+        <option value="">All Statuses</option><option>Pending</option><option>Confirmed</option><option>Shipped</option><option>Delivered</option>
       </select>
       <select id="f-retailer" onchange="renderOrders()" style="padding:7px 11px;border:1px solid var(--tan);border-radius:8px;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown-dk);">
         <option value="">All Retailers</option>
@@ -2067,7 +2115,7 @@ function buildRetailerContent() {
   <h2 class="page-h">My Orders</h2><p class="page-sub">Your complete order history.</p>
   <div class="panel">
     <select id="r-f-status" onchange="renderRetailerOrders()" style="padding:7px 11px;border:1px solid var(--tan);border-radius:8px;font-family:'Nunito',sans-serif;background:var(--cream);color:var(--brown-dk);margin-bottom:14px;">
-      <option value="">All Statuses</option><option>Pending</option><option>Confirmed</option><option>Delivered</option>
+      <option value="">All Statuses</option><option>Pending</option><option>Confirmed</option><option>Shipped</option><option>Delivered</option>
     </select>
     <div class="tbl-wrap"><table><thead><tr><th>Invoice #</th><th>Order Date</th><th>Delivery</th><th>Items</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead><tbody id="r-orders-tbody"></tbody></table></div>
   </div>
@@ -2344,6 +2392,122 @@ async function deleteRetailer(id, name) {
 //  All order_items inserts must use Number(p.price)||0 for unit_price.
 // =====================================================================
 function invNum(n){return (n&&n>0)?'INV-'+String(n).padStart(4,'0'):'TBD';}
+// ---- Shipping + tracking (orders we ship instead of deliver) ----
+// orders.status 'Shipped' plus tracking_number / tracking_carrier / shipped_at.
+// Partners see the tracking link on their orders; the order-shipped edge
+// function emails it to them.
+const CARRIERS = {
+  USPS:  {label:'USPS',  url:n=>'https://tools.usps.com/go/TrackConfirmAction?tLabels='+encodeURIComponent(n)},
+  UPS:   {label:'UPS',   url:n=>'https://www.ups.com/track?tracknum='+encodeURIComponent(n)},
+  FedEx: {label:'FedEx', url:n=>'https://www.fedex.com/fedextrack/?trknbr='+encodeURIComponent(n)},
+  Other: {label:'',      url:null}
+};
+function cleanTracking(n){return String(n||'').replace(/[\s-]+/g,'').toUpperCase();}
+function detectCarrier(n){
+  n=cleanTracking(n);
+  if(/^1Z[0-9A-Z]{16}$/.test(n)) return 'UPS';
+  if(/^(9[1-5]\d{18,24}|420\d{5,9}9[1-5]\d{18,24}|[A-Z]{2}\d{9}US)$/.test(n)) return 'USPS';
+  if(/^(\d{12}|\d{15})$/.test(n)) return 'FedEx';
+  return '';
+}
+function localToday(){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,10);}
+function trackingUrl(o){const c=CARRIERS[o.trackingCarrier];return (c&&c.url&&o.trackingNumber)?c.url(o.trackingNumber):'';}
+// Full line for order details: "USPS 9400... ↗ · shipped Nov 23, 2026"
+function trackingHtml(o){
+  if(!o.trackingNumber&&o.status!=='Shipped') return '';
+  const name=(CARRIERS[o.trackingCarrier]||{}).label||'';
+  const when=o.shippedAt?` <span style="color:var(--muted);">· shipped ${fmtDate(o.shippedAt)}</span>`:'';
+  if(!o.trackingNumber) return `${name?esc(name)+' ':''}<span style="color:var(--muted);">No tracking number yet</span>${when}`;
+  const url=trackingUrl(o), num=esc(o.trackingNumber);
+  return `${name?esc(name)+' ':''}${url?`<a class="track-link" href="${url}" target="_blank" rel="noopener">${num} ↗</a>`:`<strong>${num}</strong>`}${when}`;
+}
+// Status badge with a small Track link under it (order tables)
+function statusCellHtml(o){
+  let h=`<span class="badge ${sBadge(o.status)}">${o.status}</span>`;
+  if(o.trackingNumber){
+    const url=trackingUrl(o), name=(CARRIERS[o.trackingCarrier]||{}).label||'';
+    const tip=esc((name?name+' ':'')+o.trackingNumber);
+    h+=`<div class="track-line">${url?`<a href="${url}" target="_blank" rel="noopener" title="${tip}">📦 Track${name?' ('+esc(name)+')':''} ↗</a>`:`<span title="${tip}">📦 ${esc(o.trackingNumber)}</span>`}</div>`;
+  }
+  return h;
+}
+let _shipOrderId=null, _shipCarrierManual=false, _shipSaving=false;
+function openShipModal(id){
+  const o=db.orders.find(x=>x.id===(id||modalOrderId)); if(!o||session?.type!=='admin') return;
+  _shipOrderId=o.id; _shipCarrierManual=!!o.trackingCarrier;
+  const r=db.retailers.find(x=>x.id===o.retailerId)||{};
+  document.getElementById('ship-order-sub').textContent=`${invNum(o.invoiceNum)} · ${o.retailerName}`;
+  document.getElementById('ship-tracking').value=o.trackingNumber||'';
+  document.getElementById('ship-carrier').value=CARRIERS[o.trackingCarrier]?o.trackingCarrier:'USPS';
+  document.getElementById('ship-date').value=o.shippedAt||localToday();
+  const emails=String(r.email||'').split(',').map(e=>e.trim()).filter(Boolean);
+  const box=document.getElementById('ship-email-on'), note=document.getElementById('ship-email-note');
+  box.disabled=!emails.length; box.checked=!!emails.length&&!o.shipEmailAt;
+  note.textContent=!emails.length
+    ? `No email on file for ${o.retailerName}. Add one in Partners to send tracking emails.`
+    : (o.shipEmailAt ? `Already emailed on ${new Date(o.shipEmailAt).toLocaleDateString('en-US',{month:'short',day:'numeric'})}. Tick the box to send it again.` : `Goes to ${emails.join(', ')}`);
+  document.getElementById('ship-clear-btn').style.display=(o.trackingNumber||o.status==='Shipped')?'':'none';
+  document.getElementById('ship-save-btn').textContent=(o.status==='Shipped'||o.status==='Delivered')?'💾 Save Tracking':'📦 Save & Mark Shipped';
+  shipLinkPreview();
+  closeModal('order-detail-modal'); openModal('ship-order-modal');
+  setTimeout(()=>document.getElementById('ship-tracking').focus(),50);
+}
+function shipTrackingChanged(){
+  if(!_shipCarrierManual){const c=detectCarrier(document.getElementById('ship-tracking').value); if(c) document.getElementById('ship-carrier').value=c;}
+  shipLinkPreview();
+}
+function shipCarrierPicked(){_shipCarrierManual=true;shipLinkPreview();}
+function shipLinkPreview(){
+  const el=document.getElementById('ship-link-preview'); if(!el) return;
+  const num=cleanTracking(document.getElementById('ship-tracking').value), carrier=document.getElementById('ship-carrier').value;
+  const url=trackingUrl({trackingNumber:num,trackingCarrier:carrier});
+  el.innerHTML=!num?'<span style="color:var(--muted);">Enter a tracking number to get the link.</span>'
+    :(url?`<a class="track-link" href="${url}" target="_blank" rel="noopener">Check it on ${esc(CARRIERS[carrier].label)} ↗</a>`
+         :'<span style="color:var(--muted);">No tracking page for this carrier. Partners will see the number.</span>');
+}
+async function saveShipping(){
+  if(_shipSaving) return;
+  const o=db.orders.find(x=>x.id===_shipOrderId); if(!o) return;
+  const num=cleanTracking(document.getElementById('ship-tracking').value);
+  const carrier=document.getElementById('ship-carrier').value;
+  const date=document.getElementById('ship-date').value||localToday();
+  const box=document.getElementById('ship-email-on'); const wantEmail=box.checked&&!box.disabled;
+  const status=o.status==='Delivered'?'Delivered':'Shipped';
+  const btn=document.getElementById('ship-save-btn'), label=btn.textContent;
+  _shipSaving=true; btn.disabled=true; btn.textContent=wantEmail?'Saving & sending…':'Saving…';
+  try{
+    const {error}=await sbClient.from('orders').update({status,tracking_number:num||null,tracking_carrier:carrier,shipped_at:date}).eq('id',o.id);
+    if(error){toast('Could not save: '+error.message);return;}
+    Object.assign(o,{status,trackingNumber:num,trackingCarrier:carrier,shippedAt:date});
+    let msg=`📦 ${invNum(o.invoiceNum)} marked as shipped.`;
+    if(wantEmail){
+      const {data,error:fnErr}=await sbClient.functions.invoke('order-shipped',{body:{order_id:o.id}});
+      if(fnErr||!data||!data.ok){
+        let why=''; try{ why=(await fnErr.context.json()).error||''; }catch(e){ why=(data&&data.error)||(fnErr&&fnErr.message)||''; }
+        console.warn('[LFB] order-shipped email failed:',why||fnErr);
+        msg=`📦 Saved as shipped, but the email did not send${why?' ('+why+')':''}.`;
+      } else { o.shipEmailAt=new Date().toISOString(); msg=`📦 ${invNum(o.invoiceNum)} shipped. Tracking email sent to ${o.retailerName}.`; }
+    }
+    renderOrders();refreshDashboard();
+    if(document.getElementById('sec-bake')?.classList.contains('active'))generateBakeList();
+    closeModal('ship-order-modal'); toast(msg);
+  } finally { _shipSaving=false; btn.disabled=false; btn.textContent=label; }
+}
+// Undo: take the tracking off and put a Shipped order back to Confirmed
+async function clearShipping(){
+  if(_shipSaving) return;
+  const o=db.orders.find(x=>x.id===_shipOrderId); if(!o) return;
+  const status=o.status==='Shipped'?'Confirmed':o.status;
+  _shipSaving=true;
+  try{
+    const {error}=await sbClient.from('orders').update({status,tracking_number:null,tracking_carrier:null,shipped_at:null}).eq('id',o.id);
+    if(error){toast('Could not remove tracking: '+error.message);return;}
+    Object.assign(o,{status,trackingNumber:'',trackingCarrier:'',shippedAt:''});
+    renderOrders();refreshDashboard();
+    if(document.getElementById('sec-bake')?.classList.contains('active'))generateBakeList();
+    closeModal('ship-order-modal'); toast(`Tracking removed from ${invNum(o.invoiceNum)}. Status is ${status}.`);
+  } finally { _shipSaving=false; }
+}
 // New packaging: for each converted partner, compare an equal window before and
 // after the switch (up to 90 days each side). Units and revenue are wholesale
 // products only (fees excluded), per week so different window lengths compare.
@@ -2482,10 +2646,11 @@ function renderOrders() {
     <td style="vertical-align:middle;">${o.delivery?fmtDate(o.delivery):' - '}</td>
     <td style="vertical-align:middle;">${o.products.filter(p=>!isFeeItem(p)).length} item${o.products.filter(p=>!isFeeItem(p)).length!==1?'s':''}</td>
     <td style="vertical-align:middle;">${orderTotalCell(o)}</td>
-    <td style="vertical-align:middle;"><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
+    <td style="vertical-align:middle;">${statusCellHtml(o)}</td>
     <td style="vertical-align:middle;white-space:nowrap;">
       <button class="btn btn-outline btn-sm" onclick="viewOrderDetail(${o.id})">👁</button>
       <button class="btn btn-primary btn-sm" onclick="openEditOrder(${o.id})">✏️</button>
+      <button class="btn btn-outline btn-sm" onclick="openShipModal(${o.id})" title="${(o.status==='Shipped'||o.trackingNumber)?'Edit tracking':'Mark shipped / add tracking number'}">📦</button>
       <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})">🧾 Invoice</button>
       <button class="btn btn-danger btn-sm" onclick="deleteOrder(${o.id})">🗑</button>
     </td>
@@ -2503,6 +2668,7 @@ function viewOrderDetail(id) {
       <tr><td style="color:var(--muted);padding:5px 0;">Order Date</td><td>${fmtDate(o.date)}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Delivery</td><td>${o.delivery?fmtDate(o.delivery):' - '}</td></tr>
       <tr><td style="color:var(--muted);padding:5px 0;">Status</td><td><span class="badge ${sBadge(o.status)}">${o.status}</span>${isFoc(o)?' '+focBadge(o):''}</td></tr>
+      ${(o.trackingNumber||o.status==='Shipped')?`<tr><td style="color:var(--muted);padding:5px 0;">Tracking</td><td>${trackingHtml(o)}</td></tr>`:''}
       ${o.notes?`<tr><td style="color:var(--muted);padding:5px 0;">Notes</td><td>${esc(o.notes)}</td></tr>`:''}
     </table>
     <strong style="display:block;margin-bottom:8px;color:var(--brown);">Products:</strong>
@@ -2512,13 +2678,15 @@ function viewOrderDetail(id) {
       <tfoot>${focTfootRow(o,'padding:6px 10px;')}<tr><td colspan="3" style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">Order Total:</td><td style="padding:8px 10px;text-align:right;font-weight:700;border-top:2px solid var(--gold);">${fmtCur(o.total)}</td></tr></tfoot>
     </table>
     <p style="margin-top:14px;font-size:.8rem;color:var(--muted);font-style:italic;line-height:1.5;text-align:center;">This amount doesn't reflect the final invoice total. Delivery, shipping, and packaging costs may be included.<br>Please reference the delivered invoice for a final amount.</p>`;
-  const next={Pending:'Confirmed',Confirmed:'Delivered',Delivered:'Pending'};
+  const next={Pending:'Confirmed',Confirmed:'Delivered',Shipped:'Delivered',Delivered:'Pending'};
   const btn=document.getElementById('order-status-btn');
   btn.textContent=`Mark as ${next[o.status]}`;
   btn.onclick=()=>{updateOrderStatus(id,next[o.status]);closeModal('order-detail-modal');};
   // Show "Confirm & Notify" button only for Pending orders (admin only)
   const confirmBtn=document.getElementById('order-confirm-btn');
   if(confirmBtn) confirmBtn.style.display=(o.status==='Pending'&&session?.type==='admin')?'':'none';
+  const shipBtn=document.getElementById('order-ship-btn');
+  if(shipBtn){ shipBtn.style.display=session?.type==='admin'?'':'none'; shipBtn.textContent=(o.status==='Shipped'||o.trackingNumber)?'📦 Edit Tracking':'📦 Mark Shipped'; }
   openModal('order-detail-modal');
 }
 function openInvoiceFromDetail(){closeModal('order-detail-modal');showInvoice(modalOrderId);}
@@ -3226,7 +3394,7 @@ function renderRetailerHome() {
       <td>${fmtDate(o.date)}</td>
       <td>${o.delivery?fmtDate(o.delivery):' - '}</td>
       <td>${orderTotalCell(o)}</td>
-      <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
+      <td>${statusCellHtml(o)}</td>
       <td><button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})"> Invoice</button></td>
     </tr>`).join(''):'<tr><td colspan="6" class="empty-row">No orders yet. Place your first order!</td></tr>';
   }
@@ -3244,7 +3412,7 @@ function renderRetailerOrders() {
     <td>${o.delivery?fmtDate(o.delivery):' - '}</td>
     <td>${o.products.filter(p=>!isFeeItem(p)).length} item${o.products.filter(p=>!isFeeItem(p)).length!==1?'s':''}</td>
     <td>${orderTotalCell(o)}</td>
-    <td><span class="badge ${sBadge(o.status)}">${o.status}</span></td>
+    <td>${statusCellHtml(o)}</td>
     <td>
       <button class="btn btn-outline btn-sm" onclick="viewOrderDetail(${o.id})">👁 View</button>
       <button class="btn btn-gold btn-sm" onclick="showInvoice(${o.id})"> Invoice</button>
@@ -4413,7 +4581,7 @@ function v(id){return document.getElementById(id).value.trim();}
 function todayStr(){return new Date().toISOString().split('T')[0];}
 function fmtDate(d){if(!d)return' - ';const[y,m,day]=d.split('-');return new Date(y,m-1,day).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}
 function fmtCur(n){return'$'+(Number(n)||0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g,',');}
-function sBadge(s){return{Pending:'b-pending',Confirmed:'b-confirmed',Delivered:'b-delivered'}[s]||'b-inactive';}
+function sBadge(s){return{Pending:'b-pending',Confirmed:'b-confirmed',Shipped:'b-shipped',Delivered:'b-delivered'}[s]||'b-inactive';}
 function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 //  [25] INITIALIZATION
@@ -4569,7 +4737,7 @@ async function _saveEditOrderInner() {
     <div class="form-row">
       <div class="fg"><label>Status</label>
         <select id="eo-status">
-          <option>Pending</option><option>Confirmed</option><option>Delivered</option>
+          <option>Pending</option><option>Confirmed</option><option>Shipped</option><option>Delivered</option>
         </select>
       </div>
     </div>
